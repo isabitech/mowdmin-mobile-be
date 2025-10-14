@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../Models/UserModel.js";
+import Token from "../Models/TokenModel.js";
+import EmailService from "./emailService.js";
 
 
 class AuthService {
@@ -15,14 +17,22 @@ class AuthService {
         if (existingUser) {
             throw new Error("Email already in use");
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await User.create({
             email,
-            password: hashedPassword,
+            password,
             language,
             name
         });
-        return newUser;
+        const token = new AuthService().generateToken(newUser.id);
+        const SendRegEmail = EmailService.sendEmail(
+            newUser.email,
+            'OnBoarding Message',
+            "Welcome to Mowdministries",
+            `<p>Hello ${newUser.name},</p>
+            <p>Thank you for registering at Mowdministries!</p>
+            <p>Your registration was successful.</p>`
+        );  
+        return { user: newUser, token };
     }
 
     static async login(credentials) {
@@ -46,5 +56,8 @@ class AuthService {
         // Implement password reset logic (e.g., send email with reset link)
         return true;
     }
+    static async resetPassword(token, newPassword) {
+        const data = User.jwt.verify(token, process.env.JWT_SECRET);
+    }
 }
-export default AuthService;
+export default AuthService

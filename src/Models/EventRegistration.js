@@ -31,15 +31,20 @@ export const EventRegistration = sequelize.define(
     }
 );
 
-// EventRegistration.belongsTo(sequelize.models.Event, {
-//     foreignKey: "eventId",
-//     as: "event",
-// });
+EventRegistration.associations = () => {
+    const { Event, User } = sequelize.models;
+    EventRegistration.belongsTo(Event, {
+        foreignKey: "eventId",
+        as: "event",
+    });
+    EventRegistration.belongsTo(User, {
+        foreignKey: "userId",
+        as: "user",
+    });
+};
 
-// EventRegistration.belongsTo(sequelize.models.User, {
-//     foreignKey: "userId",
-//     as: "user",
-// });
+
+
 
 export default EventRegistration;
 

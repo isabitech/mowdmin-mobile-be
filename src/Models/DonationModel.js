@@ -31,11 +31,16 @@ export const Donation = sequelize.define(
         timestamps: true,
     }
 
-    
+
 );
-// Donation.belongsTo(User, {
-//     foreignKey: "userId",
-//     as: "user",
-// });
+
+Donation.associations = () => {
+    const { User } = sequelize.models;
+    Donation.belongsTo(User, {
+        foreignKey: "userId",
+        as: "user",
+
+    });
+};
 
 export default Donation;

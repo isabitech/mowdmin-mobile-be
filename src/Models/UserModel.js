@@ -1,9 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js"; // your sequelize instance
-import { Donation } from "./DonationModel.js"; // import other models
-import { PrayerRequest } from "./PrayerRequestModel.js";
-import { EventRegistration } from "./EventRegistration.js";
-// Define the User model directly
+import sequelize from "../Config/db.js";
+import bcrypt from "bcryptjs";
+
 export const User = sequelize.define(
   "User",
   {
@@ -28,13 +26,29 @@ export const User = sequelize.define(
   {
     tableName: "users",
     timestamps: true,
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed("password")) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+    },
   }
 );
 
-// Define associations if the other models are already imported
-// Example (you need to import Donation, PrayerRequest, EventRegistration first):
-User.hasMany(Donation, { foreignKey: "userId", as: "donations" });
-User.hasMany(PrayerRequest, { foreignKey: "userId", as: "prayerRequests" });
-User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
+// Associations
+User.associate = () => {
+  const { Donation, PrayerRequest, EventRegistration } = sequelize.models;
+  User.hasMany(Donation, { foreignKey: "userId", as: "donations" });
+  User.hasMany(PrayerRequest, { foreignKey: "userId", as: "prayerRequests" });
+  User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
+};
 
 export default User;
