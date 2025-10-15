@@ -4,28 +4,29 @@ import { success, error } from "../Utils/helper.js";
 
 class AuthController {
     static async register(req = request, res = response) {
-        try {
-            const user = await AuthService.register(req.body);
-            success(res, user);
-        } catch (err) {
-            error(res, err);
+        const { email, password, name, language } = req.body;
+        if (!email || !password || !name) {
+            return error(res, "Name, email, and password are required", 400);
         }
+        const user = await AuthService.register(req.body);
+        success(res, user);
+
     }
     static async login(req = request, res = response) {
-        try {
-            const { user, token } = await AuthService.login(req.body);
-            success(res, { user, token });
-        } catch (err) {
-            error(res, err);
-        }
+
+        const { user, token } = await AuthService.login(req.body);
+        success(res, { user, token });
+
     }
     static async forgotPassword(req = request, res = response) {
-        try {
-            await AuthService.forgotPassword(req.body.email);
-            success(res, "Password reset link sent to your email");
-        } catch (err) {
-            error(res, err);
-        }
+
+        await AuthService.forgotPassword(req.body.email);
+        success(res, "Password reset link sent to your email");
+
+    }
+    static async changePassword(req = request, res = response) {
+       await AuthService.changePassword()
+
     }
 }
 export default AuthController;

@@ -6,6 +6,7 @@ import compression from 'compression'
 import { config } from 'dotenv'
 import { connectDB } from './Config/db.js'
 import authRoutes from './Routes/AuthRoute.js'
+import { errorHandler } from './middleware/errorHandler.js'
 
 config();
 
@@ -18,12 +19,12 @@ app.use(compression());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 const PORT = process.env.PORT || 3000;
-
+app.use(errorHandler);
 connectDB()
     .then(() => {
         console.log('✅ Database connection established');
         app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🚀 Server running on port http://localhost:${PORT}`);
         });
     })
     .catch((error) => {

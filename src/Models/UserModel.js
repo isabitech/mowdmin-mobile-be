@@ -10,7 +10,7 @@ export const User = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    name: DataTypes.STRING,
+    name: { type: DataTypes.STRING },
     email: {
       type: DataTypes.STRING,
       unique: true,

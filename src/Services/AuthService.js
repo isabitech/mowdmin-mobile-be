@@ -13,27 +13,42 @@ class AuthService {
     }
     static async register(userData) {
         const { email, password, name, language } = userData;
+
+        // Check if the email is already in use
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             throw new Error("Email already in use");
         }
+
+        // Create user
         const newUser = await User.create({
             email,
             password,
             language,
             name
         });
+
+        // Generate JWT token
         const token = new AuthService().generateToken(newUser.id);
-        const SendRegEmail = EmailService.sendEmail(
+
+        // Send welcome email (asynchronous, don’t block response)
+        EmailService.sendEmail(
             newUser.email,
-            'OnBoarding Message',
+            "OnBoarding Message",
             "Welcome to Mowdministries",
             `<p>Hello ${newUser.name},</p>
-            <p>Thank you for registering at Mowdministries!</p>
-            <p>Your registration was successful.</p>`
-        );  
-        return { user: newUser, token };
+         <p>Thank you for registering at Mowdministries!</p>
+         <p>Your registration was successful.</p>`
+        ).catch(err => console.error("Email send error:", err.message));
+
+        // Remove password from the response
+        const userDataSafe = newUser.toJSON();
+        delete userDataSafe.password;
+
+        // Return user (without password) and token
+        return { user: userDataSafe, token };
     }
+
 
     static async login(credentials) {
         const { email, password } = credentials;
@@ -56,8 +71,20 @@ class AuthService {
         // Implement password reset logic (e.g., send email with reset link)
         return true;
     }
-    static async resetPassword(token, newPassword) {
-        const data = User.jwt.verify(token, process.env.JWT_SECRET);
+    
+    static async changePassword(email, currentPassword, newPassword) {
+        const user = await User.findOne(email);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidPassword) {
+            throw new Error("Current password is incorrect");
+        }
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        return true;
     }
+    static async
 }
 export default AuthService
