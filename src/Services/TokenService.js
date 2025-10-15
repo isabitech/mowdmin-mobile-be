@@ -1,4 +1,5 @@
-import { Token, User } from "../Models/index.js";
+import Token from "../Models/TokenModel.js";
+import User from "../Models/UserModel.js";
 import bcrypt from "bcryptjs";
 
 class TokenService {

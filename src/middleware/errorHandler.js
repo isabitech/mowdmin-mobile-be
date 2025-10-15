@@ -1,6 +1,3 @@
-// src/Middleware/errorHandler.js
-import { response } from "express";
-
 export const errorHandler = (err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -9,9 +6,15 @@ export const errorHandler = (err, req, res, next) => {
         console.error("🔥 Error:", err);
     }
 
-    return response.status(statusCode).json({
+    const responsePayload = {
         success: false,
         message,
-        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-    });
+    };
+
+    // Include stack trace only in development
+    if (process.env.NODE_ENV === "development") {
+        responsePayload.stack = err.stack;
+    }
+
+    return res.status(statusCode).json(responsePayload);
 };

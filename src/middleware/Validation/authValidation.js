@@ -1,5 +1,6 @@
 import { body, validationResult } from "express-validator";
-import User from "../Models/UserModel.js"; 
+import User from "../../Models/UserModel.js";
+
 // ✅ Password complexity regex
 export const validatePassword = (password) => {
     const re =
@@ -8,7 +9,14 @@ export const validatePassword = (password) => {
 };
 
 // ✅ Express-validator rules
-export const validateUser = [
+export const validateUserRegistration = [
+    body("name")
+        .trim()
+        .notEmpty()
+        .withMessage("Name is required")
+        .isLength({ min: 2 })
+        .withMessage("Name must be at least 2 characters"),
+
     body("email")
         .trim()
         .isEmail()
@@ -31,7 +39,27 @@ export const validateUser = [
         }),
 ];
 
-// ✅ Error handler helper (to use in controller)
+// ✅ Express-validator rules for login
+export const validateUserLogin = [
+    body("email")
+        .trim()
+        .isEmail()
+        .withMessage("Valid email is required"),
+
+    body("password")
+        .notEmpty()
+        .withMessage("Password is required")
+        .custom((value) => {
+            if (!validatePassword(value)) {
+                throw new Error(
+                    "Password must include uppercase, lowercase, number, and special character"
+                );
+            }
+            return true;
+        }), ,
+];
+
+// ✅ Middleware to handle validation errors
 export const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -42,4 +70,3 @@ export const handleValidationErrors = (req, res, next) => {
     }
     next();
 };
-

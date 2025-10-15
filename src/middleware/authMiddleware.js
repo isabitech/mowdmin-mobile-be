@@ -95,11 +95,7 @@ export const authorize = (...allowedRoles) => {
 
       next();
     } catch (err) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Authorization failed',
-        error: err.message,
-      });
+      return next(err);
     }
   };
 };
