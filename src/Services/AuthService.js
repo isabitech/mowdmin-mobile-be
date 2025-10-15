@@ -54,10 +54,10 @@ class AuthService {
         const { email, password } = credentials;
 
         const user = await User.findOne({ where: { email } });
-        if (!user) throw new AppError("Invalid email or password", 401);
+        if (!user) throw new AppError("Invalid email", 401);
 
         const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) throw new AppError("Invalid email or password", 401);
+        if (!isValidPassword) throw new AppError("Invalid  password", 401);
 
         const token = new AuthService().generateToken(user.id);
 

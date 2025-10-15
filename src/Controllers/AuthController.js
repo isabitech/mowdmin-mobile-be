@@ -8,7 +8,7 @@ class AuthController {
             return error(res, "Name, email, and password are required", 400);
         }
         const user = await AuthService.register(req.body);
-        success(res, user, "User registered successfully", 201);
+        success(res, "User registered successfully", user, 201);
     }
 
     static async login(req, res) {
@@ -17,7 +17,7 @@ class AuthController {
             return error(res, "Email and password are required", 400);
         }
         const { user, token } = await AuthService.login(req.body);
-        success(res, { user, token }, "Login successful");
+        success(res, "Login successful", { user, token }, 200);
     }
 
     static async forgotPassword(req, res) {

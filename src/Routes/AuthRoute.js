@@ -2,7 +2,7 @@ import { Router } from "express";
 import AuthController from "../Controllers/AuthController.js";
 import {
     validateUserRegistration,
-    validateUserLogin,
+    validateUserLogin, validateForgotPassword,
     handleValidationErrors,
 } from "../middleware/Validation/authValidation.js";
 
@@ -22,7 +22,7 @@ auth.post(
     handleValidationErrors,
     tryCatch(AuthController.login)
 );
-auth.post("/forgot-password", tryCatch(AuthController.forgotPassword));
+auth.post("/forgot-password", validateForgotPassword, handleValidationErrors, tryCatch(AuthController.forgotPassword));
 auth.post("/change-password", tryCatch(AuthController.changePassword));
 
 export default auth;
