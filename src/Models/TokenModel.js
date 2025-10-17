@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../Config/db.js";
-import { User } from "./UserModel.js"; // Lazy import via sequelize.models will also work
+import User from "./UserModel.js";
+
 
 const Token = sequelize.define(
   "Token",
@@ -41,10 +42,8 @@ const Token = sequelize.define(
   }
 );
 
-// Associations
-Token.associate = () => {
-  const { User } = sequelize.models;
-  Token.belongsTo(User, { foreignKey: "userId", as: "user" });
-};
+
+Token.belongsTo(User, { foreignKey: "userId", as: "user" });
+
 
 export default Token;

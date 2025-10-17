@@ -1,9 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../Models/UserModel.js";
+import User from "../Models/UserModel.js";
 import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import { AppError } from "../Utils/AppError.js";
+import Profile from "../Models/ProfileModel.js";
 
 class AuthService {
     // Generate JWT token
@@ -17,24 +18,15 @@ class AuthService {
     static async register(userData) {
         const { email, password, name, language } = userData;
 
-        // Check if email is already in use
         const existingUser = await User.findOne({ where: { email } });
-        if (existingUser) {
-            throw new AppError("Email already in use", 400);
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create user
+        if (existingUser) throw new AppError("Email already in use", 400);
         const newUser = await User.create({
             email,
-            password: hashedPassword,
+            password: password,
             language,
             name,
         });
 
-        // Generate JWT token
         const token = new AuthService().generateToken(newUser.id);
 
         // Send welcome email asynchronously
@@ -42,7 +34,6 @@ class AuthService {
             console.error("Email send error:", err.message)
         );
 
-        // Remove password from response
         const userDataSafe = newUser.toJSON();
         delete userDataSafe.password;
 
@@ -57,32 +48,51 @@ class AuthService {
         if (!user) throw new AppError("Invalid email", 401);
 
         const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) throw new AppError("Invalid  password", 401);
+        if (!isValidPassword) throw new AppError("Invalid password", 401);
 
         const token = new AuthService().generateToken(user.id);
 
-        // Remove password before returning
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
 
         return { user: userDataSafe, token };
     }
 
-    // Send password reset token via email
+    // Forgot password: send reset token via email
     static async forgotPassword(email) {
         const user = await User.findOne({ where: { email } });
         if (!user) throw new AppError("Email not found", 404);
 
-        // Generate reset token
-        const resetToken = new TokenService().createToken(user.id);
+        // Create a 4-digit reset token and store it
+        const resetToken = await TokenService.createToken(user.id, "reset");
 
-        // Send token email
-        await EmailService.sendTokenEmail(user.email, resetToken, "Password Reset");
+        // Send reset token email
+        await EmailService.sendTokenEmail(user.email, resetToken);
 
         return { message: "Password reset email sent" };
     }
 
-    // Change password
+    // Reset password using token
+    static async resetPassword(email, tokenValue, newPassword) {
+        const user = await User.findOne({ where: { email } });
+        if (!user) throw new AppError("User not found", 404);
+
+        // Validate token
+        const isValidToken = await TokenService.validateToken(user.id, tokenValue, "reset");
+        if (!isValidToken) throw new AppError("Invalid or expired token", 400);
+
+        // Hash and save new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        // Revoke used token
+        await TokenService.revokeToken(user.id, tokenValue, "reset");
+
+        return { message: "Password has been reset successfully" };
+    }
+
+    // Change password (authenticated user)
     static async changePassword(email, currentPassword, newPassword) {
         const user = await User.findOne({ where: { email } });
         if (!user) throw new AppError("User not found", 404);
@@ -95,6 +105,22 @@ class AuthService {
 
         return { message: "Password changed successfully" };
     }
+    async createOrUpdateProfile(userId, profileData) {
+        let profile = await Profile.findOne({ where: { userId } });
+
+        if (profile) {
+            await profile.update(profileData);
+        } else {
+            profile = await Profile.create({ ...profileData, userId });
+        }
+
+        profile = await Profile.findByPk(profile.id, {
+            include: [{ model: User, as: "user", attributes: ["id", "name", "email"] }],
+        });
+
+        return profile;
+    }
+
 }
 
 export default AuthService;

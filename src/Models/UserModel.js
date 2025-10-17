@@ -1,26 +1,16 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../Config/db.js";
 import bcrypt from "bcryptjs";
+import EventRegistration from "./EventRegistration.js";
 
-export const User = sequelize.define(
+const User = sequelize.define(
   "User",
   {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-    name: { type: DataTypes.STRING },
-    email: {
-      type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
-    },
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    name: DataTypes.STRING,
+    email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: DataTypes.STRING,
-    language: {
-      type: DataTypes.ENUM("EN", "FR", "DE"),
-      defaultValue: "EN",
-    },
+    language: { type: DataTypes.ENUM("EN", "FR", "DE"), defaultValue: "EN" },
     photo: DataTypes.STRING,
   },
   {
@@ -44,11 +34,6 @@ export const User = sequelize.define(
 );
 
 // Associations
-User.associate = () => {
-  const { Donation, PrayerRequest, EventRegistration } = sequelize.models;
-  User.hasMany(Donation, { foreignKey: "userId", as: "donations" });
-  User.hasMany(PrayerRequest, { foreignKey: "userId", as: "prayerRequests" });
-  User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
-};
+User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
 
 export default User;

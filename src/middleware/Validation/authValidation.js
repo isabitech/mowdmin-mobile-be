@@ -73,14 +73,14 @@ export const validateForgotPassword = [
       if (!user) throw new Error("Email not found");
     }),
 ];
-
-// ✅ Middleware to handle validation errors
+// middleware to check validation errors
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      error: errors.array()[0].msg,
+      message: "Validation failed",
+      errors: errors.array(),
     });
   }
   next();
