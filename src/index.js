@@ -23,6 +23,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/event', Event);
 app.use('/api/event-registration', registration);
 
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Mowdmin API is running 🚀' });
+});
 // Handle invalid routes
 app.use((req, res, next) => {
     const error = new Error(`Route ${req.originalUrl} not found`);
