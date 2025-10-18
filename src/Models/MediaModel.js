@@ -1,25 +1,39 @@
 import { DataTypes } from "sequelize";
+import sequelize from "../Config/db.js";
+import MediaCategory from "./MediaCategory.js";
 
-export default (sequelize) => {
-    const Media = sequelize.define(
-        "Media",
-        {
-            id: {
-                type: DataTypes.UUID,
-                defaultValue: DataTypes.UUIDV4,
-                primaryKey: true,
-            },
-            title: DataTypes.STRING,
-            description: DataTypes.TEXT,
-            category: DataTypes.ENUM("Sermon", "Album", "Teaching"),
-            url: DataTypes.STRING,
-            thumbnail: DataTypes.STRING,
-        },
-        {
-            tableName: "media",
-            timestamps: true,
-        }
-    );
+const Media = sequelize.define("Media", {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  title: DataTypes.STRING,
+  description: DataTypes.TEXT,
+  category_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  type: {
+    type: DataTypes.ENUM("audio", "video", "text"),
+    allowNull: false,
+  },
+  media_url: DataTypes.STRING,
+  author: DataTypes.STRING,
+  duration: DataTypes.STRING,
+  is_downloadable: DataTypes.BOOLEAN,
+  language: DataTypes.STRING,
+  thumbnail: DataTypes.STRING,
+}, {
+  tableName: "media",
+  timestamps: true,
+});
 
-    return Media;
-};
+// Associations
+Media.belongsTo(MediaCategory, {
+  foreignKey: "category_id",
+  as: "category",
+});
+
+
+export default Media;

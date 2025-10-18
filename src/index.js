@@ -9,7 +9,14 @@ import authRoutes from './Routes/AuthRoute.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import Event from './Routes/EventRoute.js'
 import registration from './Routes/EventRegistrationRoute.js'
-
+import Payment from './Routes/paymentRoutes.js'
+import Media from './Routes/MediaRoute.js'
+import Order from './Routes/OrderRoute.js'
+import OrderItem from './Routes/orderItemRoutes.js'
+import MediaCategory from './Routes/MediaCategoryRoute.js'
+import MediaBookmark from './Routes/MediaBookmarkRoute.js'
+import Prayer from './Routes/PrayerRoutes.js'
+import PrayerRequest from './Routes/PrayerRequestRoutes.js'
 config();
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -22,9 +29,17 @@ app.use("/uploads", express.static("uploads"));
 app.use('/api/auth', authRoutes);
 app.use('/api/event', Event);
 app.use('/api/event-registration', registration);
+app.use("/api/media", Media);
+app.use("/api/media-category", MediaCategory);
+app.use("/api/media-bookmark", MediaBookmark);
+app.use("/api/orders", Order);
+app.use("/api/order-items", OrderItem);
+app.use("/api/payments", Payment);
+app.use("/api/prayer", Prayer)
+app.use("/api/prayer-request", PrayerRequest)
 
 app.get('/', (req, res) => {
-    res.status(200).json({ message: 'Mowdmin API is running 🚀' });
+    res.status(200).json({ message: 'Mowdmin API is running ' });
 });
 // Handle invalid routes
 app.use((req, res, next) => {
