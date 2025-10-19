@@ -1,6 +1,6 @@
 import express from "express";
 import MediaBookmarkController from "../Controllers/MediaBookmarkController.js";
-import { validateMediaBookmarkCreate, validateMediaBookmarkDelete } from "../Middleware/Validation/MediaBookmarkValidation.js";
+import { validateMediaBookmarkCreate, validateMediaBookmarkDelete } from "../middleware/Validation/MediaBookmarkValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/authValidation.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
