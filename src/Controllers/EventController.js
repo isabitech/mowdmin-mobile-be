@@ -17,6 +17,7 @@ class EventController {
 
   }
 
+
   async getAll(req, res, next) {
 
     const events = await EventService.getAllEvents();

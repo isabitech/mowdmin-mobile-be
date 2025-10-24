@@ -1,47 +1,53 @@
-import Product from "../Models/ProductModel";
+import Product from "../Models/ProductModel.js";
 
 class ProductService {
     async create(data) {
-        const res = Product.create(data);
-        return res;
+        const product = await Product.create(data);
+        return product;
     }
-    async update(id, data) {
-        const res = this.findById(id)
-        res.update(data);
-        return res;
 
+    async update(id, data) {
+        const product = await this.findById(id);
+        if (!product) throw new Error("Product not found");
+
+        await product.update(data);
+        return product;
     }
+
     async findById(id) {
-        const res = Product.findByPk(id);
-        return res;
+        const product = await Product.findByPk(id);
+        return product;
     }
+
     async findByIdForAUser(id, userId) {
-        const res = Product.findOne({
-            where: { id: id, userId: userId }
+        const product = await Product.findOne({
+            where: { id, userId },
         });
-        return res;
+        return product;
     }
+
     async getAll() {
-        const res = await Product.findAll({
+        const products = await Product.findAll({
             order: [["createdAt", "ASC"]],
         });
-
-        return res;
+        return products;
     }
+
     async delete(id) {
-        const res = this.findById(id);
-        res.delete();
+        const product = await this.findById(id);
+        if (!product) throw new Error("Product not found");
+
+        await product.destroy();
         return true;
     }
+
     async getAllByUserId(userId) {
-        const res = await Product.findAll({
-            where: { userId: userId },
+        const products = await Product.findAll({
+            where: { userId },
             order: [["createdAt", "ASC"]],
         });
-
-        return res;
+        return products;
     }
-
 }
 
-export default new ProductService()
+export default new ProductService();

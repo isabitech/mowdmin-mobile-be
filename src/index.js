@@ -17,6 +17,7 @@ import MediaBookmark from './Routes/MediaBookmarkRoute.js'
 import Prayer from './Routes/PrayerRoutes.js'
 import PrayerRequest from './Routes/PrayerRequestRoutes.js'
 import Payment  from './Routes/PaymentRoutes.js'
+import Product from './Routes/ProductRoute.js'
 config();
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -36,7 +37,8 @@ app.use("/api/orders", Order);
 app.use("/api/order-items", OrderItem);
 app.use("/api/payments", Payment);
 app.use("/api/prayer", Prayer)
-app.use("/api/prayer-request", PrayerRequest)
+app.use("/api/prayer-request", PrayerRequest);
+app.use ("/api/Products", Product)
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Mowdmin API is running ' });
