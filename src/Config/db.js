@@ -26,7 +26,7 @@ export const connectDB = async () => {
     console.log("✅ Database connection established successfully.");
 
     if (process.env.NODE_ENV === "development") {
-      await sequelize.sync({ alter: false });
+      await sequelize.sync({ alter: true});
       console.log("✅ Database synced successfully.");
     }
   } catch (error) {
