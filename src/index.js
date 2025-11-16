@@ -5,8 +5,14 @@ import morgan from 'morgan'
 import compression from 'compression'
 import { config } from 'dotenv'
 import { connectDB } from './Config/db.js'
-import authRoutes from './Routes/AuthRoute.js'
+import { initializeRedis } from './Config/redis.js'
 import { errorHandler } from './middleware/errorHandler.js'
+
+// Load environment variables first
+config({ path: '../.env' });
+
+// Import routes after environment variables are loaded
+import authRoutes from './Routes/AuthRoute.js'
 import Event from './Routes/EventRoute.js'
 import registration from './Routes/EventRegistrationRoute.js'
 import Media from './Routes/MediaRoute.js'
@@ -19,7 +25,7 @@ import PrayerRequest from './Routes/PrayerRequestRoutes.js'
 import Payment  from './Routes/PaymentRoutes.js'
 import Product from './Routes/ProductRoute.js'
 import Notification from './Routes/NotificationRoute.js'
-config();
+
 const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
@@ -53,14 +59,32 @@ app.use((req, res, next) => {
 });
 
 app.use(errorHandler);
-connectDB()
-    .then(() => {
+
+// Initialize connections
+const initializeServices = async () => {
+    try {
+        // Initialize database first
+        await connectDB();
         console.log('✅ Database connection established');
+        
+        // Initialize Redis
+        await initializeRedis();
+        console.log('✅ Redis connection established');
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Service initialization failed:', error);
+        throw error;
+    }
+};
+
+initializeServices()
+    .then(() => {
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port http://localhost:${PORT}`);
         });
     })
     .catch((error) => {
-        console.error('❌ Database connection failed:', error);
+        console.error('❌ Failed to start server:', error);
         process.exit(1);
     });

@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 import User from "./UserModel.js";
 
-const Profile = sequelize.define(
+const Profile = getSequelize().define(
   "Profile",
   {
     id: {

@@ -1,9 +1,9 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 import User from "./UserModel.js";
 import Media from "./MediaModel.js";
 
-const MediaBookmark = sequelize.define("MediaBookmark", {
+const MediaBookmark = getSequelize().define("MediaBookmark", {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,

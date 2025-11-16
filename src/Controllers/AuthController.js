@@ -44,9 +44,9 @@ class AuthController {
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
 
-        const { email, token, newPassword, confirmPassword } = req.body;
+        const { email, otp, newPassword, confirmPassword } = req.body;
 
-        if (!email || !token || !newPassword || !confirmPassword) {
+        if (!email || !otp || !newPassword || !confirmPassword) {
             return error(res, "All fields are required", 400);
         }
 
@@ -54,9 +54,33 @@ class AuthController {
             return error(res, "New password and confirmation must match", 400);
         }
 
-        await AuthService.resetPassword(email, token, newPassword);
+        await AuthService.resetPassword(email, otp, newPassword);
         return success(res, "Password reset successfully", null, 200);
 
+    }
+
+    // Verify Email with OTP
+    static async verifyEmail(req, res) {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return error(res, "Email and verification code are required", 400);
+        }
+
+        const result = await AuthService.verifyEmail(email, otp);
+        return success(res, result.message, result.user, 200);
+    }
+
+    // Resend Email Verification OTP
+    static async resendEmailVerification(req, res) {
+        const { email } = req.body;
+
+        if (!email) {
+            return error(res, "Email is required", 400);
+        }
+
+        const result = await AuthService.resendEmailVerification(email);
+        return success(res, result.message, null, 200);
     }
 
     // Change Password — for logged-in users

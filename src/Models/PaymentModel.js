@@ -1,10 +1,10 @@
 // models/PaymentModel.js
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 import Order from "./OrderModel.js";
 import User from "./UserModel.js";
 
-const Payment = sequelize.define(
+const Payment = getSequelize().define(
   "Payment",
   {
     id: {

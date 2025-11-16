@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js"; // Sequelize instance
+import getSequelize from "../Config/db.js"; // Sequelize instance
 import PrayerRequest from "./PrayerRequestModel.js";
 
-const Prayer = sequelize.define(
+const Prayer = getSequelize().define(
     "Prayer",
     {
         id: {

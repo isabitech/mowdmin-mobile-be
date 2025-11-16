@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 
-const MediaCategory = sequelize.define("MediaCategory", {
+const MediaCategory = getSequelize().define("MediaCategory", {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,

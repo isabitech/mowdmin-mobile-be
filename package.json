@@ -6,7 +6,9 @@
   "scripts": {
     "test": "node ./src/index.js",
     "dev": "nodemon ./src/index.js",
-    "start": "node ./src/index.js"
+    "start": "node ./src/index.js",
+    "test-otp": "node test-otp.js",
+    "test-otp-interactive": "node test-otp.js interactive"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "homepage": "https://github.com/isabitech/mowdmin-mobile-be#readme",
   "description": "",
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
@@ -32,10 +35,12 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.15.2",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.9",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "prettier": "^3.6.2",
+    "redis": "^5.9.0",
     "sequelize": "^6.37.7",
     "socket.io-client": "^4.8.1",
     "uuid": "^13.0.0"
