@@ -100,7 +100,34 @@ class AuthController {
         return success(res, "Password changed successfully", null, 200);
 
     }
-    async createOrUpdateProfile(req, res) {
+
+    // Get user profile
+    static async getProfile(req, res) {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return error(res, "User ID is required", 400);
+        }
+
+        const profile = await AuthService.getProfile(userId);
+        
+        if (!profile) {
+            return error(res, "Profile not found", 404);
+        }
+
+        // Format image URL if exists
+        const profileData = {
+            ...profile.toJSON(),
+            photoUrl: profile.photoUrl
+                ? `${req.protocol}://${req.get("host")}${profile.photoUrl}`
+                : null,
+        };
+
+        return success(res, "Profile retrieved successfully", profileData, 200);
+    }
+
+    // Create or update user profile
+    static async createOrUpdateProfile(req, res) {
         const userId = req.params.userId; // assuming userId comes from route
         const data = { ...req.body };
 
@@ -119,6 +146,18 @@ class AuthController {
         };
 
         return success(res, "Profile saved successfully", profileData);
+    }
+
+    // Delete user profile
+    static async deleteProfile(req, res) {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return error(res, "User ID is required", 400);
+        }
+
+        await AuthService.deleteProfile(userId);
+        return success(res, "Profile deleted successfully", null, 200);
     }
 }
 

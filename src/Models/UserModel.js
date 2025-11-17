@@ -2,7 +2,6 @@ import { DataTypes } from "sequelize";
 import getSequelize from "../Config/db.js";
 import bcrypt from "bcryptjs";
 import EventRegistration from "./EventRegistration.js";
-import Profile from "./ProfileModel.js";
 import MediaBookmark from "./MediaBookmarksModel.js";
 import Payment from "./PaymentModel.js";
 import Order from "./OrderModel.js";
@@ -40,7 +39,6 @@ const User = getSequelize().define(
 
 // Associations
 User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
-User.hasOne(Profile, { foreignKey: "userId", as: "profile" })
 User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmark" })
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
 User.hasMany(Order,{foreignKey:"userId", as : "order"})

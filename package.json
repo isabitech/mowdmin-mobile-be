@@ -8,7 +8,9 @@
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "test-otp": "node test-otp.js",
-    "test-otp-interactive": "node test-otp.js interactive"
+    "test-otp-interactive": "node test-otp.js interactive",
+    "test-profile": "node test-profile.js --run-tests",
+    "test-profile-validation": "node test-profile.js --validation-tests"
   },
   "repository": {
     "type": "git",

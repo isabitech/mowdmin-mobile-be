@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import getSequelize from "../Config/db.js";
-import User from "./UserModel.js";
 
 const Profile = getSequelize().define(
   "Profile",
@@ -38,11 +37,5 @@ const Profile = getSequelize().define(
     timestamps: true,
   }
 );
-async () => {
-  Profile.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" });
-  User.hasOne(Profile, { foreignKey: "userId", as: "profile" });
-}
-// Associations
-
 
 export default Profile;

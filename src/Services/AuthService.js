@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../Models/UserModel.js";
+import Profile from "../Models/ProfileModel.js";
 import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import OTPService from "./OTPService.js";
 import { AppError } from "../Utils/AppError.js";
-import Profile from "../Models/ProfileModel.js";
 
 class AuthService {
     // Generate JWT token
@@ -57,7 +57,10 @@ class AuthService {
     static async login(credentials) {
         const { email, password } = credentials;
 
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ 
+            where: { email },
+            include: [{ model: Profile, as: "profile" }]
+        });
         if (!user) throw new AppError("Invalid email", 401);
 
         const isValidPassword = await bcrypt.compare(password, user.password);
@@ -211,6 +214,32 @@ class AuthService {
         });
 
         return profile;
+    }
+
+    // Get user profile
+    static async getProfile(userId) {
+        const profile = await Profile.findOne({ 
+            where: { userId },
+            include: [{ model: User, as: "user", attributes: ["id", "name", "email", "emailVerified"] }]
+        });
+
+        if (!profile) {
+            throw new AppError("Profile not found", 404);
+        }
+
+        return profile;
+    }
+
+    // Delete user profile
+    static async deleteProfile(userId) {
+        const profile = await Profile.findOne({ where: { userId } });
+        
+        if (!profile) {
+            throw new AppError("Profile not found", 404);
+        }
+
+        await profile.destroy();
+        return { message: "Profile deleted successfully" };
     }
 
 }

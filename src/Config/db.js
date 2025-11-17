@@ -47,6 +47,14 @@ export const connectDB = async () => {
     await seq.authenticate();
     console.log("✅ Database connection established successfully.");
 
+    // Setup model associations after all models are loaded
+    try {
+      const setupAssociations = await import('../Models/associations.js');
+      setupAssociations.default();
+    } catch (error) {
+      console.warn("⚠️ Could not load associations:", error.message);
+    }
+
     if (process.env.NODE_ENV === "development") {
       await seq.sync({ alter: false});
       console.log("✅ Database synced successfully.");
