@@ -1,10 +1,11 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../Models/UserModel.js";
 import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import { AppError } from "../Utils/AppError.js";
-import Profile from "../Models/ProfileModel.js";
+import { UserRepository } from "../repositories/UserRepository.js";
+import { ProfileRepository } from "../repositories/ProfileRepository.js";
+import User from "../Models/UserModel.js";
 
 class AuthService {
     // Generate JWT token
@@ -18,9 +19,9 @@ class AuthService {
     static async register(userData) {
         const { email, password, name, language } = userData;
 
-        const existingUser = await User.findOne({ where: { email } });
+        const existingUser = await UserRepository.findByEmail(email);
         if (existingUser) throw new AppError("Email already in use", 400);
-        const newUser = await User.create({
+        const newUser = await UserRepository.create({
             email,
             password: password,
             language,
@@ -33,7 +34,6 @@ class AuthService {
         EmailService.sendWelcomeEmail(newUser.email, newUser.name).catch((err) =>
             console.error("Email send error:", err.message)
         );
-
         const userDataSafe = newUser.toJSON();
         delete userDataSafe.password;
 
@@ -44,7 +44,7 @@ class AuthService {
     static async login(credentials) {
         const { email, password } = credentials;
 
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("Invalid email", 401);
 
         const isValidPassword = await bcrypt.compare(password, user.password);
@@ -60,7 +60,7 @@ class AuthService {
 
     // Forgot password: send reset token via email
     static async forgotPassword(email) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("Email not found", 404);
 
         // Create a 4-digit reset token and store it
@@ -74,7 +74,7 @@ class AuthService {
 
     // Reset password using token
     static async resetPassword(email, tokenValue, newPassword) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         // Validate token
@@ -106,17 +106,15 @@ class AuthService {
         return { message: "Password changed successfully" };
     }
     async createOrUpdateProfile(userId, profileData) {
-        let profile = await Profile.findOne({ where: { userId } });
+        let profile = await ProfileRepository.findByUserId(userId);
 
         if (profile) {
-            await profile.update(profileData);
+            await ProfileRepository.update(profile, profileData);
         } else {
-            profile = await Profile.create({ ...profileData, userId });
+            profile = await ProfileRepository.create({ ...profileData, userId });
         }
 
-        profile = await Profile.findByPk(profile.id, {
-            include: [{ model: User, as: "user", attributes: ["id", "name", "email"] }],
-        });
+        profile = await ProfileRepository.findByIdWithUser(profile.id, User);
 
         return profile;
     }

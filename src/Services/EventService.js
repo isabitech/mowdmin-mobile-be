@@ -1,14 +1,14 @@
-import Event from "../Models/EventModel.js";
 import EventRegistration from "../Models/EventRegistration.js";
 import User from "../Models/UserModel.js";
+import { EventRepository } from "../repositories/EventRepository.js";
 
 class EventService {
   async createEvent(data) {
-    return await Event.create(data);
+    return await EventRepository.create(data);
   }
 
   async getAllEvents() {
-    return await Event.findAll({
+    return await EventRepository.findAll({
       order: [["date", "ASC"]],
       include: [
         {
@@ -21,7 +21,7 @@ class EventService {
   }
 
   async getEventById(id) {
-    const event = await Event.findByPk(id, {
+    const event = await EventRepository.findById(id, {
       include: [
         {
           model: EventRegistration,

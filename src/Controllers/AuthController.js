@@ -1,79 +1,70 @@
 import AuthService from "../Services/AuthService.js";
-import { success, error } from "../Utils/helper.js";
+import { sendSuccess, sendError } from "../core/response.js";
+import {
+    validateRegister,
+    validateLogin,
+    validateForgotPassword,
+    validateResetPassword,
+    validateChangePassword,
+} from "../validators/authValidators.js";
 
 class AuthController {
     // Register
     static async register(req, res) {
-
-        const { email, password, name, language } = req.body;
-        if (!email || !password || !name) {
-            return error(res, "Name, email, and password are required", 400);
+        const { error, value } = validateRegister(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
         }
 
-        const user = await AuthService.register({ email, password, name, language });
-        return success(res, "User registered successfully", user, 201);
-
+        const user = await AuthService.register(value);
+        return sendSuccess(res, { message: "User registered successfully", data: user, statusCode: 201 });
     }
 
     // Login
     static async login(req, res) {
-
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return error(res, "Email and password are required", 400);
+        const { error, value } = validateLogin(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
         }
 
-        const { user, token } = await AuthService.login({ email, password });
-        return success(res, "Login successful", { user, token }, 200);
+        const { user, token } = await AuthService.login(value);
+        return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
 
     }
 
     // Forgot Password — send token
     static async forgotPassword(req, res) {
-
-        const { email } = req.body;
-        if (!email) {
-            return error(res, "Email is required", 400);
+        const { error, value } = validateForgotPassword(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
         }
 
-        await AuthService.forgotPassword(email);
-        return success(res, "Password reset token sent to your email", null, 200);
+        await AuthService.forgotPassword(value.email);
+        return sendSuccess(res, { message: "Password reset token sent to your email", data: {}, statusCode: 200 });
 
     }
 
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
-
-        const { email, token, newPassword, confirmPassword } = req.body;
-
-        if (!email || !token || !newPassword || !confirmPassword) {
-            return error(res, "All fields are required", 400);
+        const { error, value } = validateResetPassword(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
         }
 
-        if (newPassword !== confirmPassword) {
-            return error(res, "New password and confirmation must match", 400);
-        }
-
-        await AuthService.resetPassword(email, token, newPassword);
-        return success(res, "Password reset successfully", null, 200);
+        await AuthService.resetPassword(value.email, value.token, value.newPassword);
+        return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
     }
 
     // Change Password — for logged-in users
     static async changePassword(req, res) {
-
-        const { email, currentPassword, newPassword, confirmPassword } = req.body;
-
-        if (!email || !currentPassword || !newPassword || !confirmPassword) {
-            return error(res, "Email, current password, and new passwords are required", 400);
+        const { error, value } = validateChangePassword(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
         }
 
-        if (newPassword !== confirmPassword) {
-            return error(res, "New password and confirmation must match", 400);
-        }
-
-        await AuthService.changePassword(email, currentPassword, newPassword);
-        return success(res, "Password changed successfully", null, 200);
+        await AuthService.changePassword(value.email, value.currentPassword, value.newPassword);
+        return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
 
     }
     async createOrUpdateProfile(req, res) {
@@ -94,7 +85,7 @@ class AuthController {
                 : null,
         };
 
-        return success(res, "Profile saved successfully", profileData);
+        return sendSuccess(res, { message: "Profile saved successfully", data: profileData });
     }
 }
 

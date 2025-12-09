@@ -1,30 +1,5 @@
-import { response } from "express";
-import { body, validationResult } from "express-validator";
-import User from "../Models/UserModel.js";
-
 /* ----------------------------------------
-   RESPONSE HELPERS
----------------------------------------- */
-export const success = (res, message = 'Success', data = null) => {
-    const payload = { success: true, message };
-    if (data !== null) payload.data = data;
-    return res.status(200).json(payload);
-};
-
-export const error = (res, message = 'Error', data = null) => {
-  const payload = { success: false, error: message };
-  if (data !== null) payload.data = data;
-  return res.status(400).json(payload);
-};
-
-export const customError = (res, message = 'Error', statusCode = 400, data = null) => {
-  const payload = { success: false, error: message };
-  if (data !== null) payload.data = data;
-  return res.status(statusCode).json(payload);
-};
-
-/* ----------------------------------------
-   PAGINATION HELPERS
+    PAGINATION HELPERS
 ---------------------------------------- */
 export const paginate = (page, pageSize) => {
     const limit = pageSize ? +pageSize : 10;
