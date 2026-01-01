@@ -1,14 +1,7 @@
 import PrayerService from "../Services/PrayerService.js";
-import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreatePrayer } from "../validators/prayerValidators.js";
-class PrayerController {
+import { sendSuccess, sendError } from "../core/response.js";class PrayerController {
   async create(req, res) {
-    const { error, value } = validateCreatePrayer(req.body);
-    if (error) {
-      return sendError(res, { message: error.details[0].message, statusCode: 400 });
-    }
-
-    const data = { ...value, userId: req.user.id };
+    const data = { ...req.body, userId: req.user.id };
     const prayer = await PrayerService.create(data);
     return sendSuccess(res, { message: "Prayer Created Successfully", data: prayer });
   }

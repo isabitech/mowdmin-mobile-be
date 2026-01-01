@@ -23,23 +23,7 @@ class PrayerService {
     }
     async getAll() {
         const res = await PrayerRepository.findAll({
-            order: [["createdAt", "ASC"]],
-            include: [
-                {
-                    model: User,
-                    as: "user",
-                    attributes: ["id", "email", "photo"],
-                    include: [
-                        {
-                            model: Profile,
-                            as: "profile",
-                            attributes: ["id", "displayName", "photoUrl", "bio", "location"],
-                        },
-                    ],
-                    model: PrayerRequest,
-                    as: "prayerRequest"
-                },
-            ],
+            order: [["createdAt", "ASC"]],          
         });
 
         return res;
