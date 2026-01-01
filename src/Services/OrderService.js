@@ -1,6 +1,5 @@
 // services/OrderService.js
-import { OrderRepository } from "../repositories/index.js";
-import User from "../Models/UserModel.js";
+import { OrderRepository } from "../repositories/OrderRepository.js";
 
 class OrderService {
     // Create a new order

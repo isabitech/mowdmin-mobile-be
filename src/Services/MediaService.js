@@ -1,4 +1,4 @@
-import MediaCategory from "../Models/MediaCategory.js";
+import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 import { MediaRepository } from "../repositories/MediaRepository.js";
 
 class MediaService {
@@ -14,15 +14,14 @@ class MediaService {
   }
 
   async findById(id) {
-    return await MediaRepository.findById(id, {
-      include: [{ model: MediaCategory, as: "category", attributes: ["name"] }],
-    });
+    // Note: If you need category info, fetch it separately using MediaCategoryRepository
+    return await MediaRepository.findById(id);
   }
 
   async getAll() {
+    // Note: If you need category info, fetch it separately using MediaCategoryRepository
     return await MediaRepository.findAll({
       order: [["createdAt", "ASC"]],
-      include: [{ model: MediaCategory, as: "category", attributes: ["name"] }],
     });
   }
 

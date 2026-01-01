@@ -1,4 +1,4 @@
-import Media from "../Models/MediaModel.js";
+import { MediaRepository } from "../repositories/MediaRepository.js";
 import { MediaBookmarkRepository } from "../repositories/MediaBookmarkRepository.js";
 
 class MediaBookmarkService {
@@ -14,15 +14,14 @@ class MediaBookmarkService {
     }
 
     async findById(id) {
-        return await MediaBookmarkRepository.findById(id, {
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
-        });
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaBookmarkRepository.findById(id);
     }
 
     async getAll() {
+        // Note: If you need media info, fetch it separately using MediaRepository
         return await MediaBookmarkRepository.findAll({
             order: [["createdAt", "ASC"]],
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
         });
     }
 
@@ -34,9 +33,9 @@ class MediaBookmarkService {
     }
 
     async getAllByUserId(userId) {
+        // Note: If you need media info, fetch it separately using MediaRepository
         return await MediaBookmarkRepository.findAllByUserId(userId, {
             order: [["createdAt", "ASC"]],
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
         });
     }
 }

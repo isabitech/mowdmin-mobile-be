@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../Models/UserModel.js";
+import { UserRepository } from "../repositories/UserRepository.js";
 
 /**
  * Middleware to protect routes and ensure the user is authenticated.
@@ -23,8 +23,8 @@ export const protectUser = async (req, res, next) => {
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Fetch user from DB
-    const user = await User.findByPk(decoded.id);
+    // Fetch user from DB using repository
+    const user = await UserRepository.findById(decoded.id);
     if (!user) {
       return res.status(401).json({
         status: "error",

@@ -4,8 +4,7 @@ import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import { AppError } from "../Utils/AppError.js";
 import { UserRepository } from "../repositories/UserRepository.js";
-import { ProfileRepository } from "../repositories/ProfileRepository.js";
-import User from "../Models/UserModel.js";
+import ProfileRepository from "../repositories/ProfileRepository.js";
 
 class AuthService {
     // Generate JWT token
@@ -94,7 +93,7 @@ class AuthService {
 
     // Change password (authenticated user)
     static async changePassword(email, currentPassword, newPassword) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         const isValidPassword = await bcrypt.compare(currentPassword, user.password);

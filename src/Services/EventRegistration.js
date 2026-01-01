@@ -1,80 +1,51 @@
-import Event from "../Models/EventModel.js";
-import EventRegistration from "../Models/EventRegistration.js";
-import User from "../Models/UserModel.js";
+
+import { UserRepository } from "../repositories/UserRepository.js";
+import { EventRepository } from "../repositories/EventRepository.js";
 
 class EventRegistrationService {
     async createEventReg(data) {
         const registrationData = {
-            eventId: data.eventId,       // use model field name
-            userId: data.userId,         // use model field name
+            eventId: data.eventId,
+            userId: data.userId,
             ticketCode: data.ticketCode ?? null,
             status: "registered",
         };
-
-        return await EventRegistration.create(registrationData);
+        return await EventRepository.create(registrationData);
     }
 
     async getAllReg() {
-        return await EventRegistration.findAll({
-            order: [["createdAt", "ASC"]], // <-- use camelCase as per Sequelize timestamps
-            include: [
-                { model: User, as: "user", attributes: ["id", "name", "email"] },
-                { model: Event, as: "event", attributes: ["id", "title", "date","time", "location"] }, // match Event model field names
-            ],
-        });
+        // For MongoDB, populate userId and eventId manually if needed
+        return await EventRepository.findAll();
     }
 
-
     async getRegById(id) {
-        const reg = await EventRegistration.findByPk(id, {
-            include: [
-                { model: User, as: "user", attributes: ["id", "name", "email"] },
-                { model: Event, as: "event", attributes: ["id", "title", "date","time", "location"] },
-            ],
-        });
+        const reg = await EventRepository.findById(id);
         if (!reg) throw new Error("Event registration not found");
         return reg;
     }
 
     async updateEventReg(id, updates) {
-        const reg = await this.getRegById(id);
-        await reg.update(updates);
-        return reg;
+        return await EventRepository.updateById
+            ? EventRepository.updateById(id, updates)
+            : null;
     }
 
     async deleteEventReg(id) {
-        const reg = await this.getRegById(id);
-        await reg.destroy();
-        return true;
+        return await EventRepository.deleteById
+            ? EventRepository.deleteById(id)
+            : null;
     }
 
     async getByEventId(eventId) {
-        const registrations = await EventRegistration.findAll({
-            where: { event_id: eventId },
-            include: [
-                { model: User, as: "user", attributes: ["id", "name", "email"] },
-                { model: Event, as: "event", attributes: ["id", "title", "date", "time", "location"] },
-            ],
-            order: [["createdAt", "ASC"]],
-        });
-
+        const registrations = await EventRepository.findAll({ eventId });
         if (!registrations || registrations.length === 0)
             throw new Error("No registrations found for this event");
-
         return registrations;
     }
+
     async getByUserId(userId) {
-        const registrations = await EventRegistration.findAll({
-            where: {  userId },
-            include: [
-                { model: Event, as: "event", attributes: ["id", "title", "date","time", "location"] },
-            ],
-            order: [["createdAt", "DESC"]],
-        });
-
-        return registrations;
+        return await EventRepository.findAll({ userId });
     }
-
 }
 
 export default new EventRegistrationService();

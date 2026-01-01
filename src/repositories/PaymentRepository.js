@@ -1,19 +1,59 @@
-import Payment from "../Models/PaymentModel.js";
+
+let PaymentModel;
+const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const PaymentRepository = {
-  create: (data) => Payment.create(data),
-  findAll: (options = {}) => Payment.findAll(options),
-  findById: (id, options = {}) => Payment.findByPk(id, options),
-  findOne: (where, options = {}) => Payment.findOne({ where, ...options }),
-  updateById: async (id, data, options = {}) => {
-    const payment = await Payment.findByPk(id, options);
-    if (!payment) return null;
-    return payment.update(data);
+  async getModel() {
+    if (!PaymentModel) {
+      if (isMongo) {
+        PaymentModel = (await import('../MongoModels/PaymentMongoModel.js')).default;
+      } else {
+        PaymentModel = (await import('../Models/PaymentModel.js')).default;
+      }
+    }
+    return PaymentModel;
   },
-  deleteById: async (id, options = {}) => {
-    const payment = await Payment.findByPk(id, options);
-    if (!payment) return null;
-    await payment.destroy();
-    return true;
+
+  async create(data) {
+    const Model = await this.getModel();
+    return Model.create(data);
+  },
+  async findAll(options = {}) {
+    const Model = await this.getModel();
+    if (isMongo) {
+      return Model.find({});
+    } else {
+      return Model.findAll(options);
+    }
+  },
+  async findById(id, options = {}) {
+    const Model = await this.getModel();
+    return isMongo ? Model.findById(id) : Model.findByPk(id, options);
+  },
+  async findOne(where, options = {}) {
+    const Model = await this.getModel();
+    return isMongo ? Model.findOne(where) : Model.findOne({ where, ...options });
+  },
+  async updateById(id, data, options = {}) {
+    const Model = await this.getModel();
+    if (isMongo) {
+      return Model.findByIdAndUpdate(id, data, { new: true });
+    } else {
+      const payment = await Model.findByPk(id, options);
+      if (!payment) return null;
+      return payment.update(data);
+    }
+  },
+  async deleteById(id, options = {}) {
+    const Model = await this.getModel();
+    if (isMongo) {
+      const result = await Model.findByIdAndDelete(id);
+      return !!result;
+    } else {
+      const payment = await Model.findByPk(id, options);
+      if (!payment) return null;
+      await payment.destroy();
+      return true;
+    }
   },
 };

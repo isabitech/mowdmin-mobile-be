@@ -1,5 +1,5 @@
-import Token from "../Models/TokenModel.js";
-import User from "../Models/UserModel.js";
+import { TokenRepository } from "../repositories/TokenRepository.js";
+import { UserRepository } from "../repositories/UserRepository.js";
 import bcrypt from "bcryptjs";
 
 class TokenService {
@@ -16,7 +16,7 @@ class TokenService {
 
         const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
-        await Token.create({
+        await TokenRepository.create({
             userId,
             type,
             token: hashedToken,
@@ -29,13 +29,13 @@ class TokenService {
     }
 
     static async validateToken(userId, tokenValue, type) {
-        const tokens = await Token.findAll({
+        const tokens = await TokenRepository.findAll({
             where: {
                 userId,
                 type,
                 revoked: false,
             },
-            order: [["createdAt", "DESC"]], // most recent first
+            order: [["createdAt", "DESC"]],
         });
 
         for (const token of tokens) {
@@ -51,7 +51,7 @@ class TokenService {
     }
 
     static async revokeToken(userId, tokenValue, type) {
-        const tokens = await Token.findAll({
+        const tokens = await TokenRepository.findAll({
             where: {
                 userId,
                 type,

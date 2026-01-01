@@ -1,0 +1,1320 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Mowdmin Mobile BE API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Mowdmin Mobile BE API with login and token handling."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Test User", "type": "text" },
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save the auth token from the response",
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  if (jsonData.token) {",
+                  "    pm.environment.set('authToken', jsonData.token);",
+                  "  } else if (jsonData.data && jsonData.data.token) {",
+                  "    pm.environment.set('authToken', jsonData.data.token);",
+                  "  } else {",
+                  "    pm.environment.unset('authToken');",
+                  "  }",
+                  "} else {",
+                  "  pm.environment.unset('authToken');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "email", "value": "{{email}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/forgot-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "token", "value": "", "type": "text" },
+                { "key": "newPassword", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/reset-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "oldPassword", "value": "", "type": "text" },
+                { "key": "newPassword", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Event",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Sample Event", "type": "text" },
+                { "key": "description", "value": "Event description", "type": "text" },
+                { "key": "date", "value": "2026-01-01", "type": "text" },
+                { "key": "time", "value": "12:00", "type": "text" },
+                { "key": "location", "value": "Main Hall", "type": "text" },
+                { "key": "type", "value": "Crusade", "type": "text" },
+                { "key": "image", "type": "file" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Event", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" },
+                { "key": "date", "value": "2026-01-02", "type": "text" },
+                { "key": "time", "value": "13:00", "type": "text" },
+                { "key": "location", "value": "Main Hall", "type": "text" },
+                { "key": "type", "value": "Baptism", "type": "text" },
+                { "key": "image", "type": "file" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Event Registration",
+      "item": [
+        {
+          "name": "Register for Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "eventId", "value": "", "type": "text" },
+                { "key": "ticketCode", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get All Registrations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Registrations by Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/event/:eventId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", "event", ":eventId"]
+            }
+          }
+        },
+        {
+          "name": "Get Registrations by User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get Registration by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Registration",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "eventId", "value": "", "type": "text" },
+                { "key": "ticketCode", "value": "", "type": "text" },
+                { "key": "status", "value": "registered", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Registration",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/event-registration/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-registration", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Sample Notification", "type": "text" },
+                { "key": "message", "value": "Notification message", "type": "text" },
+                { "key": "type", "value": "info", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notification/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", ""]
+            }
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notification/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", ""]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notification/:id/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", ":id", "read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Create Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Sample Media", "type": "text" },
+                { "key": "description", "value": "Media description", "type": "text" },
+                { "key": "category_id", "value": "", "type": "text" },
+                { "key": "type", "value": "audio", "type": "text" },
+                { "key": "media_url", "value": "", "type": "text" },
+                { "key": "author", "value": "", "type": "text" },
+                { "key": "duration", "value": "", "type": "text" },
+                { "key": "is_downloadable", "value": "false", "type": "text" },
+                { "key": "language", "value": "", "type": "text" },
+                { "key": "thumbnail", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Media",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Media By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Media",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Media", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" },
+                { "key": "category_id", "value": "", "type": "text" },
+                { "key": "type", "value": "video", "type": "text" },
+                { "key": "media_url", "value": "", "type": "text" },
+                { "key": "author", "value": "", "type": "text" },
+                { "key": "duration", "value": "", "type": "text" },
+                { "key": "is_downloadable", "value": "true", "type": "text" },
+                { "key": "language", "value": "", "type": "text" },
+                { "key": "thumbnail", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media Category",
+      "item": [
+        {
+          "name": "Create Media Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Sample Category", "type": "text" },
+                { "key": "description", "value": "Category description", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media-category/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-category", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Media Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-category/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-category", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Media Category By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-category/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-category", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Media Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Updated Category", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media-category/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-category", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Media Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-category/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-category", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media Bookmark",
+      "item": [
+        {
+          "name": "Create Media Bookmark",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "userId", "value": "", "type": "text" },
+                { "key": "mediaId", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Media Bookmarks",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Media Bookmarks By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/user/:userId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", "user", ":userId"]
+            }
+          }
+        },
+        {
+          "name": "Get Media Bookmark By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Media Bookmark",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "userId", "value": "", "type": "text" },
+                { "key": "mediaId", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Media Bookmark",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/media-bookmark/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "media-bookmark", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "userId", "value": "", "type": "text" },
+                { "key": "items", "value": "[{\"productId\":\"\",\"quantity\":1}]", "type": "text" },
+                { "key": "totalAmount", "value": "0", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", ""]
+            }
+          }
+        },
+        {
+          "name": "Get User Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "status", "value": "", "type": "text" },
+                { "key": "totalAmount", "value": "0", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order Item",
+      "item": [
+        {
+          "name": "Create Order Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "orderId", "value": "", "type": "text" },
+                { "key": "productId", "value": "", "type": "text" },
+                { "key": "quantity", "value": "1", "type": "text" },
+                { "key": "unit_price", "value": "0", "type": "text" },
+                { "key": "subtotal", "value": "0", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order-item/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Order Items",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order-item/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Order Items By Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order-item/order/:orderId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", "order", ":orderId"]
+            }
+          }
+        },
+        {
+          "name": "Get Order Item By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order-item/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "quantity", "value": "1", "type": "text" },
+                { "key": "unit_price", "value": "0", "type": "text" },
+                { "key": "subtotal", "value": "0", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/order-item/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Order Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/order-item/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "order-item", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "orderId", "value": "", "type": "text" },
+                { "key": "amount", "value": "0", "type": "text" },
+                { "key": "method", "value": "", "type": "text" },
+                { "key": "status", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payment/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payment/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Payments By Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payment/order/:orderId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", "order", ":orderId"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payment/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Payment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "amount", "value": "0", "type": "text" },
+                { "key": "method", "value": "", "type": "text" },
+                { "key": "status", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/payment/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Payment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/payment/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "payment", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prayer",
+      "item": [
+        {
+          "name": "Create Prayer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Sample Prayer", "type": "text" },
+                { "key": "content", "value": "Prayer content", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prayer/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Prayers",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Prayers By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get Prayer By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Prayer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prayer Request",
+      "item": [
+        {
+          "name": "Create Prayer Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Sample Prayer Request", "type": "text" },
+                { "key": "description", "value": "Prayer request description", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Prayer Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Prayer Requests By User",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", "user"]
+            }
+          }
+        },
+        {
+          "name": "Get Prayer Request By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Prayer Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Prayer Request", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Prayer Request",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prayer-request/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "prayer-request", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Sample Product", "type": "text" },
+                { "key": "price", "value": "0", "type": "text" },
+                { "key": "description", "value": "Product description", "type": "text" },
+                { "key": "categoryId", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/product/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", ""]
+            }
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/product/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Products By Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/product/category/:categoryId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", "category", ":categoryId"]
+            }
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/product/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Updated Product", "type": "text" },
+                { "key": "price", "value": "0", "type": "text" },
+                { "key": "description", "value": "Updated description", "type": "text" },
+                { "key": "categoryId", "value": "", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/product/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/product/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "product", ":id"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "email", "value": "user@example.com" },
+    { "key": "password", "value": "password" }
+  ]
+}

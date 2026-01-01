@@ -1,5 +1,5 @@
 // services/OrderItemService.js
-import Order from "../Models/OrderModel.js";
+import { OrderRepository } from "../repositories/OrderRepository.js";
 import { OrderItemRepository } from "../repositories/OrderItemRepository.js";
 
 class OrderItemService {

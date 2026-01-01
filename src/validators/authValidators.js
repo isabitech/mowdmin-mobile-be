@@ -3,6 +3,8 @@ import Joi from "joi";
 const email = Joi.string().email().required();
 const password = Joi.string().min(6).max(128).required();
 
+
+// Joi validation schemas (for use in services/controllers)
 export const validateRegister = (payload) =>
   Joi.object({
     name: Joi.string().min(2).max(255).required(),
@@ -13,7 +15,7 @@ export const validateRegister = (payload) =>
     .prefs({ stripUnknown: true })
     .validate(payload);
 
-export const validateLogin = (payload) =>
+export const joiValidateLogin = (payload) =>
   Joi.object({
     email,
     password,
@@ -21,7 +23,7 @@ export const validateLogin = (payload) =>
     .prefs({ stripUnknown: true })
     .validate(payload);
 
-export const validateForgotPassword = (payload) =>
+export const joiValidateForgotPassword = (payload) =>
   Joi.object({
     email,
   })
@@ -37,6 +39,25 @@ export const validateResetPassword = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+
+// Express middleware for validation (for use in routes)
+export function validateUserRegistration(req, res, next) {
+  const { error } = validateRegister(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+}
+
+export function validateUserLogin(req, res, next) {
+  const { error } = joiValidateLogin(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+}
+
+export function validateForgotPassword(req, res, next) {
+  const { error } = joiValidateForgotPassword(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+}
 
 export const validateChangePassword = (payload) =>
   Joi.object({

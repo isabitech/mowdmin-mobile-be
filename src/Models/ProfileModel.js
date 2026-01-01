@@ -29,6 +29,15 @@ const Profile = sequelize.define(
     birthdate: {
       type: DataTypes.DATE,
     },
+    language: {
+      type: DataTypes.ENUM('EN', 'FR', 'DE'),
+      defaultValue: 'EN',
+    },
+    notificationPreferences: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+      comment: 'Store notification settings as JSON object',
+    },
   },
   {
     tableName: "profiles",

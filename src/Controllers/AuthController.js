@@ -1,69 +1,40 @@
 import AuthService from "../Services/AuthService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import {
-    validateRegister,
-    validateLogin,
-    validateForgotPassword,
-    validateResetPassword,
-    validateChangePassword,
-} from "../validators/authValidators.js";
 
 class AuthController {
     // Register
     static async register(req, res) {
-        const { error, value } = validateRegister(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
 
-        const user = await AuthService.register(value);
+        const user = await AuthService.register(req.body);
         return sendSuccess(res, { message: "User registered successfully", data: user, statusCode: 201 });
     }
 
     // Login
     static async login(req, res) {
-        const { error, value } = validateLogin(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
-
-        const { user, token } = await AuthService.login(value);
+      
+        const { user, token } = await AuthService.login(req.body);
         return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
-
     }
 
     // Forgot Password — send token
     static async forgotPassword(req, res) {
-        const { error, value } = validateForgotPassword(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
-
-        await AuthService.forgotPassword(value.email);
+      
+        await AuthService.forgotPassword(req.body.email);
         return sendSuccess(res, { message: "Password reset token sent to your email", data: {}, statusCode: 200 });
 
     }
 
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
-        const { error, value } = validateResetPassword(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
-
-        await AuthService.resetPassword(value.email, value.token, value.newPassword);
+      
+        await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
         return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
     }
 
     // Change Password — for logged-in users
-    static async changePassword(req, res) {
-        const { error, value } = validateChangePassword(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
-
-        await AuthService.changePassword(value.email, value.currentPassword, value.newPassword);
+    static async changePassword(req, res) { 
+        await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
         return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
 
     }

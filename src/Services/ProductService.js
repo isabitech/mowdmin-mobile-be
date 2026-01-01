@@ -1,4 +1,4 @@
-import { ProductRepository } from "../repositories/index.js";
+import { ProductRepository } from "../repositories/ProductRepository.js";
 
 class ProductService {
     async create(data) {

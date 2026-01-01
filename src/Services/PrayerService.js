@@ -1,6 +1,3 @@
-import PrayerRequest from "../Models/PrayerRequestModel.js";
-import Profile from "../Models/ProfileModel.js";
-import User from "../Models/UserModel.js";
 import { PrayerRepository } from "../repositories/PrayerRepository.js";
 
 
