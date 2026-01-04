@@ -1,6 +1,7 @@
-// services/PaymentService.js
 import { PaymentRepository } from "../repositories/PaymentRepository.js";
 import { OrderRepository } from "../repositories/OrderRepository.js";
+import Order from "../Models/OrderModel.js";
+import User from "../Models/UserModel.js";
 
 class PaymentService {
     // Initialize a new payment record

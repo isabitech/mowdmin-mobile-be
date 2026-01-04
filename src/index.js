@@ -22,16 +22,19 @@ import membership from './Routes/MembershipRoute.js'
 import profile from './Routes/ProfileRoute.js'
 import donation from './Routes/DonationRoute.js'
 import info from './Routes/InfoRoute.js'
+import payment from './Routes/PaymentRoute.js'
 
 config();
 const PORT = process.env.PORT || 3000;
 const app = express();
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(compression());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
+
 const apiRouter = express.Router();
 apiRouter.use('/auth', auth);
 apiRouter.use('/event', Event);
@@ -49,15 +52,19 @@ apiRouter.use('/membership', membership);
 apiRouter.use('/profile', profile);
 apiRouter.use('/donation', donation);
 apiRouter.use('/info', info);
+apiRouter.use('/payment', payment);
+
 app.use('/api/v1', apiRouter);
+
 // Handle invalid routes
 app.use((req, res, next) => {
     const error = new Error(`Route ${req.originalUrl} not found`);
-    error.status = 404;
+    error.statusCode = 404;
     next(error);
 });
 
 app.use(errorHandler);
+
 async function bootstrap() {
     try {
         if (process.env.DB_CONNECTION === 'mysql') {
@@ -81,4 +88,8 @@ async function bootstrap() {
     }
 }
 
-bootstrap();
+export default app;
+
+if (process.env.NODE_ENV !== 'test') {
+    bootstrap();
+}
