@@ -67,13 +67,13 @@ app.use(errorHandler);
 
 async function bootstrap() {
     try {
-        if (process.env.DB_CONNECTION === 'mysql') {
+        if (process.env.DB_CONNECTION === "mongodb") {
+            console.log('🔄 Connecting to MongoDB database...');
+            await connectMongoDB();
+        } else if (process.env.DB_CONNECTION === "mysql") {
             console.log('🔄 Connecting to MySQL database...');
             const { connectDB } = await import('./Config/db.js');
             await connectDB();
-        } else if (process.env.DB_CONNECTION === 'mongodb') {
-            console.log('🔄 Connecting to MongoDB database...');
-            await connectMongoDB();
         } else {
             throw new Error(`Unsupported DB_CONNECTION: ${process.env.DB_CONNECTION}`);
         }

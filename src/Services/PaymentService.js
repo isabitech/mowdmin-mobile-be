@@ -1,9 +1,19 @@
 import { PaymentRepository } from "../repositories/PaymentRepository.js";
 import { OrderRepository } from "../repositories/OrderRepository.js";
-import Order from "../Models/OrderModel.js";
-import User from "../Models/UserModel.js";
-
+let Order;
+if (process.env.DB_CONNECTION !== 'mongodb') {
+    Order = (await import("../Models/OrderModel.js")).default;
+}else{
+    Order = (await import("../MongoModels/OrderMongoModel.js")).default;
+}
+let User;
+if (process.env.DB_CONNECTION !== 'mongodb') {
+    User = (await import("../Models/UserModel.js")).default;
+}else{
+    User = (await import("../MongoModels/UserMongoModel.js")).default;
+}
 class PaymentService {
+
     // Initialize a new payment record
     async createPayment(data) {
         return PaymentRepository.create(data);
