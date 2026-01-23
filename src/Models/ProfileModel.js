@@ -20,6 +20,9 @@ const Profile = sequelize.define(
     photoUrl: {
       type: DataTypes.STRING,
     },
+    phone_number: {
+      type: DataTypes.STRING
+    },
     bio: {
       type: DataTypes.TEXT,
     },
@@ -44,9 +47,11 @@ const Profile = sequelize.define(
     timestamps: true,
   }
 );
-
+async () => {
+  Profile.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" });
+  User.hasOne(Profile, { foreignKey: "userId", as: "profile" });
+}
 // Associations
-Profile.belongsTo(User, { foreignKey: "userId", targetKey: "id", as: "user" });
-User.hasOne(Profile, { foreignKey: "userId", as: "profile" });
+
 
 export default Profile;

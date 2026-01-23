@@ -18,6 +18,32 @@ class EventController {
     };
     return sendSuccess(res, { message: "Event Created Successfully", data: eventData });
   }
+
+
+  async getAll(req, res, next) {
+
+    const events = await EventService.getAllEvents();
+    const formatted = events.map((event) => ({
+      ...event.toJSON(),
+      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
+    }));
+
+    return success(res, "All Events Fetched Successfully", formatted);
+
+  }
+
+  async getOne(req, res, next) {
+
+    const event = await EventService.getEventById(req.params.id);
+    const eventData = {
+      ...event.toJSON(),
+      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
+    };
+
+    return success(res, "Event Fetched Successfully", eventData);
+
+  }
+
   async update(req, res, next) {
     const { error, value } = joiValidateUpdateEvent(req.body);
     if (error) {
