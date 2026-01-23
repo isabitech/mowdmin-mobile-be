@@ -1,38 +1,42 @@
 import MediaBookmarkService from "../Services/MediaBookmarkService.js";
-import { success } from "../Utils/helper.js";
+import { sendSuccess, sendError } from "../core/response.js";
+import { validateCreateMediaBookmark, validateUpdateMediaBookmark } from "../validators/mediaBookmarkValidators.js";
 
 class MediaBookmarkController {
     async create(req, res, next) {
-        const data = { ...req.body };
-        const bookmark = await MediaBookmarkService.create(data);
+        const { error, value } = validateCreateMediaBookmark(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
+        }
 
-        return success(res, "Bookmark Created Successfully", bookmark);
+        const bookmark = await MediaBookmarkService.create(value);
+        return sendSuccess(res, { message: "Bookmark Created Successfully", data: bookmark });
     }
-
     async getAll(req, res, next) {
         const bookmarks = await MediaBookmarkService.getAll();
-        return success(res, "All Bookmarks Fetched Successfully", bookmarks);
+        return sendSuccess(res, { message: "All Bookmarks Fetched Successfully", data: bookmarks });
     }
-
     async getAllByUser(req, res, next) {
         const { userId } = req.params;
         const bookmarks = await MediaBookmarkService.getAllByUserId(userId);
-        return success(res, "User Bookmarks Fetched Successfully", bookmarks);
+        return sendSuccess(res, { message: "User Bookmarks Fetched Successfully", data: bookmarks });
     }
-
     async getOne(req, res, next) {
         const bookmark = await MediaBookmarkService.findById(req.params.id);
-        return success(res, "Bookmark Fetched Successfully", bookmark);
+        return sendSuccess(res, { message: "Bookmark Fetched Successfully", data: bookmark });
     }
-
     async update(req, res, next) {
-        const updated = await MediaBookmarkService.update(req.params.id, req.body);
-        return success(res, "Bookmark Updated Successfully", updated);
-    }
+        const { error, value } = validateUpdateMediaBookmark(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
+        }
 
+        const updated = await MediaBookmarkService.update(req.params.id, value);
+        return sendSuccess(res, { message: "Bookmark Updated Successfully", data: updated });
+    }
     async delete(req, res, next) {
         await MediaBookmarkService.delete(req.params.id);
-        return success(res, "Bookmark Deleted Successfully");
+        return sendSuccess(res, { message: "Bookmark Deleted Successfully", data: {} });
     }
 }
 

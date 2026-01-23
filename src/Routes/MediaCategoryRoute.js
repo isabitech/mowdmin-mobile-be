@@ -1,15 +1,28 @@
-import express from "express";
+import { Router } from "express";
 import MediaCategoryController from "../Controllers/MediaCategoryController.js";
-import { validateMediaCategoryCreate, validateMediaCategoryUpdate } from "../middleware/Validation/MediaCategoryValidation.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { handleValidationErrors } from "../middleware/Validation/authValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
-const MediaCategory = express.Router();
+import { validateCreateMediaCategory, validateUpdateMediaCategory } from "../validators/mediaCategoryValidators.js";
+import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
-MediaCategory.post("/", protectUser, validateMediaCategoryCreate, handleValidationErrors, tryCatch(MediaCategoryController.create));
-MediaCategory.get("/", protectUser, tryCatch(MediaCategoryController.getAll));
-MediaCategory.get("/:id", protectUser, tryCatch(MediaCategoryController.getOne));
-MediaCategory.put("/:id", protectUser, validateMediaCategoryUpdate, handleValidationErrors, tryCatch(MediaCategoryController.update));
-MediaCategory.delete("/:id", protectUser, tryCatch(MediaCategoryController.delete));
+const mediaCategory = Router();
 
-export default MediaCategory;
+mediaCategory.post(
+	"/",
+	protectUser,
+	validateCreateMediaCategory,
+	handleValidationErrors,
+	tryCatch(MediaCategoryController.create)
+);
+mediaCategory.get("/", protectUser, tryCatch(MediaCategoryController.getAll));
+mediaCategory.get("/:id", protectUser, tryCatch(MediaCategoryController.getOne));
+mediaCategory.put(
+	"/:id",
+	protectUser,
+	validateUpdateMediaCategory,
+	handleValidationErrors,
+	tryCatch(MediaCategoryController.update)
+);
+mediaCategory.delete("/:id", protectUser, tryCatch(MediaCategoryController.delete));
+
+export default mediaCategory;

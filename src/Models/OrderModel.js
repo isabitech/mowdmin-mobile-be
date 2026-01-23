@@ -1,8 +1,7 @@
+// OrderModel.js
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js"; // your sequelize instance
+import sequelize from "../Config/db.js";
 import User from "./UserModel.js";
-import OrderItem from "./OrderItemModel.js"; // you’ll create this next
-import Payment from "./PaymentModel.js"; // link to payments
 
 const Order = sequelize.define(
   "Order",
@@ -16,21 +15,22 @@ const Order = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    total_amount: {
+    totalAmount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    currency: {
-      type: DataTypes.STRING,
-      defaultValue: "USD",
-    },
     status: {
-      type: DataTypes.ENUM("pending", "paid", "failed", "cancelled", "delivered"),
+      type: DataTypes.ENUM("pending", "paid", "cancelled", "shipped", "completed"),
       defaultValue: "pending",
     },
-    payment_reference: {
+    paymentMethod: {
       type: DataTypes.STRING,
-      allowNull: true,
+    },
+    shippingAddress: {
+      type: DataTypes.STRING,
+    },
+    notes: {
+      type: DataTypes.TEXT,
     },
   },
   {
@@ -39,13 +39,6 @@ const Order = sequelize.define(
   }
 );
 
-async () => {
-  // --- Associations ---
-  Order.belongsTo(User, { foreignKey: "userId", as: "user" });
-  Order.hasMany(OrderItem, { foreignKey: "orderId", as: "items" });
-  Order.hasOne(Payment, { foreignKey: "orderId", as: "payment" });
-
-}
-
+Order.belongsTo(User, { foreignKey: "userId", as: "user" });
 
 export default Order;

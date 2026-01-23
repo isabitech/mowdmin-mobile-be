@@ -1,8 +1,8 @@
-import Notification from "../Models/NotificationModel.js";
+import { NotificationRepository } from "../repositories/NotificationRepository.js";
 
 class NotificationService {
   async create(userId, title, message, type = "info", metadata = {}) {
-    return await Notification.create({
+    return await NotificationRepository.create({
       userId,
       title,
       message,
@@ -12,14 +12,11 @@ class NotificationService {
   }
 
   async getUserNotifications(userId) {
-    return await Notification.findAll({
-      where: { userId },
-      order: [["createdAt", "DESC"]],
-    });
+    return await NotificationRepository.findAllByUserId(userId);
   }
 
   async markAsRead(notificationId) {
-    const notification = await Notification.findByPk(notificationId);
+    const notification = await NotificationRepository.findById(notificationId);
     if (!notification) return null;
     notification.isRead = true;
     await notification.save();

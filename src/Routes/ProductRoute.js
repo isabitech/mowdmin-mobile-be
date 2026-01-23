@@ -1,17 +1,28 @@
-import express from "express";
+import { Router } from "express";
 import ProductController from "../Controllers/ProductController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import {validateProductCreate, validateProductUpdate} from "../middleware/Validation/ProductValidation.js";
+import { validateCreateProduct, validateUpdateProduct } from "../validators/productValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
+const product = Router();
 
-const Product = express.Router();
+product.post(
+	"/",
+	protectUser,
+	validateCreateProduct,
+	
+	tryCatch(ProductController.create)
+);
+product.get("/", protectUser, tryCatch(ProductController.getAll));
+product.get("/category/:categoryId", protectUser, tryCatch(ProductController.getByCategory));
+product.get("/:id", protectUser, tryCatch(ProductController.getOne));
+product.put(
+	"/:id",
+	protectUser,
+	validateUpdateProduct,
+	
+	tryCatch(ProductController.update)
+);
+product.delete("/:id", protectUser, tryCatch(ProductController.delete));
 
-Product.post("/", protectUser, validateProductCreate, tryCatch(ProductController.create));
-Product.get("/", tryCatch(ProductController.getAll));
-Product.get("/:id", tryCatch(ProductController.getOne));
-Product.get("/category/:categoryId", tryCatch(ProductController.getByCategory));
-Product.put("/:id", protectUser,validateProductUpdate, tryCatch(ProductController.update));
-Product.delete("/:id", protectUser, tryCatch(ProductController.delete));
-
-export default Product;
+export default product;

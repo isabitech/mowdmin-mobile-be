@@ -21,22 +21,14 @@ const Notification = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    type: {
-      type: DataTypes.ENUM("info", "alert", "transaction", "system"),
-      defaultValue: "info",
-    },
-    isRead: {
+    read: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    metadata: {
-      type: DataTypes.JSON,
-      allowNull: true,
     },
   },
   {
     tableName: "notifications",
-    underscored: true,
+    timestamps: true,
   }
 );
 

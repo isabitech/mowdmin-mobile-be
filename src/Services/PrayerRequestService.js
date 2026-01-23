@@ -1,31 +1,22 @@
-import PrayerRequest from "../Models/PrayerRequestModel.js";
-import Profile from "../Models/ProfileModel.js";
-import User from "../Models/UserModel.js";
+import { PrayerRequestRepository } from "../repositories/PrayerRequestRepository.js";
 
 
 class PrayerRequestService {
     async create(data) {
-        const res = PrayerRequest.create(data);
-        return res;
+        return PrayerRequestRepository.create(data);
     }
     async update(id, data) {
-        const res = this.findById(id)
-        res.update(data);
-        return res;
-
+        const updated = await PrayerRequestRepository.updateById(id, data);
+        return updated;
     }
     async findById(id) {
-        const res = PrayerRequest.findByPk(id);
-        return res;
+        return PrayerRequestRepository.findById(id);
     }
     async findByIdForAUser(id, userId) {
-        const res = PrayerRequest.findOne({
-            where: { id: id, userId: userId }
-        });
-        return res;
+        return PrayerRequestRepository.findOne({ id, userId });
     }
     async getAll() {
-        const res = await PrayerRequest.findAll({
+        const res = await PrayerRequestRepository.findAll({
             order: [["createdAt", "ASC"]],
             include: [
                 {
@@ -46,17 +37,13 @@ class PrayerRequestService {
         return res;
     }
     async delete(id) {
-        const res = this.findById(id);
-        res.delete();
-        return true;
+        const deleted = await PrayerRequestRepository.deleteById(id);
+        return deleted;
     }
     async getAllByUserId(userId) {
-        const res = await PrayerRequest.findAll({
-            where: { userId: userId },
+        return PrayerRequestRepository.findAllByUserId(userId, {
             order: [["createdAt", "ASC"]],
         });
-
-        return res;
     }
 
 }

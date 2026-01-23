@@ -1,27 +1,29 @@
 import { Router } from "express";
 import OrderController from "../Controllers/OrderController.js";
-import { validateOrder } from "../middleware/Validation/orderValidation.js";
 import { protectUser } from "../middleware/authMiddleware.js";
+import { validateCreateOrder, validateUpdateOrder } from "../validators/orderValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
-const Order = Router();
 
-//  Create a new order
-Order.post("/", protectUser, validateOrder, tryCatch(OrderController.create));
+const order = Router();
 
-//  Get all orders (admin)
-Order.get("/", protectUser, tryCatch(OrderController.getAll));
+order.post(
+	"/",
+	protectUser,
+	validateCreateOrder,
+	
+	tryCatch(OrderController.create)
+);
+order.get("/", protectUser, tryCatch(OrderController.getAll));
+order.get("/user", protectUser, tryCatch(OrderController.getUserOrders));
+order.get("/:id", protectUser, tryCatch(OrderController.getOne));
+order.put(
+	"/:id",
+	protectUser,
+	validateUpdateOrder,
 
-//  Get all orders for a single user
-Order.get("/user/:userId", protectUser, tryCatch(OrderController.getUserOrders));
+	tryCatch(OrderController.update)
+);
+order.delete("/:id", protectUser, tryCatch(OrderController.delete));
 
-//  Get a single order by ID
-Order.get("/:id", protectUser, tryCatch(OrderController.getOne));
-
-//  Update order
-Order.put("/:id", protectUser, validateOrder, tryCatch(OrderController.update));
-
-//  Delete order
-Order.delete("/:id", protectUser, tryCatch(OrderController.delete));
-
-export default Order;
+export default order;

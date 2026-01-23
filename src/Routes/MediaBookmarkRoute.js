@@ -1,17 +1,29 @@
-import express from "express";
+import { Router } from "express";
 import MediaBookmarkController from "../Controllers/MediaBookmarkController.js";
-import { validateMediaBookmarkCreate, validateMediaBookmarkDelete } from "../middleware/Validation/MediaBookmarkValidation.js";
-import { handleValidationErrors } from "../middleware/Validation/authValidation.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
+import { validateCreateMediaBookmark, validateUpdateMediaBookmark } from "../validators/mediaBookmarkValidators.js";
+import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
-const MediaBookmark = express.Router();
+const mediaBookmark = Router();
 
-MediaBookmark.post("/", protectUser, validateMediaBookmarkCreate, handleValidationErrors, tryCatch(MediaBookmarkController.create));
-MediaBookmark.get("/", protectUser, tryCatch(MediaBookmarkController.getAll));
-MediaBookmark.get("/user/:userId", protectUser, tryCatch(MediaBookmarkController.getAllByUser));
-MediaBookmark.get("/:id", protectUser, tryCatch(MediaBookmarkController.getOne));
-MediaBookmark.put("/:id", protectUser, validateMediaBookmarkCreate, handleValidationErrors, tryCatch(MediaBookmarkController.update));
-MediaBookmark.delete("/:id", protectUser, validateMediaBookmarkDelete, tryCatch(MediaBookmarkController.delete));
+mediaBookmark.post(
+	"/",
+	protectUser,
+	validateCreateMediaBookmark,
+	handleValidationErrors,
+	tryCatch(MediaBookmarkController.create)
+);
+mediaBookmark.get("/", protectUser, tryCatch(MediaBookmarkController.getAll));
+mediaBookmark.get("/user/:userId", protectUser, tryCatch(MediaBookmarkController.getAllByUser));
+mediaBookmark.get("/:id", protectUser, tryCatch(MediaBookmarkController.getOne));
+mediaBookmark.put(
+	"/:id",
+	protectUser,
+	validateUpdateMediaBookmark,
+	handleValidationErrors,
+	tryCatch(MediaBookmarkController.update)
+);
+mediaBookmark.delete("/:id", protectUser, tryCatch(MediaBookmarkController.delete));
 
-export default MediaBookmark;
+export default mediaBookmark;

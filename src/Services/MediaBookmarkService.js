@@ -1,9 +1,9 @@
-import MediaBookmark from "../Models/MediaBookmarksModel.js";
-import Media from "../Models/MediaModel.js";
+import { MediaRepository } from "../repositories/MediaRepository.js";
+import { MediaBookmarkRepository } from "../repositories/MediaBookmarkRepository.js";
 
 class MediaBookmarkService {
     async create(data) {
-        return await MediaBookmark.create(data);
+        return await MediaBookmarkRepository.create(data);
     }
 
     async update(id, data) {
@@ -14,15 +14,14 @@ class MediaBookmarkService {
     }
 
     async findById(id) {
-        return await MediaBookmark.findByPk(id, {
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
-        });
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaBookmarkRepository.findById(id);
     }
 
     async getAll() {
-        return await MediaBookmark.findAll({
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaBookmarkRepository.findAll({
             order: [["createdAt", "ASC"]],
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
         });
     }
 
@@ -34,10 +33,9 @@ class MediaBookmarkService {
     }
 
     async getAllByUserId(userId) {
-        return await MediaBookmark.findAll({
-            where: { userId },
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaBookmarkRepository.findAllByUserId(userId, {
             order: [["createdAt", "ASC"]],
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
         });
     }
 }

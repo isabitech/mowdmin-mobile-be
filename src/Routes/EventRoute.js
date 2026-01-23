@@ -1,9 +1,9 @@
 import { Router } from "express";
 import EventController from "../Controllers/EventController.js";
-import { validateEventCreate, validateEventUpdate } from "../middleware/Validation/eventValidation.js"
+import { validateEventCreate, validateEventUpdate } from "../validators/eventValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 import upload from "../Config/multer.js";
-import { handleValidationErrors } from "../middleware/Validation/authValidation.js";
+import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 
 
@@ -12,6 +12,7 @@ Event.post(
     "/", protectUser,
     upload.single("image"),        // 1. handle form-data first
     validateEventCreate,           // 2. then validate fields
+    handleValidationErrors,
     tryCatch(EventController.create)
 );
 Event.get("/", protectUser, tryCatch(EventController.getAll));

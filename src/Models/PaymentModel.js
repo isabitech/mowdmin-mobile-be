@@ -1,8 +1,5 @@
-// models/PaymentModel.js
 import { DataTypes } from "sequelize";
 import sequelize from "../Config/db.js";
-import Order from "./OrderModel.js";
-import User from "./UserModel.js";
 
 const Payment = sequelize.define(
   "Payment",
@@ -24,21 +21,17 @@ const Payment = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    method: {
-      type: DataTypes.STRING, // e.g., 'card', 'bank', 'paypal'
-      allowNull: false,
-    },
     status: {
-      type: DataTypes.ENUM("pending", "successful", "failed"),
+      type: DataTypes.ENUM("pending", "completed", "failed"),
       defaultValue: "pending",
     },
     reference: {
       type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
     },
-    currency: {
+    method: {
       type: DataTypes.STRING,
-      defaultValue: "USD",
     },
   },
   {
@@ -46,13 +39,5 @@ const Payment = sequelize.define(
     timestamps: true,
   }
 );
-
-async (params) => {
-  // Associations
-  Payment.belongsTo(Order, { foreignKey: "orderId", as: "order" });
-
-  Payment.belongsTo(User, { foreignKey: "userId", as: "user" });
-}
-
 
 export default Payment;

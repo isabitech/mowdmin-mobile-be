@@ -1,32 +1,29 @@
 import NotificationService from "../Services/NotificationService.js";
-import { success, error } from "../Utils/helper.js";
+import { sendSuccess, sendError } from "../core/response.js";
+import { validateCreateNotification } from "../validators/notificationValidators.js";
 
 class NotificationController {
     async create(req, res) {
+        const { error, value } = validateCreateNotification(req.body);
+        if (error) {
+            return sendError(res, { message: error.details[0].message, statusCode: 400 });
+        }
 
-        const { title, message, type, metadata } = req.body;
         const userId = req.user?.id;
-        const notification = await NotificationService.create(userId, title, message, type, metadata);
-        return success(res, "Notification created successfully", notification);
-
+        const notification = await NotificationService.create(userId, value.title, value.message, value.type, value.metadata);
+        return sendSuccess(res, { message: "Notification created successfully", data: notification });
     }
-
     async getUserNotifications(req, res) {
-
         const userId = req.user?.id;
         const notifications = await NotificationService.getUserNotifications(userId);
-        return success(res, "Notifications fetched successfully", notifications);
-
+        return sendSuccess(res, { message: "Notifications fetched successfully", data: notifications });
     }
-
     async markAsRead(req, res) {
-
         const { id } = req.params;
         const notification = await NotificationService.markAsRead(id);
-        if (!notification) return error(res, "Notification not found", 404);
-        return success(res, "Notification marked as read", notification);
+        if (!notification) return sendError(res, { message: "Notification not found", statusCode: 404 });
+        return sendSuccess(res, { message: "Notification marked as read", data: notification });
 
     }
 }
-
 export default new NotificationController();

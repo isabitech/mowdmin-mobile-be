@@ -1,16 +1,15 @@
 // services/OrderService.js
-import Order from "../Models/OrderModel.js";
-import User from "../Models/UserModel.js";
+import { OrderRepository } from "../repositories/OrderRepository.js";
 
 class OrderService {
     // Create a new order
     async createOrder(data) {
-        return await Order.create(data);
+        return OrderRepository.create(data);
     }
 
     // Fetch all orders (admin/global view)
     async getAllOrders() {
-        return await Order.findAll({
+        return OrderRepository.findAll({
             include: [
                 {
                     model: User,
@@ -24,8 +23,7 @@ class OrderService {
 
     // Fetch all orders for a single user
     async getOrdersByUser(userId) {
-        return await Order.findAll({
-            where: { userId },
+        return OrderRepository.findAllByUserId(userId, {
             include: [
                 {
                     model: User,
@@ -39,14 +37,14 @@ class OrderService {
 
     // Fetch a single order by ID
     async getOrderById(id) {
-        return await Order.findByPk(id, {
+        return OrderRepository.findById(id, {
             include: [{ model: User, as: "user" }],
         });
     }
 
     // Update order details
     async updateOrder(id, data) {
-        const order = await Order.findByPk(id);
+        const order = await OrderRepository.findById(id);
         if (!order) return null;
 
         return await order.update(data);
@@ -54,16 +52,15 @@ class OrderService {
 
     // Delete an order
     async deleteOrder(id) {
-        const order = await Order.findByPk(id);
-        if (!order) return null;
+        const deleted = await OrderRepository.deleteById(id);
+        if (!deleted) return null;
 
-        await order.destroy();
         return { message: "Order deleted successfully" };
     }
 
     // Mark order as paid
     async markAsPaid(id, payment_reference) {
-        const order = await Order.findByPk(id);
+        const order = await OrderRepository.findById(id);
         if (!order) return null;
 
         order.status = "paid";
@@ -75,7 +72,7 @@ class OrderService {
 
     // Cancel an order
     async cancelOrder(id) {
-        const order = await Order.findByPk(id);
+        const order = await OrderRepository.findById(id);
         if (!order) return null;
 
         order.status = "cancelled";

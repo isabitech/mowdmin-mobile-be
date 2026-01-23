@@ -1,17 +1,16 @@
 // services/OrderItemService.js
-import OrderItem from "../Models/OrderItemModel.js";
-import Order from "../Models/OrderModel.js";
+import { OrderRepository } from "../repositories/OrderRepository.js";
+import { OrderItemRepository } from "../repositories/OrderItemRepository.js";
 
 class OrderItemService {
     // Add item(s) to an order
     async addItem(data) {
-        return await OrderItem.create(data);
+        return await OrderItemRepository.create(data);
     }
 
     // Get all items for a specific order
     async getItemsByOrder(orderId) {
-        return await OrderItem.findAll({
-            where: { orderId },
+        return await OrderItemRepository.findAllByOrderId(orderId, {
             include: [
                 {
                     model: Order,
@@ -25,14 +24,14 @@ class OrderItemService {
 
     // Get a single item by ID
     async getItemById(id) {
-        return await OrderItem.findByPk(id, {
+        return await OrderItemRepository.findById(id, {
             include: [{ model: Order, as: "order" }],
         });
     }
 
     // Update an order item
     async updateItem(id, data) {
-        const item = await OrderItem.findByPk(id);
+        const item = await OrderItemRepository.findById(id);
         if (!item) return null;
 
         return await item.update(data);
@@ -40,7 +39,7 @@ class OrderItemService {
 
     // Delete an order item
     async deleteItem(id) {
-        const item = await OrderItem.findByPk(id);
+        const item = await OrderItemRepository.findById(id);
         if (!item) return null;
 
         await item.destroy();
@@ -49,7 +48,7 @@ class OrderItemService {
 
     // Get total cost for all items in an order
     async calculateOrderTotal(orderId) {
-        const items = await OrderItem.findAll({ where: { orderId } });
+        const items = await OrderItemRepository.findAllByOrderId(orderId);
         const total = items.reduce(
             (sum, item) => sum + parseFloat(item.subtotal),
             0

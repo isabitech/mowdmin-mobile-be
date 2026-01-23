@@ -44,3 +44,4 @@ export const validateEventRegistration = [
         .isIn(["registered", "attended"])
         .withMessage("Status must be either 'registered' or 'attended'"),
 ];
+

@@ -1,16 +1,20 @@
-import express from "express";
+import { Router } from "express";
 import NotificationController from "../Controllers/NotificationController.js";
-import { createNotificationValidation } from "../middleware/Validation/NotificationValidation.js";
-import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
-import { tryCatch } from "../Utils/try-catch.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 
-const Notification = express.Router();
+import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
-Notification.post("/", protectUser, createNotificationValidation, handleValidationErrors, tryCatch(NotificationController.create));
+import { tryCatch } from "../Utils/try-catch.js";
 
-Notification.get("/", protectUser, tryCatch(NotificationController.getUserNotifications));
+const notification = Router();
 
-Notification.put("/:id/read", protectUser, tryCatch(NotificationController.markAsRead));
+notification.post(
+	"/",
+	protectUser,
+	handleValidationErrors,
+	tryCatch(NotificationController.create)
+);
+notification.get("/", protectUser, tryCatch(NotificationController.getUserNotifications));
+notification.put("/:id/read", protectUser, tryCatch(NotificationController.markAsRead));
 
-export default Notification;
+export default notification;

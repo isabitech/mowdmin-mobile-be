@@ -9,33 +9,27 @@ const Product = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    title: {
-      type: DataTypes.STRING
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     description: {
-      type: DataTypes.TEXT
-    },
-    type: {
-      type: DataTypes.ENUM("Book", "Album")
+      type: DataTypes.TEXT,
     },
     price: {
-      type: DataTypes.DECIMAL(10, 2)
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
     },
-    currency: {
-      type: DataTypes.STRING
+    category: {
+      type: DataTypes.STRING,
     },
-    language: {
-      type: DataTypes.ENUM("EN", "FR", "DE")
+    imageUrl: {
+      type: DataTypes.STRING,
     },
     stock: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
-    image: {
-      type: DataTypes.STRING
-    },
-    url: {
-      type: DataTypes.STRING
-    }
   },
   {
     tableName: "products",

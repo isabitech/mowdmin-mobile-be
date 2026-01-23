@@ -1,60 +1,41 @@
-import Prayer from "../Models/PrayerModel.js";
-import PrayerRequest from "../Models/PrayerRequestModel.js";
-import Profile from "../Models/ProfileModel.js";
-import User from "../Models/UserModel.js";
+import { PrayerRepository } from "../repositories/PrayerRepository.js";
 
 
 class PrayerService {
     async create(data) {
-        const res = Prayer.create(data);
+        const res = await PrayerRepository.create(data);
         return res;
     }
     async update(id, data) {
-        const res = this.findById(id)
-        res.update(data);
+        const res = await this.findById(id);
+        if (!res) return null;
+        await res.update(data);
         return res;
 
     }
     async findById(id) {
-        const res = Prayer.findByPk(id);
+        const res = await PrayerRepository.findById(id);
         return res;
     }
     async findByIdForAUser(id, userId) {
-        const res = Prayer.findOne({
-            where: { id: id, userId: userId }
-        });
+        const res = await PrayerRepository.findOne({ id, userId });
         return res;
     }
     async getAll() {
-        const res = await Prayer.findAll({
-            order: [["createdAt", "ASC"]],
-            include: [
-                {
-                    model: User,
-                    as: "user",
-                    attributes: ["id", "email", "photo"],
-                    include: [
-                        {
-                            model: Profile,
-                            as: "profile",
-                            attributes: ["id", "displayName", "photoUrl", "bio", "location"],
-                        },
-                    ],
-                    model: PrayerRequest,
-                    as: "prayerRequest"
-                },
-            ],
+        const res = await PrayerRepository.findAll({
+            order: [["createdAt", "ASC"]],          
         });
 
         return res;
     }
     async delete(id) {
-        const res = this.findById(id);
-        res.delete();
+        const res = await this.findById(id);
+        if (!res) return null;
+        await res.destroy();
         return true;
     }
     async getAllByUserId(userId) {
-        const res = await Prayer.findAll({
+        const res = await PrayerRepository.findAll({
             where: { userId: userId },
             order: [["createdAt", "ASC"]],
         });

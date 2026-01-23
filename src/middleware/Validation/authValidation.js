@@ -1,6 +1,5 @@
 import { body, validationResult } from "express-validator";
 import User from "../../Models/UserModel.js";
-
 // ✅ Password complexity regex
 export const validatePassword = (password) => {
   const re =

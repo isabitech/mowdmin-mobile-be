@@ -1,20 +1,22 @@
 import EventService from "../Services/EventService.js";
-import { success } from "../Utils/helper.js";
+import { sendSuccess, sendError } from "../core/response.js";
+import { joiValidateCreateEvent, joiValidateUpdateEvent } from "../validators/eventValidators.js";
 
 class EventController {
   async create(req, res, next) {
+    const { error, value } = joiValidateCreateEvent(req.body);
+    if (error) {
+      return sendError(res, { message: error.details[0].message, statusCode: 400 });
+    }
 
-    const data = { ...req.body };
+    const data = { ...value };
     if (req.file) data.image = `/uploads/${req.file.filename}`;
-
     const event = await EventService.createEvent(data);
     const eventData = {
       ...event.toJSON(),
       image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
     };
-
-    return success(res, "Event Created Successfully", eventData);
-
+    return sendSuccess(res, { message: "Event Created Successfully", data: eventData });
   }
 
 
@@ -43,24 +45,44 @@ class EventController {
   }
 
   async update(req, res, next) {
+    const { error, value } = joiValidateUpdateEvent(req.body);
+    if (error) {
+      return sendError(res, { message: error.details[0].message, statusCode: 400 });
+    }
 
-    const data = { ...req.body };
-    if (req.file) data.image = `/uploads/${req.file.filename}`;
-
-    const event = await EventService.updateEvent(req.params.id, data);
+    let updateData = { ...value };
+    if (req.file) updateData.image = `/uploads/${req.file.filename}`;
+    const event = await EventService.updateEvent(req.params.id, updateData);
+    if (!event) {
+      return sendError(res, { message: "Event not found", statusCode: 404 });
+    }
     const eventData = {
       ...event.toJSON(),
       image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
     };
-
-    return success(res, "Event Updated Successfully", eventData);
-
+    return sendSuccess(res, { message: "Event Updated Successfully", data: eventData });
   }
-
   async delete(req, res, next) {
     await EventService.deleteEvent(req.params.id);
-    return success(res, "Event Deleted Successfully");
+    return sendSuccess(res, { message: "Event Deleted Successfully", data: {} });
   }
+    async getAll(req, res, next) {
+      const events = await EventService.getAllEvents();
+      return sendSuccess(res, { message: "Events fetched successfully", data: events });
+    }
+    async getOne(req, res, next) {
+      const event = await EventService.getEventById(req.params.id);
+      if (!event) {
+        return sendError(res, { message: "Event not found", statusCode: 404 });
+      }
+      return sendSuccess(res, { message: "Event fetched successfully", data: event });
+    }
 }
 
-export default new EventController();
+export default {
+  create: (req, res, next) => new EventController().create(req, res, next),
+  update: (req, res, next) => new EventController().update(req, res, next),
+  delete: (req, res, next) => new EventController().delete(req, res, next),
+  getAll: (req, res, next) => new EventController().getAll(req, res, next),
+  getOne: (req, res, next) => new EventController().getOne(req, res, next)
+};

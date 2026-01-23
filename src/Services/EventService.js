@@ -1,35 +1,20 @@
-import Event from "../Models/EventModel.js";
-import EventRegistration from "../Models/EventRegistration.js";
-import User from "../Models/UserModel.js";
+
+import { EventRepository } from "../repositories/EventRepository.js";
 
 class EventService {
   async createEvent(data) {
-    return await Event.create(data);
+    return await EventRepository.create(data);
   }
 
   async getAllEvents() {
-    return await Event.findAll({
+    return await EventRepository.findAll({
       order: [["date", "ASC"]],
-      include: [
-        {
-          model: EventRegistration,
-          as: "registrations",
-          include: [{ model: User, as: "user" }],
-        },
-      ],
+      // If you need registration/user info, fetch it separately using repositories
     });
   }
 
   async getEventById(id) {
-    const event = await Event.findByPk(id, {
-      include: [
-        {
-          model: EventRegistration,
-          as: "registrations",
-          include: [{ model: User, as: "user" }],
-        },
-      ],
-    });
+    const event = await EventRepository.findById(id);
 
     if (!event) throw new Error("Event not found");
     return event;
@@ -37,8 +22,18 @@ class EventService {
 
   async updateEvent(id, updates) {
     const event = await this.getEventById(id);
-    await event.update(updates);
-    return event;
+    if (event.update) {
+      // Sequelize instance
+      await event.update(updates);
+      return event;
+    } else if (event.save) {
+      // Mongoose document
+      Object.assign(event, updates);
+      await event.save();
+      return event;
+    } else {
+      throw new Error('Event update not supported for this model instance');
+    }
   }
 
   async deleteEvent(id) {

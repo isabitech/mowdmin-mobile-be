@@ -2,7 +2,7 @@ import { Router } from "express";
 import EventRegistrationController from "../Controllers/EventRegistration.js";
 import { tryCatch } from "../Utils/try-catch.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { validateEventRegistration } from "../middleware/Validation/eventRegistrationValidation.js";
+import { validateEventRegistration } from "../validators/eventRegistrationValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
 const registration = Router();

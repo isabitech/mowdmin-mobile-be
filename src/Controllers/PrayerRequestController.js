@@ -1,11 +1,17 @@
 import PrayerRequestService from "../Services/PrayerRequestService.js";
-import { success, customError } from "../Utils/helper.js";
+import { sendSuccess, sendError } from "../core/response.js";
+import { validateCreatePrayerRequest, validateUpdatePrayerRequest } from "../validators/prayerRequestValidators.js";
 
 class PrayerRequestController {
   async create(req, res) {
-    const data = { ...req.body, userId: req.user.id };
+    const { error, value } = validateCreatePrayerRequest(req.body);
+    if (error) {
+      return sendError(res, { message: error.details[0].message, statusCode: 400 });
+    }
+
+    const data = { ...value, userId: req.user.id };
     const result = await PrayerRequestService.create(data);
-    return success(res, "Prayer Request Created Successfully", result);
+    return sendSuccess(res, { message: "Prayer Request Created Successfully", data: result });
   }
 
   async update(req, res) {
@@ -13,29 +19,33 @@ class PrayerRequestController {
     const request = await PrayerRequestService.findByIdForAUser(id, req.user.id);
 
     if (!request)
-      return customError(res, "Prayer Request Not Found", 404);
+      return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
+    const { error, value } = validateUpdatePrayerRequest(req.body);
+    if (error) {
+      return sendError(res, { message: error.details[0].message, statusCode: 400 });
+    }
 
-    const updated = await request.update(req.body);
-    return success(res, "Prayer Request Updated Successfully", updated);
+    const updated = await request.update(value);
+    return sendSuccess(res, { message: "Prayer Request Updated Successfully", data: updated });
   }
 
   async getAll(req, res) {
     const requests = await PrayerRequestService.getAll();
-    return success(res, "All Prayer Requests Fetched Successfully", requests);
+    return sendSuccess(res, { message: "All Prayer Requests Fetched Successfully", data: requests });
   }
 
   async getAllByUser(req, res) {
     const requests = await PrayerRequestService.getAllByUserId(req.user.id);
-    return success(res, "User Prayer Requests Fetched Successfully", requests);
+    return sendSuccess(res, { message: "User Prayer Requests Fetched Successfully", data: requests });
   }
 
   async getSingle(req, res) {
     const { id } = req.params;
     const request = await PrayerRequestService.findById(id);
     if (!request)
-      return customError(res, "Prayer Request Not Found", 404);
+      return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
 
-    return success(res, "Prayer Request Fetched Successfully", request);
+    return sendSuccess(res, { message: "Prayer Request Fetched Successfully", data: request });
   }
 
   async delete(req, res) {
@@ -43,10 +53,10 @@ class PrayerRequestController {
     const request = await PrayerRequestService.findByIdForAUser(id, req.user.id);
 
     if (!request)
-      return customError(res, "Prayer Request Not Found", 404);
+      return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
 
     await request.destroy();
-    return success(res, "Prayer Request Deleted Successfully");
+    return sendSuccess(res, { message: "Prayer Request Deleted Successfully", data: {} });
   }
 }
 

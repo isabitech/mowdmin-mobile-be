@@ -2,8 +2,9 @@ import { Router } from "express";
 import AuthController from "../Controllers/AuthController.js";
 import {
     validateUserRegistration,
-    validateUserLogin, validateForgotPassword,
-} from "../middleware/Validation/authValidation.js";
+    validateUserLogin,
+    validateForgotPassword,
+} from "../validators/authValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 import { tryCatch } from "../Utils/try-catch.js";
 

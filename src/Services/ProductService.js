@@ -1,52 +1,40 @@
-import Product from "../Models/ProductModel.js";
+import { ProductRepository } from "../repositories/ProductRepository.js";
 
 class ProductService {
     async create(data) {
-        const product = await Product.create(data);
-        return product;
+        return ProductRepository.create(data);
     }
 
     async update(id, data) {
-        const product = await this.findById(id);
-        if (!product) throw new Error("Product not found");
-
-        await product.update(data);
-        return product;
+        const updated = await ProductRepository.updateById(id, data);
+        if (!updated) throw new Error("Product not found");
+        return updated;
     }
 
     async findById(id) {
-        const product = await Product.findByPk(id);
-        return product;
+        return ProductRepository.findById(id);
     }
 
     async findByIdForAUser(id, userId) {
-        const product = await Product.findOne({
-            where: { id, userId },
-        });
-        return product;
+        return ProductRepository.findOne({ id, userId });
     }
 
     async getAll() {
-        const products = await Product.findAll({
+        return ProductRepository.findAll({
             order: [["createdAt", "ASC"]],
         });
-        return products;
     }
 
     async delete(id) {
-        const product = await this.findById(id);
-        if (!product) throw new Error("Product not found");
-
-        await product.destroy();
-        return true;
+        const deleted = await ProductRepository.deleteById(id);
+        if (!deleted) throw new Error("Product not found");
+        return deleted;
     }
 
     async getAllByUserId(userId) {
-        const products = await Product.findAll({
-            where: { userId },
+        return ProductRepository.findAllByUserId(userId, {
             order: [["createdAt", "ASC"]],
         });
-        return products;
     }
 }
 

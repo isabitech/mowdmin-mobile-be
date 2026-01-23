@@ -1,9 +1,9 @@
-import MediaCategory from "../Models/MediaCategory.js";
-import Media from "../Models/MediaModel.js";
+import { MediaRepository } from "../repositories/MediaRepository.js";
+import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 
 class MediaCategoryService {
     async create(data) {
-        return await MediaCategory.create(data);
+        return await MediaCategoryRepository.create(data);
     }
 
     async update(id, data) {
@@ -14,15 +14,14 @@ class MediaCategoryService {
     }
 
     async findById(id) {
-        return await MediaCategory.findByPk(id, {
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
-        });
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaCategoryRepository.findById(id);
     }
 
     async getAll() {
-        return await MediaCategory.findAll({
+        // Note: If you need media info, fetch it separately using MediaRepository
+        return await MediaCategoryRepository.findAll({
             order: [["createdAt", "ASC"]],
-            include: [{ model: Media, as: "media", attributes: ["title", "description"] }],
         });
     }
 

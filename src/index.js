@@ -4,43 +4,57 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import compression from 'compression'
 import { config } from 'dotenv'
-import { connectDB } from './Config/db.js'
-import authRoutes from './Routes/AuthRoute.js'
+import { connectMongoDB } from './Config/mongodb.js'
+import auth from './Routes/AuthRoute.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import Event from './Routes/EventRoute.js'
 import registration from './Routes/EventRegistrationRoute.js'
-import Media from './Routes/MediaRoute.js'
-import Order from './Routes/OrderRoute.js'
-import OrderItem from './Routes/OrderItemRoutes.js'
-import MediaCategory from './Routes/MediaCategoryRoute.js'
-import MediaBookmark from './Routes/MediaBookmarkRoute.js'
-import Prayer from './Routes/PrayerRoutes.js'
-import PrayerRequest from './Routes/PrayerRequestRoutes.js'
-import Payment  from './Routes/PaymentRoutes.js'
+import mediaBookmark from './Routes/MediaBookmarkRoute.js'
+import notification from './Routes/NotificationRoute.js'
+import prayer from './Routes/PrayerRoute.js'
+import Orders from './Routes/OrderRoute.js'
 import Product from './Routes/ProductRoute.js'
-import Notification from './Routes/NotificationRoute.js'
+import mediaCategory from './Routes/MediaCategoryRoute.js'
+import orderItem from './Routes/OrderItemRoute.js'
+import prayerRequest from './Routes/PrayerRequestRoute.js'
+import media from './Routes/MediaRoute.js'
+import membership from './Routes/MembershipRoute.js'
+import profile from './Routes/ProfileRoute.js'
+import donation from './Routes/DonationRoute.js'
+import info from './Routes/InfoRoute.js'
+import payment from './Routes/PaymentRoute.js'
+
 config();
 const PORT = process.env.PORT || 3000;
 const app = express();
+
 app.use(cors());
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(compression());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
-app.use('/api/auth', authRoutes);
-app.use('/api/event', Event);
-app.use('/api/event-registration', registration);
-app.use("/api/media", Media);
-app.use("/api/media-category", MediaCategory);
-app.use("/api/media-bookmark", MediaBookmark);
-app.use("/api/orders", Order);
-app.use("/api/order-items", OrderItem);
-app.use("/api/payments", Payment);
-app.use("/api/prayer", Prayer)
-app.use("/api/prayer-request", PrayerRequest);
-app.use ("/api/Products", Product)
-app.use("/api/notifications", Notification);
+
+const apiRouter = express.Router();
+apiRouter.use('/auth', auth);
+apiRouter.use('/event', Event);
+apiRouter.use('/event-registration', registration);
+apiRouter.use('/media-bookmark', mediaBookmark);
+apiRouter.use('/notification', notification);
+apiRouter.use('/prayer', prayer);
+apiRouter.use('/orders', Orders);
+apiRouter.use('/product', Product);
+apiRouter.use('/media-category', mediaCategory);
+apiRouter.use('/order-item', orderItem);
+apiRouter.use('/prayer-request', prayerRequest);
+apiRouter.use('/media', media);
+apiRouter.use('/membership', membership);
+apiRouter.use('/profile', profile);
+apiRouter.use('/donation', donation);
+apiRouter.use('/info', info);
+apiRouter.use('/payment', payment);
+
+app.use('/api/v1', apiRouter);
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Mowdmin API is running ' });
@@ -48,19 +62,37 @@ app.get('/', (req, res) => {
 // Handle invalid routes
 app.use((req, res, next) => {
     const error = new Error(`Route ${req.originalUrl} not found`);
-    error.status = 404;
+    error.statusCode = 404;
     next(error);
 });
 
 app.use(errorHandler);
-connectDB()
-    .then(() => {
-        console.log('✅ Database connection established');
+
+async function bootstrap() {
+    try {
+        if (process.env.DB_CONNECTION === "mongodb") {
+            console.log('🔄 Connecting to MongoDB database...');
+            await connectMongoDB();
+        } else if (process.env.DB_CONNECTION === "mysql") {
+            console.log('🔄 Connecting to MySQL database...');
+            const { connectDB } = await import('./Config/db.js');
+            await connectDB();
+        } else {
+            throw new Error(`Unsupported DB_CONNECTION: ${process.env.DB_CONNECTION}`);
+        }
+
         app.listen(PORT, () => {
-            console.log(`🚀 Server running on port http://localhost:${PORT}`);
+            console.log(`🚀 Server running at http://localhost:${PORT}`);
         });
-    })
-    .catch((error) => {
-        console.error('❌ Database connection failed:', error);
+
+    } catch (err) {
+        console.error('❌ Database connection failed:', err);
         process.exit(1);
-    });
+    }
+}
+
+export default app;
+
+if (process.env.NODE_ENV !== 'test') {
+    bootstrap();
+}
