@@ -22,6 +22,7 @@ auth.post(
     handleValidationErrors,
     tryCatch(AuthController.login)
 );
+auth.post("/logout", tryCatch(AuthController.logout));
 auth.post("/forgot-password", validateForgotPassword, handleValidationErrors, tryCatch(AuthController.forgotPassword));
 auth.post("/reset-password", tryCatch(AuthController.resetPassword));
 auth.post("/change-password", tryCatch(AuthController.forgotPassword))

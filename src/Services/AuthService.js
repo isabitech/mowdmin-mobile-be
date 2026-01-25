@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import { AppError } from "../Utils/AppError.js";
 import { UserRepository } from "../repositories/UserRepository.js";
 import ProfileRepository from "../repositories/ProfileRepository.js";
+import { AuthRepository } from "../repositories/AuthRepository.js";
 
 class AuthService {
     // Generate JWT token
@@ -14,8 +16,13 @@ class AuthService {
         });
     }
 
+    // Helper to hash token
+    static hashToken(token) {
+        return crypto.createHash("sha256").update(token).digest("hex");
+    }
+
     // Register a new user
-    static async register(userData) {
+    static async register(userData, meta = {}) {
         const { email, password, name, language } = userData;
 
         const existingUser = await UserRepository.findByEmail(email);
@@ -29,6 +36,15 @@ class AuthService {
 
         const token = new AuthService().generateToken(newUser.id);
 
+        // Store session
+        const tokenHash = AuthService.hashToken(token);
+        await AuthRepository.create({
+            userId: newUser.id,
+            tokenHash,
+            ipAddress: meta.ip,
+            deviceInfo: meta.userAgent
+        });
+
         // Send welcome email asynchronously
         EmailService.sendWelcomeEmail(newUser.email, newUser.name).catch((err) =>
             console.error("Email send error:", err.message)
@@ -40,7 +56,7 @@ class AuthService {
     }
 
     // Login user
-    static async login(credentials) {
+    static async login(credentials, meta = {}) {
         const { email, password } = credentials;
 
         const user = await UserRepository.findByEmail(email);
@@ -51,10 +67,32 @@ class AuthService {
 
         const token = new AuthService().generateToken(user.id);
 
+        // Store session
+        const tokenHash = AuthService.hashToken(token);
+        await AuthRepository.create({
+            userId: user.id,
+            tokenHash,
+            ipAddress: meta.ip,
+            deviceInfo: meta.userAgent
+        });
+
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
 
         return { user: userDataSafe, token };
+    }
+
+    // Logout user
+    static async logout(token) {
+        const tokenHash = AuthService.hashToken(token);
+        await AuthRepository.revokeToken(null, tokenHash); // Passing null for userId as we might strictly revoke by hash, or we can update revokeToken to handle just hash if unique
+        // Actually AuthRepository.revokeToken expects (userId, tokenHash).
+        // Let's check repository. findByTokenHash is safer.
+        const session = await AuthRepository.findByTokenHash(tokenHash);
+        if (session) {
+            await AuthRepository.revokeToken(session.userId, tokenHash);
+        }
+        return { message: "Logged out successfully" };
     }
 
     // Forgot password: send reset token via email

@@ -4,21 +4,36 @@ import { sendSuccess, sendError } from "../core/response.js";
 class AuthController {
     // Register
     static async register(req, res) {
-
-        const user = await AuthService.register(req.body);
+        const meta = {
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        };
+        const user = await AuthService.register(req.body, meta);
         return sendSuccess(res, { message: "User registered successfully", data: user, statusCode: 201 });
     }
 
     // Login
     static async login(req, res) {
-      
-        const { user, token } = await AuthService.login(req.body);
+        const meta = {
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        };
+        const { user, token } = await AuthService.login(req.body, meta);
         return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
+    }
+
+    // Logout
+    static async logout(req, res) {
+        const token = req.headers.authorization?.split(" ")[1];
+        if (token) {
+            await AuthService.logout(token);
+        }
+        return sendSuccess(res, { message: "Logged out successfully", data: {}, statusCode: 200 });
     }
 
     // Forgot Password — send token
     static async forgotPassword(req, res) {
-      
+
         await AuthService.forgotPassword(req.body.email);
         return sendSuccess(res, { message: "Password reset token sent to your email", data: {}, statusCode: 200 });
 
@@ -26,14 +41,14 @@ class AuthController {
 
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
-      
+
         await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
         return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
     }
 
     // Change Password — for logged-in users
-    static async changePassword(req, res) { 
+    static async changePassword(req, res) {
         await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
         return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
 

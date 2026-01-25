@@ -20,29 +20,7 @@ class EventController {
   }
 
 
-  async getAll(req, res, next) {
 
-    const events = await EventService.getAllEvents();
-    const formatted = events.map((event) => ({
-      ...event.toJSON(),
-      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
-    }));
-
-    return success(res, "All Events Fetched Successfully", formatted);
-
-  }
-
-  async getOne(req, res, next) {
-
-    const event = await EventService.getEventById(req.params.id);
-    const eventData = {
-      ...event.toJSON(),
-      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
-    };
-
-    return success(res, "Event Fetched Successfully", eventData);
-
-  }
 
   async update(req, res, next) {
     const { error, value } = joiValidateUpdateEvent(req.body);
@@ -66,17 +44,17 @@ class EventController {
     await EventService.deleteEvent(req.params.id);
     return sendSuccess(res, { message: "Event Deleted Successfully", data: {} });
   }
-    async getAll(req, res, next) {
-      const events = await EventService.getAllEvents();
-      return sendSuccess(res, { message: "Events fetched successfully", data: events });
+  async getAll(req, res, next) {
+    const events = await EventService.getAllEvents();
+    return sendSuccess(res, { message: "Events fetched successfully", data: events });
+  }
+  async getOne(req, res, next) {
+    const event = await EventService.getEventById(req.params.id);
+    if (!event) {
+      return sendError(res, { message: "Event not found", statusCode: 404 });
     }
-    async getOne(req, res, next) {
-      const event = await EventService.getEventById(req.params.id);
-      if (!event) {
-        return sendError(res, { message: "Event not found", statusCode: 404 });
-      }
-      return sendSuccess(res, { message: "Event fetched successfully", data: event });
-    }
+    return sendSuccess(res, { message: "Event fetched successfully", data: event });
+  }
 }
 
 export default {

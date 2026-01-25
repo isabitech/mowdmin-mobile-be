@@ -5,7 +5,7 @@ import EventRegistration from "./EventRegistration.js";
 import Profile from "./ProfileModel.js";
 import MediaBookmark from "./MediaBookmarksModel.js";
 import Payment from "./PaymentModel.js";
-import Order from "./OrderModel.js";
+// import Order from "./OrderModel.js"; -> Moved to associations.js
 
 const User = sequelize.define(
   "User",
@@ -41,5 +41,5 @@ User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
 User.hasOne(Profile, { foreignKey: "userId", as: "profile" })
 User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmark" })
 User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
-User.hasMany(Order,{foreignKey:"userId", as : "order"})
+// User.hasMany(Order,{foreignKey:"userId", as : "order"}) -> Moved to associations.js
 export default User;

@@ -33,6 +33,7 @@ app.use(helmet());
 app.use(morgan('combined'));
 app.use(compression());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 const apiRouter = express.Router();
@@ -68,6 +69,14 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+process.on('uncaughtException', (err) => {
+    console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+    console.log(err.name, err.message);
+    process.exit(1);
+});
+
+let server;
+
 async function bootstrap() {
     try {
         if (process.env.DB_CONNECTION === "mongodb") {
@@ -77,11 +86,13 @@ async function bootstrap() {
             console.log('🔄 Connecting to MySQL database...');
             const { connectDB } = await import('./Config/db.js');
             await connectDB();
+            const { default: defineAssociations } = await import('./Models/associations.js');
+            defineAssociations();
         } else {
             throw new Error(`Unsupported DB_CONNECTION: ${process.env.DB_CONNECTION}`);
         }
 
-        app.listen(PORT, () => {
+        server = app.listen(PORT, () => {
             console.log(`🚀 Server running at http://localhost:${PORT}`);
         });
 
@@ -90,6 +101,18 @@ async function bootstrap() {
         process.exit(1);
     }
 }
+
+process.on('unhandledRejection', (err) => {
+    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+    console.log(err.name, err.message);
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    } else {
+        process.exit(1);
+    }
+});
 
 export default app;
 

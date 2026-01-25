@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import { UserRepository } from "../repositories/UserRepository.js";
+import { AuthRepository } from "../repositories/AuthRepository.js";
+import AuthService from "../Services/AuthService.js";
+import { AppError } from "../Utils/AppError.js";
 
 /**
  * Middleware to protect routes and ensure the user is authenticated.
@@ -14,47 +17,36 @@ export const protectUser = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({
-        status: "error",
-        message: "Auth Token is Required",
-      });
+      return next(new AppError("Auth Token is Required", 401));
     }
 
     // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Check if token exists in Auth DB (Session Check)
+    const tokenHash = AuthService.hashToken(token);
+    const session = await AuthRepository.findByTokenHash(tokenHash);
+
+    if (!session || session.isLoggedOut) {
+      return next(new AppError("Session has ended. Please login again.", 401));
+    }
+
     // Fetch user from DB using repository
     const user = await UserRepository.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({
-        status: "error",
-        message: "User no longer exists",
-      });
+      return next(new AppError("User no longer exists", 401));
     }
-
-    // if (!user.isActive) {
-    //   return res.status(401).json({
-    //     status: "error",
-    //     message: "User account is deactivated",
-    //   });
-    // }
 
     // Attach user to request object
     req.user = user;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        status: "error",
-        message: "Token has expired",
-      });
+      return next(new AppError("Token has expired", 401));
     }
 
     if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        status: "error",
-        message: "Invalid token",
-      });
+      return next(new AppError("Invalid token", 401));
     }
 
     next(error);
