@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 
-const Notification = sequelize.define(
+const Notification = getSequelize().define(
   "Notification",
   {
     id: {

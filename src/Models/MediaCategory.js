@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 
-const MediaCategory = sequelize.define(
+const MediaCategory = getSequelize().define(
   "MediaCategory",
   {
     id: {

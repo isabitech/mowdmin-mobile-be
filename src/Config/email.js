@@ -1,17 +1,13 @@
-import nodemailer from "nodemailer";
-
+import * as brevo from '@getbrevo/brevo';
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for port 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// Initialize Brevo API client
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-export default transporter;
+// Configure API key authentication
+let apiKey = apiInstance.authentications['apiKey'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
+
+export default apiInstance;

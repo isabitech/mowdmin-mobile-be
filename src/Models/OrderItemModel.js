@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
+import Product from "./ProductModel.js";
 
-const OrderItem = sequelize.define(
+const OrderItem = getSequelize().define(
   "OrderItem",
   {
     id: {
@@ -19,12 +20,15 @@ const OrderItem = sequelize.define(
     },
     quantity: {
       type: DataTypes.INTEGER,
-      allowNull: false,
       defaultValue: 1,
-    },
-    price: {
-      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    unit_price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false, // Ensure price is required
+    },
+    subtotal: {
+      type: DataTypes.DECIMAL(10, 2),
     },
   },
   {

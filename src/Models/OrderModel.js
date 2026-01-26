@@ -1,9 +1,9 @@
 // OrderModel.js
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
-// import User from "./UserModel.js"; -> Moved to associations.js
+import getSequelize from "../Config/db.js"; // your sequelize instance
 
-const Order = sequelize.define(
+
+const Order = getSequelize().define(
   "Order",
   {
     id: {

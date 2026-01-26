@@ -42,9 +42,44 @@ class AuthController {
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
 
-        await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
-        return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
+        const { email, otp, newPassword, confirmPassword } = req.body;
+
+        if (!email || !otp || !newPassword || !confirmPassword) {
+            return error(res, "All fields are required", 400);
+        }
+
+        if (newPassword !== confirmPassword) {
+            return error(res, "New password and confirmation must match", 400);
+        }
+
+        await AuthService.resetPassword(email, otp, newPassword);
+        return success(res, "Password reset successfully", null, 200);
+
+    }
+
+    // Verify Email with OTP
+    static async verifyEmail(req, res) {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return error(res, "Email and verification code are required", 400);
+        }
+
+        const result = await AuthService.verifyEmail(email, otp);
+        return success(res, result.message, result.user, 200);
+    }
+
+    // Resend Email Verification OTP
+    static async resendEmailVerification(req, res) {
+        const { email } = req.body;
+
+        if (!email) {
+            return error(res, "Email is required", 400);
+        }
+
+        const result = await AuthService.resendEmailVerification(email);
+        return success(res, result.message, null, 200);
     }
 
     // Change Password — for logged-in users
@@ -53,7 +88,34 @@ class AuthController {
         return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
 
     }
-    async createOrUpdateProfile(req, res) {
+
+    // Get user profile
+    static async getProfile(req, res) {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return error(res, "User ID is required", 400);
+        }
+
+        const profile = await AuthService.getProfile(userId);
+        
+        if (!profile) {
+            return error(res, "Profile not found", 404);
+        }
+
+        // Format image URL if exists
+        const profileData = {
+            ...profile.toJSON(),
+            photoUrl: profile.photoUrl
+                ? `${req.protocol}://${req.get("host")}${profile.photoUrl}`
+                : null,
+        };
+
+        return success(res, "Profile retrieved successfully", profileData, 200);
+    }
+
+    // Create or update user profile
+    static async createOrUpdateProfile(req, res) {
         const userId = req.params.userId; // assuming userId comes from route
         const data = { ...req.body };
 
@@ -72,6 +134,18 @@ class AuthController {
         };
 
         return sendSuccess(res, { message: "Profile saved successfully", data: profileData });
+    }
+
+    // Delete user profile
+    static async deleteProfile(req, res) {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return error(res, "User ID is required", 400);
+        }
+
+        await AuthService.deleteProfile(userId);
+        return success(res, "Profile deleted successfully", null, 200);
     }
 }
 
