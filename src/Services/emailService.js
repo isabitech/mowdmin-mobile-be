@@ -38,9 +38,19 @@ class EmailService {
             console.log(`✅ Email sent to ${to} - Subject: ${subject} - Message ID: ${response.messageId}`);
             return true;
         } catch (error) {
+            const status = error?.response?.status;
             console.error(`❌ Failed to send email to ${to}:`, error.message);
-            if (error.response && error.response.body) {
-                console.error('Brevo API Error:', error.response.body);
+            if (status) {
+                console.error('Brevo HTTP Status:', status);
+            }
+
+            const brevoBody = error?.response?.data ?? error?.response?.body ?? error?.body;
+            if (brevoBody) {
+                console.error('Brevo API Error:', brevoBody);
+            }
+
+            if (status === 401) {
+                console.error('Brevo auth failed (401). Check that BREVO_API_KEY is a valid Brevo API key and has Transactional Email permissions.');
             }
             throw new Error(`Email sending failed: ${error.message}`);
         }

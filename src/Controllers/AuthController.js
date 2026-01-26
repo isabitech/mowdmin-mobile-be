@@ -9,7 +9,7 @@ class AuthController {
             userAgent: req.get('User-Agent')
         };
         const user = await AuthService.register(req.body, meta);
-        return sendSuccess(res, { message: "User registered successfully", data: user, statusCode: 201 });
+        return sendSuccess(res, { message: "User registered successfully", data: user, meta, statusCode: 201 });
     }
 
     // Login
@@ -42,18 +42,8 @@ class AuthController {
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
 
-        const { email, otp, newPassword, confirmPassword } = req.body;
-
-        if (!email || !otp || !newPassword || !confirmPassword) {
-            return error(res, "All fields are required", 400);
-        }
-
-        if (newPassword !== confirmPassword) {
-            return error(res, "New password and confirmation must match", 400);
-        }
-
-        await AuthService.resetPassword(email, otp, newPassword);
-        return success(res, "Password reset successfully", null, 200);
+        await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
+        return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
     }
 
@@ -97,7 +87,7 @@ class AuthController {
         }
 
         const profile = await AuthService.getProfile(userId);
-
+        
         if (!profile) {
             return error(res, "Profile not found", 404);
         }

@@ -29,6 +29,8 @@ class AuthService {
         const existingUser = await UserRepository.findByEmail(email);
         if (existingUser) throw new AppError("Email already in use", 400);
         const newUser = await UserRepository.create({
+
+            // Create user with email unverified
             email,
             password: password,
             language,
@@ -46,16 +48,16 @@ class AuthService {
             // Don't fail registration if email sending fails
         }
 
-        const token = new AuthService().generateToken(newUser.id);
+        // const token = new AuthService().generateToken(newUser.id);
 
-        // Store session
-        const tokenHash = AuthService.hashToken(token);
-        await AuthRepository.create({
-            userId: newUser.id,
-            tokenHash,
-            ipAddress: meta.ip,
-            deviceInfo: meta.userAgent
-        });
+        // // Store session
+        // const tokenHash = AuthService.hashToken(token);
+        // await AuthRepository.create({
+        //     userId: newUser.id,
+        //     tokenHash,
+        //     ipAddress: meta.ip,
+        //     deviceInfo: meta.userAgent
+        // });
 
         // Send welcome email asynchronously
         EmailService.sendWelcomeEmail(newUser.email, newUser.name).catch((err) =>
@@ -66,7 +68,7 @@ class AuthService {
 
         return {
             user: userDataSafe,
-            token,
+            token: null,
             message: "Registration successful! Please check your email for verification code."
         };
     }
@@ -133,7 +135,7 @@ class AuthService {
 
     // Reset password using OTP
     static async resetPassword(email, otp, newPassword) {
-        const user = await UserRepository.findByEmail(email);
+        const user = await User.findOne({ where: { email } });
         if (!user) throw new AppError("User not found", 404);
 
         // Verify OTP from Redis
@@ -167,7 +169,7 @@ class AuthService {
 
     // Verify email with OTP
     static async verifyEmail(email, otp) {
-        const user = await UserRepository.findByEmail(email);
+        const user = await User.findOne({ where: { email } });
         if (!user) throw new AppError("User not found", 404);
 
         if (user.emailVerified) {
@@ -209,7 +211,7 @@ class AuthService {
 
     // Resend email verification OTP
     static async resendEmailVerification(email) {
-        const user = await UserRepository.findByEmail(email);
+        const user = await User.findOne({ where: { email } });
         if (!user) throw new AppError("User not found", 404);
 
         if (user.emailVerified) {
@@ -246,14 +248,17 @@ class AuthService {
             profile = await ProfileRepository.create({ ...profileData, userId });
         }
 
-        profile = await ProfileRepository.findByIdWithUser(profile.id);
+        profile = await ProfileRepository.findByIdWithUser(profile.id, User);
 
         return profile;
     }
 
     // Get user profile
     static async getProfile(userId) {
-        const profile = await ProfileRepository.findByUserIdWithUser(userId);
+        const profile = await Profile.findOne({
+            where: { userId },
+            include: [{ model: User, as: "user", attributes: ["id", "name", "email", "emailVerified"] }]
+        });
 
         if (!profile) {
             throw new AppError("Profile not found", 404);
@@ -264,12 +269,13 @@ class AuthService {
 
     // Delete user profile
     static async deleteProfile(userId) {
-        const result = await ProfileRepository.deleteByUserId(userId);
+        const profile = await Profile.findOne({ where: { userId } });
 
-        if (!result) {
+        if (!profile) {
             throw new AppError("Profile not found", 404);
         }
 
+        await profile.destroy();
         return { message: "Profile deleted successfully" };
     }
 
