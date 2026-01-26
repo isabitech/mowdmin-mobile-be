@@ -17,6 +17,19 @@ export const validateCreateOrder = (payload) =>
     .prefs({ stripUnknown: true })
     .validate(payload);
 
+export const validateUpdateOrder = (payload) =>
+  Joi.object({
+    userId: Joi.forbidden(),
+    totalAmount: Joi.number().min(0),
+    status: Joi.string().valid("pending", "paid", "cancelled", "shipped", "completed"),
+    paymentMethod: Joi.string().allow(null, ""),
+    shippingAddress: Joi.string().allow(null, ""),
+    notes: Joi.string().allow(null, ""),
+  })
+    .min(1)
+    .prefs({ stripUnknown: true })
+    .validate(payload);
+
 export const middlewareValidateCreateOrder = (req, res, next) => {
   const { error } = validateCreateOrder(req.body);
   if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
