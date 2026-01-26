@@ -1,32 +1,47 @@
 // MembershipRepository.js
 let MembershipModel;
+let UserModel;
+
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
-export class MembershipRepository {
-  static async getModel() {
-    if (!MembershipModel) {
+export const MembershipRepository = {
+  async getModels() {
+    if (!MembershipModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         MembershipModel = (await import('../MongoModels/MembershipMongoModel.js')).default;
+        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
       } else {
         MembershipModel = (await import('../Models/MembershipModel.js')).default;
+        UserModel = (await import('../Models/UserModel.js')).default;
       }
     }
-    return MembershipModel;
-  }
+    return { MembershipModel, UserModel };
+  },
 
-  static async create(dto) {
-    const Model = await this.getModel();
-    return Model.create(dto);
-  }
+  async create(dto) {
+    const { MembershipModel } = await this.getModels();
+    return MembershipModel.create(dto);
+  },
 
-  static async findAll(query) {
-    const Model = await this.getModel();
+  async findAll(query) {
+    const { MembershipModel, UserModel } = await this.getModels();
+
     if (isMongo) {
-      return Model.find({});
+      // Mongo implementation (basic find, can add populate if needed later)
+      return MembershipModel.find(query || {});
     } else {
-      return Model.findAll({ where: query });
+      return MembershipModel.findAll({
+        where: query,
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
     }
   }
-}
+};
 
 export default MembershipRepository;

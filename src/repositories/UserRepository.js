@@ -1,29 +1,58 @@
-
 let UserModel;
+let ProfileModel;
+
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const UserRepository = {
-  async getModel() {
-    if (!UserModel) {
+  async getModels() {
+    if (!UserModel || (!isMongo && !ProfileModel)) {
       if (isMongo) {
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        const userImport = await import('../MongoModels/UserMongoModel.js');
+        const profileImport = await import('../MongoModels/ProfileMongoModel.js');
+
+        UserModel = userImport.default;
+        ProfileModel = profileImport.default;
       } else {
-        UserModel = (await import('../Models/UserModel.js')).default;
+        const userImport = await import('../Models/UserModel.js');
+        const profileImport = await import('../Models/ProfileModel.js');
+
+        UserModel = userImport.default;
+        ProfileModel = profileImport.default;
       }
     }
-    return UserModel;
+
+    return { UserModel, ProfileModel };
   },
 
   async findByEmail(email) {
-    const Model = await this.getModel();
-    return isMongo ? Model.findOne({ email }) : Model.findOne({ where: { email } });
+    const { UserModel, ProfileModel } = await this.getModels();
+
+    if (isMongo) {
+      return UserModel.findOne({ email });
+    }
+
+    return UserModel.findOne({
+      where: { email },
+      include: [
+        {
+          model: ProfileModel,
+          as: 'profile'
+        }
+      ]
+    });
   },
+
   async findById(id) {
-    const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id);
+    const { UserModel } = await this.getModels();
+
+    return isMongo
+      ? UserModel.findById(id)
+      : UserModel.findByPk(id);
   },
+
   async create(payload) {
-    const Model = await this.getModel();
-    return Model.create(payload);
-  },
+    const { UserModel } = await this.getModels();
+
+    return UserModel.create(payload);
+  }
 };

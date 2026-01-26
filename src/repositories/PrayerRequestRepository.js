@@ -1,63 +1,109 @@
 
 let PrayerRequestModel;
+let UserModel;
+
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const PrayerRequestRepository = {
-  async getModel() {
-    if (!PrayerRequestModel) {
+  async getModels() {
+    if (!PrayerRequestModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         PrayerRequestModel = (await import('../MongoModels/PrayerRequestMongoModel.js')).default;
+        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
       } else {
         PrayerRequestModel = (await import('../Models/PrayerRequestModel.js')).default;
+        UserModel = (await import('../Models/UserModel.js')).default;
       }
     }
-    return PrayerRequestModel;
+    return { PrayerRequestModel, UserModel };
   },
 
   async create(data) {
-    const Model = await this.getModel();
-    return Model.create(data);
+    const { PrayerRequestModel } = await this.getModels();
+    return PrayerRequestModel.create(data);
   },
+
   async findById(id, options = {}) {
-    const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id, options);
-  },
-  async findOne(where, options = {}) {
-    const Model = await this.getModel();
-    return isMongo ? Model.findOne(where) : Model.findOne({ where, ...options });
-  },
-  async findAll(options = {}) {
-    const Model = await this.getModel();
+    const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return Model.find({});
+      return PrayerRequestModel.findById(id).populate('userId', 'name email');
     } else {
-      return Model.findAll(options);
+      return PrayerRequestModel.findByPk(id, {
+        ...options,
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
     }
   },
-  async updateById(id, data, options = {}) {
-    const Model = await this.getModel();
+
+  async findOne(where, options = {}) {
+    const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return Model.findByIdAndUpdate(id, data, { new: true });
+      return PrayerRequestModel.findOne(where).populate('userId', 'name email');
     } else {
-      const prayerRequest = await Model.findByPk(id, options);
+      return PrayerRequestModel.findOne({
+        where,
+        ...options,
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
+    }
+  },
+
+  async findAll(options = {}) {
+    const { PrayerRequestModel, UserModel } = await this.getModels();
+    if (isMongo) {
+      return PrayerRequestModel.find({}).populate('userId', 'name email');
+    } else {
+      return PrayerRequestModel.findAll({
+        ...options,
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
+    }
+  },
+
+  async updateById(id, data, options = {}) {
+    const { PrayerRequestModel } = await this.getModels();
+    if (isMongo) {
+      return PrayerRequestModel.findByIdAndUpdate(id, data, { new: true });
+    } else {
+      const prayerRequest = await PrayerRequestModel.findByPk(id, options);
       if (!prayerRequest) return null;
       return prayerRequest.update(data);
     }
   },
+
   async deleteById(id, options = {}) {
-    const Model = await this.getModel();
+    const { PrayerRequestModel } = await this.getModels();
     if (isMongo) {
-      const result = await Model.findByIdAndDelete(id);
+      const result = await PrayerRequestModel.findByIdAndDelete(id);
       return !!result;
     } else {
-      const prayerRequest = await Model.findByPk(id, options);
+      const prayerRequest = await PrayerRequestModel.findByPk(id, options);
       if (!prayerRequest) return null;
       await prayerRequest.destroy();
       return true;
     }
   },
+
   async findAllByUserId(userId, options = {}) {
-    const Model = await this.getModel();
-    return isMongo ? Model.find({ userId, ...options }) : Model.findAll({ where: { userId }, ...options });
+    const { PrayerRequestModel } = await this.getModels();
+    return isMongo ? PrayerRequestModel.find({ userId, ...options }) : PrayerRequestModel.findAll({ where: { userId }, ...options });
   },
 };

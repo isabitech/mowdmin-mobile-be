@@ -2,8 +2,8 @@
 let TokenModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
-export class TokenRepository {
-  static async getModel() {
+export const TokenRepository = {
+  async getModel() {
     if (!TokenModel) {
       if (isMongo) {
         TokenModel = (await import('../MongoModels/TokenMongoModel.js')).default;
@@ -12,22 +12,22 @@ export class TokenRepository {
       }
     }
     return TokenModel;
-  }
+  },
 
-  static async create(dto) {
+  async create(dto) {
     const Model = await this.getModel();
     return Model.create(dto);
-  }
+  },
 
-  static async findAll(query) {
+  async findAll(query) {
     const Model = await this.getModel();
-    return isMongo ? Model.find(query) : Model.findAll(query);
-  }
+    return isMongo ? Model.find(query) : Model.findAll({ where: query });
+  },
 
-  static async findOne(query) {
+  async findOne(query) {
     const Model = await this.getModel();
-    return isMongo ? Model.findOne(query) : Model.findOne(query);
+    return isMongo ? Model.findOne(query) : Model.findOne({ where: query });
   }
-}
+};
 
 export default TokenRepository;
