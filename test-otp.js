@@ -4,7 +4,8 @@ import { config } from 'dotenv';
 // Load environment variables
 config({ path: '.env' });
 
-const API_BASE_URL = `http://localhost:${process.env.PORT || 3000}/api/auth`;
+const API_BASE_URL = `http://localhost:${process.env.PORT || 3000}/api/v1/auth`;
+const isDryRun = process.env.DRY_RUN === '1' || process.argv.includes('--dry-run');
 
 class OTPTester {
     constructor() {
@@ -15,6 +16,25 @@ class OTPTester {
 
     async makeRequest(endpoint, method = 'POST', body = null) {
         try {
+            if (isDryRun) {
+                console.log(`\n🧯 DRY RUN ${method} ${endpoint}`);
+                if (body) console.log('Would send:', JSON.stringify(body, null, 2));
+
+                const statusByEndpoint = {
+                    '/register': 201,
+                    '/verify-email': 200,
+                    '/resend-verification': 200,
+                    '/forgot-password': 200,
+                    '/reset-password': 200,
+                };
+
+                const status = statusByEndpoint[endpoint] ?? 200;
+                return {
+                    response: { status, statusText: 'DRY_RUN' },
+                    data: { status: 'dry_run', message: 'DRY_RUN' },
+                };
+            }
+
             const options = {
                 method,
                 headers: {

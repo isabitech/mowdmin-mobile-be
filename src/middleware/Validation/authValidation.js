@@ -1,5 +1,5 @@
 import { body, validationResult } from "express-validator";
-import User from "../../Models/UserModel.js";
+import { UserRepository } from "../../repositories/UserRepository.js";
 // ✅ Password complexity regex
 export const validatePassword = (password) => {
   const re =
@@ -21,7 +21,7 @@ export const validateUserRegistration = [
     .isEmail()
     .withMessage("Invalid email format")
     .custom(async (value) => {
-      const existing = await User.findOne({ where: { email: value } });
+      const existing = await UserRepository.findByEmail(value);
       if (existing) throw new Error("Email already exists");
     }),
 
@@ -45,7 +45,7 @@ export const validateUserLogin = [
     .isEmail()
     .withMessage("Valid email is required")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("No account found with this email");
     }),
 
@@ -68,7 +68,7 @@ export const validateForgotPassword = [
     .isEmail()
     .withMessage("Invalid email")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("Email not found");
     }),
 ];
@@ -112,7 +112,7 @@ export const validateEmailVerification = [
     .isEmail()
     .withMessage("Invalid email")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("Email not found");
       if (user.emailVerified) throw new Error("Email is already verified");
     }),
@@ -128,7 +128,7 @@ export const validateResendVerification = [
     .isEmail()
     .withMessage("Invalid email")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("Email not found");
       if (user.emailVerified) throw new Error("Email is already verified");
     }),

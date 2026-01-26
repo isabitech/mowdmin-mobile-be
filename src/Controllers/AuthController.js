@@ -42,7 +42,6 @@ class AuthController {
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
 
-
         const { email, otp, newPassword, confirmPassword } = req.body;
 
         if (!email || !otp || !newPassword || !confirmPassword) {
@@ -98,7 +97,7 @@ class AuthController {
         }
 
         const profile = await AuthService.getProfile(userId);
-        
+
         if (!profile) {
             return error(res, "Profile not found", 404);
         }

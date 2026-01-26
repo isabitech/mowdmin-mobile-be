@@ -17,10 +17,14 @@ export const validateCreateOrder = (payload) =>
     .prefs({ stripUnknown: true })
     .validate(payload);
 
-export const validateUpdateOrder = (payload) =>
-  Joi.object({
-    status: Joi.string(),
-    totalAmount: Joi.number().min(0),
-  })
-    .prefs({ stripUnknown: true })
-    .validate(payload);
+export const middlewareValidateCreateOrder = (req, res, next) => {
+  const { error } = validateCreateOrder(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdateOrder = (req, res, next) => {
+  const { error } = validateUpdateOrder(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

@@ -12,11 +12,12 @@ class EventController {
     const data = { ...value };
     if (req.file) data.image = `/uploads/${req.file.filename}`;
     const event = await EventService.createEvent(data);
+    const eventJson = event.toJSON ? event.toJSON() : event;
     const eventData = {
-      ...event.toJSON(),
+      ...eventJson,
       image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
     };
-    return sendSuccess(res, { message: "Event Created Successfully", data: eventData });
+    return sendSuccess(res, { message: "Event Created Successfully", data: eventData, statusCode: 201 });
   }
 
 
@@ -34,8 +35,9 @@ class EventController {
     if (!event) {
       return sendError(res, { message: "Event not found", statusCode: 404 });
     }
+    const eventJson = event.toJSON ? event.toJSON() : event;
     const eventData = {
-      ...event.toJSON(),
+      ...eventJson,
       image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
     };
     return sendSuccess(res, { message: "Event Updated Successfully", data: eventData });
@@ -57,10 +59,4 @@ class EventController {
   }
 }
 
-export default {
-  create: (req, res, next) => new EventController().create(req, res, next),
-  update: (req, res, next) => new EventController().update(req, res, next),
-  delete: (req, res, next) => new EventController().delete(req, res, next),
-  getAll: (req, res, next) => new EventController().getAll(req, res, next),
-  getOne: (req, res, next) => new EventController().getOne(req, res, next)
-};
+export default new EventController();

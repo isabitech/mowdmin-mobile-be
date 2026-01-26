@@ -1,17 +1,16 @@
 import { Router } from "express";
 import OrderController from "../Controllers/OrderController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { validateCreateOrder, validateUpdateOrder } from "../validators/orderValidators.js";
+import { middlewareValidateCreateOrder, middlewareValidateUpdateOrder } from "../validators/orderValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
 
 const order = Router();
 
 order.post(
-	"/",
+	"/create",
 	protectUser,
-	validateCreateOrder,
-	
+	middlewareValidateCreateOrder,
 	tryCatch(OrderController.create)
 );
 order.get("/", protectUser, tryCatch(OrderController.getAll));
@@ -20,8 +19,7 @@ order.get("/:id", protectUser, tryCatch(OrderController.getOne));
 order.put(
 	"/:id",
 	protectUser,
-	validateUpdateOrder,
-
+	middlewareValidateUpdateOrder,
 	tryCatch(OrderController.update)
 );
 order.delete("/:id", protectUser, tryCatch(OrderController.delete));

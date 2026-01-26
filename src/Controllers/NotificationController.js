@@ -11,7 +11,7 @@ class NotificationController {
 
         const userId = req.user?.id;
         const notification = await NotificationService.create(userId, value.title, value.message, value.type, value.metadata);
-        return sendSuccess(res, { message: "Notification created successfully", data: notification });
+        return sendSuccess(res, { message: "Notification created successfully", data: notification, statusCode: 201 });
     }
     async getUserNotifications(req, res) {
         const userId = req.user?.id;

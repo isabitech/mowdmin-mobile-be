@@ -15,3 +15,15 @@ export const validateUpdateMediaCategory = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+
+export const middlewareValidateCreateMediaCategory = (req, res, next) => {
+  const { error } = validateCreateMediaCategory(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdateMediaCategory = (req, res, next) => {
+  const { error } = validateUpdateMediaCategory(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

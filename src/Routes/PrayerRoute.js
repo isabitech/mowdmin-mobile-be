@@ -1,15 +1,15 @@
 import { Router } from "express";
 import PrayerController from "../Controllers/PrayerController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { validateCreatePrayer } from "../validators/prayerValidators.js";
-
+import { middlewareValidateCreatePrayer } from "../validators/prayerValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
 const prayer = Router();
 
 prayer.post(
-	"/",
+	"/create",
 	protectUser,
+	middlewareValidateCreatePrayer,
 	tryCatch(PrayerController.create)
 );
 prayer.get("/", protectUser, tryCatch(PrayerController.getAll));

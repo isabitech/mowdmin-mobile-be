@@ -1,0 +1,546 @@
+﻿  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒøá´©Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒøá´©Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  write to custom object with { processEnv: myObject }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒæÑ sync secrets across teammates & machines: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  suppress all logs with { quiet: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  suppress all logs with { quiet: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  enable debug logging with { debug: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/Controllers/AuthController.js:1:1)
+      at Object.require (src/Routes/AuthRoute.js:2:1)
+      at Object.require (src/__tests__/Auth.test.js:29:1)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/EventRegistrationRoute.js:4:1)
+      at Object.require (src/__tests__/EventRegistration.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ prevent committing .env to code: https://dotenvx.com/precommit
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/MediaRoute.js:3:1)
+      at Object.require (src/__tests__/Media.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  write to custom object with { processEnv: myObject }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/PrayerRequestRoute.js:3:1)
+      at Object.require (src/__tests__/PrayerRequest.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/PaymentRoute.js:3:1)
+      at Object.require (src/__tests__/Payment.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöÉ encrypt with Dotenvx: https://dotenvx.com
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/MediaCategoryRoute.js:3:1)
+      at Object.require (src/__tests__/MediaCategory.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/EventRoute.js:7:1)
+      at Object.require (src/__tests__/Event.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒöæ add access controls to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒùé´©Å backup and recover secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  override existing env vars with { override: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöæ add access controls to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒùé´©Å backup and recover secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒöæ add access controls to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒùé´©Å backup and recover secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/MediaBookmarkRoute.js:3:1)
+      at Object.require (src/__tests__/MediaBookmark.test.js:29:1)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/PrayerRoute.js:3:1)
+      at Object.require (src/__tests__/Prayer.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/NotificationRoute.js:3:1)
+      at Object.require (src/__tests__/Notification.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/OrderRoute.js:3:1)
+      at Object.require (src/__tests__/Order.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  suppress all logs with { quiet: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒùé´©Å backup and recover secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  suppress all logs with { quiet: true }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ÔÜÖ´©Å  write to custom object with { processEnv: myObject }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/ProfileRoute.js:4:1)
+      at Object.require (src/__tests__/Profile.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒøá´©Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: Ô£à audit secrets and track compliance: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/OrderItemRoute.js:3:1)
+      at Object.require (src/__tests__/OrderItem.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+
+  console.log
+    [dotenv@17.2.3] injecting env (29) from .env -- tip: ÔÜÖ´©Å  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒøá´©Å  run anywhere with `dotenvx run -- yourcommand`
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ­ƒôí add observability to secrets: https://dotenvx.com/ops
+
+      at log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.warn
+    ÔÜá´©Å Environment variable DB_PASSWORD is not set
+
+    [0m [90m 20 |[39m [36mfor[39m ([36mconst[39m varName [36mof[39m requiredVars) {
+     [90m 21 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[varName]) {
+    [31m[1m>[22m[39m[90m 22 |[39m         console[33m.[39mwarn([32m`ÔÜá´©Å Environment variable ${varName} is not set`[39m)[33m;[39m
+     [90m    |[39m                 [31m[1m^[22m[39m
+     [90m 23 |[39m     }
+     [90m 24 |[39m }
+     [90m 25 |[39m[0m
+
+      at Object.warn (src/env.js:22:17)
+      at Object.require (src/Config/redis.js:2:1)
+      at Object.require (src/Services/OTPService.js:1:1)
+      at Object.require (src/Services/AuthService.js:6:1)
+      at Object.require (src/middleware/authMiddleware.js:4:1)
+      at Object.require (src/Routes/ProductRoute.js:3:1)
+      at Object.require (src/__tests__/Product.test.js:29:1)
+
+  console.log
+    Ô£à Environment variables loaded successfully
+
+      at Object.log (src/env.js:26:9)
+

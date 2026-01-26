@@ -7,9 +7,15 @@
     "test": "jest",
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
+    "test-email": "node test-email.js",
+    "test-email-dry": "set DRY_RUN=1&& node test-email.js --dry-run",
+    "test-registration": "node test-registration.js",
+    "test-registration-dry": "set DRY_RUN=1&& node test-registration.js --dry-run",
     "test-otp": "node test-otp.js",
+    "test-otp-dry": "set DRY_RUN=1&& node test-otp.js --dry-run",
     "test-otp-interactive": "node test-otp.js interactive",
     "test-profile": "node test-profile.js --run-tests",
+    "test-profile-dry": "set DRY_RUN=1&& node test-profile.js --run-tests --dry-run",
     "test-profile-validation": "node test-profile.js --validation-tests"
   },
   "repository": {

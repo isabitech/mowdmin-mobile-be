@@ -1,16 +1,13 @@
-// ProfileService.js
 import ProfileRepository from "../repositories/ProfileRepository.js";
 
+class ProfileService {
+  async getProfile(userId) {
+    return ProfileRepository.findByUserId(userId);
+  }
 
-export const getProfile = async (userId) => {
-  return ProfileRepository.findByUserId(userId);
-};
+  async updateProfile(userId, dto) {
+    return ProfileRepository.updateByUserId(userId, dto);
+  }
+}
 
-export const updateProfile = async (userId, dto) => {
-  return ProfileRepository.updateByUserId(userId, dto);
-};
-
-export default {
-  getProfile,
-  updateProfile,
-};
+export default new ProfileService();

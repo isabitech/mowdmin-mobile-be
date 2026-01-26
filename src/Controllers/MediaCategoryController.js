@@ -9,12 +9,12 @@ class MediaCategoryController {
       return sendError(res, { message: error.details[0].message, statusCode: 400 });
     }
 
-    const category = await MediaCategoryService.create(value);
-    return sendSuccess(res, { message: "Media Category Created Successfully", data: category });
+    const category = await MediaCategoryService.createMediaCategory(value);
+    return sendSuccess(res, { message: "Media Category Created Successfully", data: category, statusCode: 201 });
   }
 
   async getAll(req, res, next) {
-    const categories = await MediaCategoryService.getAll();
+    const categories = await MediaCategoryService.getAllMediaCategories();
     return sendSuccess(res, { message: "All Media Categories Fetched Successfully", data: categories });
   }
   async getOne(req, res, next) {
@@ -27,11 +27,11 @@ class MediaCategoryController {
       return sendError(res, { message: error.details[0].message, statusCode: 400 });
     }
 
-    const updated = await MediaCategoryService.update(req.params.id, value);
+    const updated = await MediaCategoryService.updateMediaCategory(req.params.id, value);
     return sendSuccess(res, { message: "Media Category Updated Successfully", data: updated });
   }
   async delete(req, res, next) {
-    await MediaCategoryService.delete(req.params.id);
+    await MediaCategoryService.deleteMediaCategory(req.params.id);
     return sendSuccess(res, { message: "Media Category Deleted Successfully", data: {} });
   }
 }

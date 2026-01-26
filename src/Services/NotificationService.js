@@ -1,6 +1,10 @@
 import { NotificationRepository } from "../repositories/NotificationRepository.js";
 
 class NotificationService {
+  async createNotification(...args) {
+    return this.create(...args);
+  }
+
   async create(userId, title, message, type = "info", metadata = {}) {
     return await NotificationRepository.create({
       userId,

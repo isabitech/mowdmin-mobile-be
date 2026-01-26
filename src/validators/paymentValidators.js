@@ -18,3 +18,15 @@ export const validateUpdatePayment = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+
+export const middlewareValidateCreatePayment = (req, res, next) => {
+  const { error } = validateCreatePayment(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdatePayment = (req, res, next) => {
+  const { error } = validateUpdatePayment(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

@@ -2,26 +2,34 @@ import fetch from 'node-fetch';
 import FormData from 'form-data';
 import fs from 'fs';
 
-const API_BASE = 'http://localhost:3000/api/auth';
+const PORT = process.env.PORT || 3000;
+const API_BASE = `http://localhost:${PORT}/api/v1`;
+const isDryRun = process.env.DRY_RUN === '1' || process.argv.includes('--dry-run');
 
 class ProfileTestClient {
     constructor() {
         this.testUserId = null;
-        this.authToken = null;
+        this.authToken = process.env.AUTH_TOKEN || null;
     }
 
     async makeRequest(endpoint, method = 'GET', body = null, isFormData = false) {
         try {
-            const options = {
-                method,
-                headers: isFormData ? {} : {
-                    'Content-Type': 'application/json',
-                },
-            };
-
-            if (this.authToken && !isFormData) {
-                options.headers['Authorization'] = `Bearer ${this.authToken}`;
+            if (isDryRun) {
+                console.log(`\n🧯 DRY RUN ${method} ${endpoint}`);
+                if (body && !isFormData) console.log('Would send:', JSON.stringify(body, null, 2));
+                if (body && isFormData) console.log('Would send: [FormData]');
+                return { response: { status: 200 }, data: { status: 'dry_run' } };
             }
+
+            const headers = isFormData
+                ? (body && typeof body.getHeaders === 'function' ? body.getHeaders() : {})
+                : { 'Content-Type': 'application/json' };
+
+            if (this.authToken) {
+                headers['Authorization'] = `Bearer ${this.authToken}`;
+            }
+
+            const options = { method, headers };
 
             if (body) {
                 if (isFormData) {
@@ -152,6 +160,10 @@ class ProfileTestClient {
         console.log('🚀 Starting Profile API Test Suite...');
         console.log('='.repeat(50));
 
+        if (!this.authToken) {
+            console.log('⚠️ AUTH_TOKEN not set. Profile routes are protected; set AUTH_TOKEN env var for real requests.');
+        }
+
         // You'll need to provide a valid user ID for testing
         const testUserId = 'c47d6c8c-4d8b-4f9b-9c2a-1234567890ab'; // Replace with actual user ID
         
@@ -227,4 +239,7 @@ if (process.argv.includes('--run-tests')) {
     console.log('💡 To run tests:');
     console.log('node test-profile.js --run-tests');
     console.log('node test-profile.js --validation-tests');
+    console.log('');
+    console.log('💡 For protected endpoints, set:');
+    console.log('set AUTH_TOKEN=YOUR_JWT_HERE');
 }

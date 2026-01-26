@@ -2,6 +2,16 @@
 import { OrderRepository } from "../repositories/OrderRepository.js";
 
 class OrderService {
+    async getModels() {
+        let User;
+        if (process.env.DB_CONNECTION !== 'mongodb') {
+            User = (await import("../Models/UserModel.js")).default;
+        } else {
+            User = (await import("../MongoModels/UserMongoModel.js")).default;
+        }
+        return { User };
+    }
+
     // Create a new order
     async createOrder(data) {
         return OrderRepository.create(data);
@@ -9,6 +19,7 @@ class OrderService {
 
     // Fetch all orders (admin/global view)
     async getAllOrders() {
+        const { User } = await this.getModels();
         return OrderRepository.findAll({
             include: [
                 {
@@ -23,6 +34,7 @@ class OrderService {
 
     // Fetch all orders for a single user
     async getOrdersByUser(userId) {
+        const { User } = await this.getModels();
         return OrderRepository.findAllByUserId(userId, {
             include: [
                 {
@@ -37,6 +49,7 @@ class OrderService {
 
     // Fetch a single order by ID
     async getOrderById(id) {
+        const { User } = await this.getModels();
         return OrderRepository.findById(id, {
             include: [{ model: User, as: "user" }],
         });

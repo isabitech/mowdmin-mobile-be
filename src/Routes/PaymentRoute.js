@@ -1,16 +1,16 @@
 import { Router } from "express";
 import PaymentController from "../Controllers/PaymentController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { validateCreatePayment, validateUpdatePayment } from "../validators/paymentValidators.js";
+import { middlewareValidateCreatePayment, middlewareValidateUpdatePayment } from "../validators/paymentValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
-import { tryCatch } from "../utils/try-catch.js";
+import { tryCatch } from "../Utils/try-catch.js";
 
 const payment = Router();
 
 payment.post(
-	"/",
+	"/create",
 	protectUser,
-	validateCreatePayment,
+	middlewareValidateCreatePayment,
 	handleValidationErrors,
 	tryCatch(PaymentController.create)
 );
@@ -20,7 +20,7 @@ payment.get("/:id", protectUser, tryCatch(PaymentController.getOne));
 payment.put(
 	"/:id",
 	protectUser,
-	validateUpdatePayment,
+	middlewareValidateUpdatePayment,
 	handleValidationErrors,
 	tryCatch(PaymentController.update)
 );

@@ -9,6 +9,7 @@ class DonationController {
     return sendSuccess(res, {
       message: "Donation created successfully",
       data: result,
+      statusCode: 201
     });
   }
   async getDonations(req, res, next) {

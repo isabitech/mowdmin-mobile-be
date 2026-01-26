@@ -2,11 +2,11 @@ import { MediaRepository } from "../repositories/MediaRepository.js";
 import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 
 class MediaCategoryService {
-    async create(data) {
+    async createMediaCategory(data) {
         return await MediaCategoryRepository.create(data);
     }
 
-    async update(id, data) {
+    async updateMediaCategory(id, data) {
         const res = await this.findById(id);
         if (!res) return null;
         await res.update(data);
@@ -14,18 +14,16 @@ class MediaCategoryService {
     }
 
     async findById(id) {
-        // Note: If you need media info, fetch it separately using MediaRepository
         return await MediaCategoryRepository.findById(id);
     }
 
-    async getAll() {
-        // Note: If you need media info, fetch it separately using MediaRepository
+    async getAllMediaCategories() {
         return await MediaCategoryRepository.findAll({
             order: [["createdAt", "ASC"]],
         });
     }
 
-    async delete(id) {
+    async deleteMediaCategory(id) {
         const res = await this.findById(id);
         if (!res) return null;
         await res.destroy();

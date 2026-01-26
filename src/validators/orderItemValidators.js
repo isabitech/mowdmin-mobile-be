@@ -19,3 +19,15 @@ export const validateUpdateOrderItem = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+
+export const middlewareValidateCreateOrderItem = (req, res, next) => {
+  const { error } = validateCreateOrderItem(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdateOrderItem = (req, res, next) => {
+  const { error } = validateUpdateOrderItem(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

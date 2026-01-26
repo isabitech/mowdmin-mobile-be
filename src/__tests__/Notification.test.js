@@ -1,10 +1,22 @@
 // MUST BE AT TOP
-jest.mock('express-validator', () => ({
-    validationResult: () => ({
-        isEmpty: () => true,
-        array: () => [],
-    }),
-}));
+jest.mock('express-validator', () => {
+    const middleware = (req, res, next) => next();
+    const chain = () => new Proxy(middleware, {
+        get: (target, prop) => {
+            if (prop === 'then') return undefined;
+            return chain;
+        }
+    });
+    return {
+        body: chain,
+        param: chain,
+        query: chain,
+        validationResult: () => ({
+            isEmpty: () => true,
+            array: () => [],
+        }),
+    };
+});
 
 jest.mock('nodemailer', () => ({
     createTransport: () => ({

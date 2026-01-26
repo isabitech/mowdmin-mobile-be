@@ -1,10 +1,20 @@
 import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 import { MediaRepository } from "../repositories/MediaRepository.js";
 
+export const createMedia = async (data) => {
+  return await MediaRepository.create(data);
+};
+
+export const create = createMedia; // Alias
+
 class MediaService {
-  async create(data) {
+  async createMedia(data) {
     return await MediaRepository.create(data);
   }
+  async create(data) {
+    return await this.createMedia(data);
+  }
+
 
   async update(id, data) {
     const res = await this.findById(id);

@@ -1,6 +1,10 @@
 import { ProductRepository } from "../repositories/ProductRepository.js";
 
 class ProductService {
+    async createProduct(data) {
+        return this.create(data);
+    }
+
     async create(data) {
         return ProductRepository.create(data);
     }

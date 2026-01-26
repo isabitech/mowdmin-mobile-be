@@ -1,19 +1,15 @@
 import { config } from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Load environment variables from the project root
-const envPath = path.join(__dirname, '..', '.env');
+const envPath = path.resolve(process.cwd(), '.env');
 config({ path: envPath });
 
 // Ensure critical environment variables are loaded
 const requiredVars = [
     'DB_HOST',
     'DB_DATABASE',
-    'DB_USERNAME', 
+    'DB_USERNAME',
     'DB_PASSWORD',
     'REDIS_HOST',
     'REDIS_PASSWORD',

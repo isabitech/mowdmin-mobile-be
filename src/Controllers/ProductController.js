@@ -10,7 +10,7 @@ class ProductController {
         }
 
         const product = await ProductService.createProduct(value);
-        return sendSuccess(res, { message: "Product Created Successfully", data: product });
+        return sendSuccess(res, { message: "Product Created Successfully", data: product, statusCode: 201 });
     }
     async getAll(req, res) {
         const products = await ProductService.getAllProducts();

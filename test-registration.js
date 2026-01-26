@@ -3,11 +3,14 @@
 
 import fetch from 'node-fetch';
 
-const API_BASE = 'http://localhost:3000/api/auth';
+const PORT = process.env.PORT || 3000;
+const API_BASE = `http://localhost:${PORT}/api/v1/auth`;
+const isDryRun = process.env.DRY_RUN === '1' || process.argv.includes('--dry-run');
 
 async function testRegistration() {
     try {
         console.log('🧪 Testing user registration with Brevo email...');
+        console.log('API_BASE:', API_BASE);
         
         const testUser = {
             name: 'Test User Brevo',
@@ -15,6 +18,12 @@ async function testRegistration() {
             password: 'TestPass123@',
             language: 'EN'
         };
+
+        if (isDryRun) {
+            console.log('🧯 DRY RUN enabled: skipping POST /register');
+            console.log('Would send:', JSON.stringify(testUser, null, 2));
+            return;
+        }
 
         const response = await fetch(`${API_BASE}/register`, {
             method: 'POST',
@@ -43,6 +52,12 @@ async function testRegistration() {
 async function testForgotPassword() {
     try {
         console.log('🧪 Testing forgot password with Brevo email...');
+
+        if (isDryRun) {
+            console.log('🧯 DRY RUN enabled: skipping POST /forgot-password');
+            console.log('Would send:', JSON.stringify({ email: 'test.brevo@example.com' }, null, 2));
+            return;
+        }
         
         const response = await fetch(`${API_BASE}/forgot-password`, {
             method: 'POST',

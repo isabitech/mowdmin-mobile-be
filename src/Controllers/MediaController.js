@@ -9,8 +9,8 @@ class MediaController {
       return sendError(res, { message: error.details[0].message, statusCode: 400 });
     }
 
-    const media = await MediaService.create(value);
-    return sendSuccess(res, { message: "Media Created Successfully", data: media });
+    const media = await MediaService.createMedia(value);
+    return sendSuccess(res, { message: "Media Created Successfully", data: media, statusCode: 201 });
   }
   async getAll(req, res, next) {
     const mediaList = await MediaService.getAll();

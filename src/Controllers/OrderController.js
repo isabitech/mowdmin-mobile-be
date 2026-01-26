@@ -11,7 +11,7 @@ class OrderController {
     }
 
     const order = await OrderService.createOrder(value);
-    return sendSuccess(res, { message: "Order Created Successfully", data: order });
+    return sendSuccess(res, { message: "Order Created Successfully", data: order, statusCode: 201 });
   }
   async getAll(req, res) {
     const orders = await OrderService.getAllOrders();

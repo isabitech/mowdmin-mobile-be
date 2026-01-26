@@ -9,7 +9,7 @@ import { protectUser } from "../middleware/authMiddleware.js";
 
 const Event = Router();
 Event.post(
-    "/", protectUser,
+    "/create", protectUser,
     upload.single("image"),        // 1. handle form-data first
     validateEventCreate,           // 2. then validate fields
     handleValidationErrors,

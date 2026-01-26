@@ -10,7 +10,7 @@ class PaymentController {
     }
 
     const payment = await PaymentService.createPayment(value);
-    return sendSuccess(res, { message: "Payment Created Successfully", data: payment });
+    return sendSuccess(res, { message: "Payment Created Successfully", data: payment, statusCode: 201 });
   }
   async getAll(req, res) {
     const payments = await PaymentService.getAllPayments();

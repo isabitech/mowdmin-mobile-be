@@ -1,15 +1,15 @@
 import { Router } from "express";
 import PrayerRequestController from "../Controllers/PrayerRequestController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { validateCreatePrayerRequest, validateUpdatePrayerRequest } from "../validators/prayerRequestValidators.js";
+import { middlewareValidateCreatePrayerRequest, middlewareValidateUpdatePrayerRequest } from "../validators/prayerRequestValidators.js";
 import { tryCatch } from "../Utils/try-catch.js";
 const prayerRequest = Router();
 
 prayerRequest.post(
-	"/",
+	"/create",
 	protectUser,
-	validateCreatePrayerRequest,
-		
+	middlewareValidateCreatePrayerRequest,
+
 	tryCatch(PrayerRequestController.create)
 );
 prayerRequest.get("/", protectUser, tryCatch(PrayerRequestController.getAll));
@@ -18,7 +18,7 @@ prayerRequest.get("/:id", protectUser, tryCatch(PrayerRequestController.getSingl
 prayerRequest.put(
 	"/:id",
 	protectUser,
-	validateUpdatePrayerRequest,
+	middlewareValidateUpdatePrayerRequest,
 	tryCatch(PrayerRequestController.update)
 );
 prayerRequest.delete("/:id", protectUser, tryCatch(PrayerRequestController.delete));

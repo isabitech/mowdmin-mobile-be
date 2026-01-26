@@ -10,7 +10,10 @@ export const getDonations = async (filters, pagination) => {
   return DonationRepository.findAll(filters, pagination);
 };
 
+export const getAllDonations = getDonations; // Alias for tests
+
 export default {
   createDonation,
   getDonations,
+  getAllDonations,
 };

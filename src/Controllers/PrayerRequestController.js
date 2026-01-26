@@ -10,8 +10,8 @@ class PrayerRequestController {
     }
 
     const data = { ...value, userId: req.user.id };
-    const result = await PrayerRequestService.create(data);
-    return sendSuccess(res, { message: "Prayer Request Created Successfully", data: result });
+    const result = await PrayerRequestService.createPrayerRequest(data);
+    return sendSuccess(res, { message: "Prayer Request Created Successfully", data: result, statusCode: 201 });
   }
 
   async update(req, res) {

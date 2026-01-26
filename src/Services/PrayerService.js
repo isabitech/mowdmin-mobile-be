@@ -2,6 +2,10 @@ import { PrayerRepository } from "../repositories/PrayerRepository.js";
 
 
 class PrayerService {
+    async createPrayer(data) {
+        return this.create(data);
+    }
+
     async create(data) {
         const res = await PrayerRepository.create(data);
         return res;
@@ -23,7 +27,7 @@ class PrayerService {
     }
     async getAll() {
         const res = await PrayerRepository.findAll({
-            order: [["createdAt", "ASC"]],          
+            order: [["createdAt", "ASC"]],
         });
 
         return res;
