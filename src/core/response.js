@@ -18,7 +18,7 @@ const buildFallbackRequestMeta = (res) => {
     ip: req.ip,
     userAgent: (typeof req.get === "function" ? req.get("User-Agent") : req.headers?.["user-agent"]) || undefined,
     method: req.method,
-    path: req.originalUrl || req.url,
+    // path: req.originalUrl || req.url,
     timestamp: new Date().toISOString(),
   };
 };
