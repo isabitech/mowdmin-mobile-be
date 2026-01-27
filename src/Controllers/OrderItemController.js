@@ -10,7 +10,7 @@ class OrderItemController {
         }
 
         const orderItem = await OrderItemService.addItem(value);
-        return sendSuccess(res, { message: "Order Item Created Successfully", data: orderItem });
+        return sendSuccess(res, { message: "Order Item Created Successfully", data: orderItem, statusCode: 201 });
     }
     async getAll(req, res) {
         const orderItems = await OrderItemService.getItemsByOrder(req.query.orderId);

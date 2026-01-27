@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 import User from "./UserModel.js";
 
-const EventRegistration = sequelize.define(
+const EventRegistration = getSequelize().define(
   "EventRegistration",
   {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },

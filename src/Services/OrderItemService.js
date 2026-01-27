@@ -3,6 +3,16 @@ import { OrderRepository } from "../repositories/OrderRepository.js";
 import { OrderItemRepository } from "../repositories/OrderItemRepository.js";
 
 class OrderItemService {
+    async getModels() {
+        let Order;
+        if (process.env.DB_CONNECTION !== 'mongodb') {
+            Order = (await import("../Models/OrderModel.js")).default;
+        } else {
+            Order = (await import("../MongoModels/OrderMongoModel.js")).default;
+        }
+        return { Order };
+    }
+
     // Add item(s) to an order
     async addItem(data) {
         return await OrderItemRepository.create(data);
@@ -10,6 +20,7 @@ class OrderItemService {
 
     // Get all items for a specific order
     async getItemsByOrder(orderId) {
+        const { Order } = await this.getModels();
         return await OrderItemRepository.findAllByOrderId(orderId, {
             include: [
                 {
@@ -24,6 +35,7 @@ class OrderItemService {
 
     // Get a single item by ID
     async getItemById(id) {
+        const { Order } = await this.getModels();
         return await OrderItemRepository.findById(id, {
             include: [{ model: Order, as: "order" }],
         });
@@ -54,6 +66,10 @@ class OrderItemService {
             0
         );
         return total.toFixed(2);
+    }
+    // Alias for controller/tests
+    async getItemsByOrderId(orderId) {
+        return this.getItemsByOrder(orderId);
     }
 }
 

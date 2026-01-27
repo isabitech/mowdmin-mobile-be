@@ -1,7 +1,7 @@
 import { Router } from "express";
 import EventRegistrationController from "../Controllers/EventRegistration.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { protectUser } from "../middleware/authMiddleware.js";
+import { protectUser ,protectAdmin} from "../middleware/authMiddleware.js";
 import { validateEventRegistration } from "../validators/eventRegistrationValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
@@ -20,6 +20,7 @@ registration.post(
 registration.get(
     "/",
     protectUser,
+    protectAdmin,
     tryCatch(EventRegistrationController.GetAll)
 );
 
@@ -55,6 +56,7 @@ registration.put(
 registration.delete(
     "/:id",
     protectUser,
+    protectAdmin,
     tryCatch(EventRegistrationController.Delete)
 );
 

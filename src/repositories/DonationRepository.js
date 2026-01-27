@@ -1,32 +1,42 @@
 // DonationRepository.js
 let DonationModel;
+let UserModel;
+
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
-export class DonationRepository {
-  static async getModel() {
-    if (!DonationModel) {
+export const DonationRepository = {
+  async getModels() {
+    if (!DonationModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         DonationModel = (await import('../MongoModels/DonationMongoModel.js')).default;
+        // Mongo usually handles relations differently (e.g. populate), but we load it anyway if needed for consistency or future manual populations
+        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
       } else {
         DonationModel = (await import('../Models/DonationModel.js')).default;
+        UserModel = (await import('../Models/UserModel.js')).default;
       }
     }
-    return DonationModel;
-  }
+    return { DonationModel, UserModel };
+  },
 
-  static async create(dto) {
-    const Model = await this.getModel();
-    return isMongo ? Model.create(dto) : Model.create(dto);
-  }
+  async create(dto) {
+    const { DonationModel } = await this.getModels();
+    return DonationModel.create(dto);
+  },
 
-  static async findAll(filters = {}, pagination = { page: 1, limit: 10 }) {
-    const Model = await this.getModel();
+  async findAll(filters = {}, pagination = { page: 1, limit: 10 }) {
+    const { DonationModel, UserModel } = await this.getModels();
     const { page, limit } = pagination;
+
     if (isMongo) {
       const skip = (page - 1) * limit;
       const [data, total] = await Promise.all([
-        Model.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
-        Model.countDocuments(filters)
+        DonationModel.find(filters)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .populate('userId', 'name email'), // Assuming we want basic user info
+        DonationModel.countDocuments(filters)
       ]);
       return {
         data,
@@ -39,11 +49,18 @@ export class DonationRepository {
       };
     } else {
       const offset = (page - 1) * limit;
-      const { rows, count } = await Model.findAndCountAll({
+      const { rows, count } = await DonationModel.findAndCountAll({
         where: filters,
         offset,
         limit,
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
       });
       return {
         data: rows,
@@ -56,6 +73,6 @@ export class DonationRepository {
       };
     }
   }
-}
+};
 
 export default DonationRepository;

@@ -17,15 +17,34 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Test User", "type": "text" },
-                { "key": "email", "value": "{{email}}", "type": "text" },
-                { "key": "password", "value": "{{password}}", "type": "text" }
+                {
+                  "key": "name",
+                  "value": "Test User",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "register"]
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -37,14 +56,29 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "email", "value": "{{email}}", "type": "text" },
-                { "key": "password", "value": "{{password}}", "type": "text" }
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           },
           "event": [
@@ -79,13 +113,24 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "email", "value": "{{email}}", "type": "text" }
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/forgot-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "forgot-password"]
+              "raw": "{{base_url}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
             }
           }
         },
@@ -97,15 +142,34 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "email", "value": "{{email}}", "type": "text" },
-                { "key": "token", "value": "", "type": "text" },
-                { "key": "newPassword", "value": "", "type": "text" }
+                {
+                  "key": "email",
+                  "value": "{{email}}",
+                  "type": "text"
+                },
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/reset-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "reset-password"]
+              "raw": "{{base_url}}/api/v1/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
             }
           }
         },
@@ -114,19 +178,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "oldPassword", "value": "", "type": "text" },
-                { "key": "newPassword", "value": "", "type": "text" }
+                {
+                  "key": "oldPassword",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/auth/change-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "change-password"]
+              "raw": "{{base_url}}/api/v1/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "change-password"
+              ]
             }
           }
         }
@@ -140,24 +223,62 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Sample Event", "type": "text" },
-                { "key": "description", "value": "Event description", "type": "text" },
-                { "key": "date", "value": "2026-01-01", "type": "text" },
-                { "key": "time", "value": "12:00", "type": "text" },
-                { "key": "location", "value": "Main Hall", "type": "text" },
-                { "key": "type", "value": "Crusade", "type": "text" },
-                { "key": "image", "type": "file" }
+                {
+                  "key": "title",
+                  "value": "Sample Event",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Event description",
+                  "type": "text"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "time",
+                  "value": "12:00",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Main Hall",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "Crusade",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/event/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event", ""]
+              "raw": "{{base_url}}/api/v1/event/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event",
+                ""
+              ]
             }
           }
         },
@@ -166,12 +287,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event", ""]
+              "raw": "{{base_url}}/api/v1/event/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event",
+                ""
+              ]
             }
           }
         },
@@ -180,12 +312,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event", ":id"]
+              "raw": "{{base_url}}/api/v1/event/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event",
+                ":id"
+              ]
             }
           }
         },
@@ -194,24 +337,62 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Updated Event", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" },
-                { "key": "date", "value": "2026-01-02", "type": "text" },
-                { "key": "time", "value": "13:00", "type": "text" },
-                { "key": "location", "value": "Main Hall", "type": "text" },
-                { "key": "type", "value": "Baptism", "type": "text" },
-                { "key": "image", "type": "file" }
+                {
+                  "key": "title",
+                  "value": "Updated Event",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-01-02",
+                  "type": "text"
+                },
+                {
+                  "key": "time",
+                  "value": "13:00",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Main Hall",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "Baptism",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/event/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event", ":id"]
+              "raw": "{{base_url}}/api/v1/event/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event",
+                ":id"
+              ]
             }
           }
         },
@@ -220,12 +401,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event", ":id"]
+              "raw": "{{base_url}}/api/v1/event/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event",
+                ":id"
+              ]
             }
           }
         }
@@ -239,19 +431,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "eventId", "value": "", "type": "text" },
-                { "key": "ticketCode", "value": "", "type": "text" }
+                {
+                  "key": "eventId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "ticketCode",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/event-registration/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", "register"]
+              "raw": "{{base_url}}/api/v1/event-registration/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                "register"
+              ]
             }
           }
         },
@@ -260,12 +471,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event-registration/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", ""]
+              "raw": "{{base_url}}/api/v1/event-registration/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                ""
+              ]
             }
           }
         },
@@ -274,12 +496,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event-registration/event/:eventId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", "event", ":eventId"]
+              "raw": "{{base_url}}/api/v1/event-registration/event/:eventId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                "event",
+                ":eventId"
+              ]
             }
           }
         },
@@ -288,12 +522,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event-registration/user",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", "user"]
+              "raw": "{{base_url}}/api/v1/event-registration/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                "user"
+              ]
             }
           }
         },
@@ -302,12 +547,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event-registration/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", ":id"]
+              "raw": "{{base_url}}/api/v1/event-registration/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                ":id"
+              ]
             }
           }
         },
@@ -316,20 +572,43 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "eventId", "value": "", "type": "text" },
-                { "key": "ticketCode", "value": "", "type": "text" },
-                { "key": "status", "value": "registered", "type": "text" }
+                {
+                  "key": "eventId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "ticketCode",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "registered",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/event-registration/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", ":id"]
+              "raw": "{{base_url}}/api/v1/event-registration/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                ":id"
+              ]
             }
           }
         },
@@ -338,12 +617,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/event-registration/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "event-registration", ":id"]
+              "raw": "{{base_url}}/api/v1/event-registration/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "event-registration",
+                ":id"
+              ]
             }
           }
         }
@@ -357,20 +647,43 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Sample Notification", "type": "text" },
-                { "key": "message", "value": "Notification message", "type": "text" },
-                { "key": "type", "value": "info", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Sample Notification",
+                  "type": "text"
+                },
+                {
+                  "key": "message",
+                  "value": "Notification message",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "info",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/notification/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", ""]
+              "raw": "{{base_url}}/api/v1/notification/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                ""
+              ]
             }
           }
         },
@@ -379,12 +692,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/notification/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", ""]
+              "raw": "{{base_url}}/api/v1/notification/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                ""
+              ]
             }
           }
         },
@@ -393,12 +717,24 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/notification/:id/read",
-              "host": ["{{base_url}}"],
-              "path": ["api", "notification", ":id", "read"]
+              "raw": "{{base_url}}/api/v1/notification/:id/read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notification",
+                ":id",
+                "read"
+              ]
             }
           }
         }
@@ -412,27 +748,78 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Sample Media", "type": "text" },
-                { "key": "description", "value": "Media description", "type": "text" },
-                { "key": "category_id", "value": "", "type": "text" },
-                { "key": "type", "value": "audio", "type": "text" },
-                { "key": "media_url", "value": "", "type": "text" },
-                { "key": "author", "value": "", "type": "text" },
-                { "key": "duration", "value": "", "type": "text" },
-                { "key": "is_downloadable", "value": "false", "type": "text" },
-                { "key": "language", "value": "", "type": "text" },
-                { "key": "thumbnail", "value": "", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Sample Media",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Media description",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "audio",
+                  "type": "text"
+                },
+                {
+                  "key": "media_url",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "author",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "duration",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "is_downloadable",
+                  "value": "false",
+                  "type": "text"
+                },
+                {
+                  "key": "language",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "thumbnail",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media", ""]
+              "raw": "{{base_url}}/api/v1/media/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media",
+                ""
+              ]
             }
           }
         },
@@ -441,12 +828,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media", ""]
+              "raw": "{{base_url}}/api/v1/media/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media",
+                ""
+              ]
             }
           }
         },
@@ -455,12 +853,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media", ":id"]
+              "raw": "{{base_url}}/api/v1/media/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media",
+                ":id"
+              ]
             }
           }
         },
@@ -469,27 +878,78 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Updated Media", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" },
-                { "key": "category_id", "value": "", "type": "text" },
-                { "key": "type", "value": "video", "type": "text" },
-                { "key": "media_url", "value": "", "type": "text" },
-                { "key": "author", "value": "", "type": "text" },
-                { "key": "duration", "value": "", "type": "text" },
-                { "key": "is_downloadable", "value": "true", "type": "text" },
-                { "key": "language", "value": "", "type": "text" },
-                { "key": "thumbnail", "value": "", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Updated Media",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "category_id",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "video",
+                  "type": "text"
+                },
+                {
+                  "key": "media_url",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "author",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "duration",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "is_downloadable",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "language",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "thumbnail",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media", ":id"]
+              "raw": "{{base_url}}/api/v1/media/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media",
+                ":id"
+              ]
             }
           }
         },
@@ -498,12 +958,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media", ":id"]
+              "raw": "{{base_url}}/api/v1/media/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media",
+                ":id"
+              ]
             }
           }
         }
@@ -517,19 +988,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Sample Category", "type": "text" },
-                { "key": "description", "value": "Category description", "type": "text" }
+                {
+                  "key": "name",
+                  "value": "Sample Category",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Category description",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media-category/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-category", ""]
+              "raw": "{{base_url}}/api/v1/media-category/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-category",
+                ""
+              ]
             }
           }
         },
@@ -538,12 +1028,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-category/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-category", ""]
+              "raw": "{{base_url}}/api/v1/media-category/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-category",
+                ""
+              ]
             }
           }
         },
@@ -552,12 +1053,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-category/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-category", ":id"]
+              "raw": "{{base_url}}/api/v1/media-category/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-category",
+                ":id"
+              ]
             }
           }
         },
@@ -566,19 +1078,38 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Updated Category", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" }
+                {
+                  "key": "name",
+                  "value": "Updated Category",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media-category/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-category", ":id"]
+              "raw": "{{base_url}}/api/v1/media-category/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-category",
+                ":id"
+              ]
             }
           }
         },
@@ -587,12 +1118,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-category/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-category", ":id"]
+              "raw": "{{base_url}}/api/v1/media-category/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-category",
+                ":id"
+              ]
             }
           }
         }
@@ -606,19 +1148,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "userId", "value": "", "type": "text" },
-                { "key": "mediaId", "value": "", "type": "text" }
+                {
+                  "key": "userId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "mediaId",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", ""]
+              "raw": "{{base_url}}/api/v1/media-bookmark/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                ""
+              ]
             }
           }
         },
@@ -627,12 +1188,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", ""]
+              "raw": "{{base_url}}/api/v1/media-bookmark/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                ""
+              ]
             }
           }
         },
@@ -641,12 +1213,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/user/:userId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", "user", ":userId"]
+              "raw": "{{base_url}}/api/v1/media-bookmark/user/:userId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                "user",
+                ":userId"
+              ]
             }
           }
         },
@@ -655,12 +1239,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", ":id"]
+              "raw": "{{base_url}}/api/v1/media-bookmark/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                ":id"
+              ]
             }
           }
         },
@@ -669,19 +1264,38 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "userId", "value": "", "type": "text" },
-                { "key": "mediaId", "value": "", "type": "text" }
+                {
+                  "key": "userId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "mediaId",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", ":id"]
+              "raw": "{{base_url}}/api/v1/media-bookmark/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                ":id"
+              ]
             }
           }
         },
@@ -690,12 +1304,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/media-bookmark/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "media-bookmark", ":id"]
+              "raw": "{{base_url}}/api/v1/media-bookmark/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-bookmark",
+                ":id"
+              ]
             }
           }
         }
@@ -709,20 +1334,43 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "userId", "value": "", "type": "text" },
-                { "key": "items", "value": "[{\"productId\":\"\",\"quantity\":1}]", "type": "text" },
-                { "key": "totalAmount", "value": "0", "type": "text" }
+                {
+                  "key": "userId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "items",
+                  "value": "[{\"productId\":\"\",\"quantity\":1}]",
+                  "type": "text"
+                },
+                {
+                  "key": "totalAmount",
+                  "value": "0",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/order/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", ""]
+              "raw": "{{base_url}}/api/v1/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                ""
+              ]
             }
           }
         },
@@ -731,12 +1379,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", ""]
+              "raw": "{{base_url}}/api/v1/orders/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                ""
+              ]
             }
           }
         },
@@ -745,12 +1404,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order/user",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", "user"]
+              "raw": "{{base_url}}/api/v1/orders/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "user"
+              ]
             }
           }
         },
@@ -759,12 +1429,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", ":id"]
+              "raw": "{{base_url}}/api/v1/orders/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                ":id"
+              ]
             }
           }
         },
@@ -773,19 +1454,38 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "status", "value": "", "type": "text" },
-                { "key": "totalAmount", "value": "0", "type": "text" }
+                {
+                  "key": "status",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "totalAmount",
+                  "value": "0",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/order/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", ":id"]
+              "raw": "{{base_url}}/api/v1/orders/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                ":id"
+              ]
             }
           }
         },
@@ -794,12 +1494,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order", ":id"]
+              "raw": "{{base_url}}/api/v1/orders/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                ":id"
+              ]
             }
           }
         }
@@ -813,22 +1524,53 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "orderId", "value": "", "type": "text" },
-                { "key": "productId", "value": "", "type": "text" },
-                { "key": "quantity", "value": "1", "type": "text" },
-                { "key": "unit_price", "value": "0", "type": "text" },
-                { "key": "subtotal", "value": "0", "type": "text" }
+                {
+                  "key": "orderId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "productId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "quantity",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "unit_price",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "subtotal",
+                  "value": "0",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/order-item/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", ""]
+              "raw": "{{base_url}}/api/v1/order-item/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                ""
+              ]
             }
           }
         },
@@ -837,12 +1579,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order-item/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", ""]
+              "raw": "{{base_url}}/api/v1/order-item/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                ""
+              ]
             }
           }
         },
@@ -851,12 +1604,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order-item/order/:orderId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", "order", ":orderId"]
+              "raw": "{{base_url}}/api/v1/order-item/order/:orderId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                "order",
+                ":orderId"
+              ]
             }
           }
         },
@@ -865,12 +1630,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order-item/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", ":id"]
+              "raw": "{{base_url}}/api/v1/order-item/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                ":id"
+              ]
             }
           }
         },
@@ -879,20 +1655,43 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "quantity", "value": "1", "type": "text" },
-                { "key": "unit_price", "value": "0", "type": "text" },
-                { "key": "subtotal", "value": "0", "type": "text" }
+                {
+                  "key": "quantity",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "unit_price",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "subtotal",
+                  "value": "0",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/order-item/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", ":id"]
+              "raw": "{{base_url}}/api/v1/order-item/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                ":id"
+              ]
             }
           }
         },
@@ -901,12 +1700,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/order-item/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "order-item", ":id"]
+              "raw": "{{base_url}}/api/v1/order-item/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order-item",
+                ":id"
+              ]
             }
           }
         }
@@ -920,21 +1730,48 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "orderId", "value": "", "type": "text" },
-                { "key": "amount", "value": "0", "type": "text" },
-                { "key": "method", "value": "", "type": "text" },
-                { "key": "status", "value": "", "type": "text" }
+                {
+                  "key": "orderId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "amount",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "method",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/payment/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", ""]
+              "raw": "{{base_url}}/api/v1/payment/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                ""
+              ]
             }
           }
         },
@@ -943,12 +1780,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/payment/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", ""]
+              "raw": "{{base_url}}/api/v1/payment/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                ""
+              ]
             }
           }
         },
@@ -957,12 +1805,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/payment/order/:orderId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", "order", ":orderId"]
+              "raw": "{{base_url}}/api/v1/payment/order/:orderId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                "order",
+                ":orderId"
+              ]
             }
           }
         },
@@ -971,12 +1831,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/payment/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", ":id"]
+              "raw": "{{base_url}}/api/v1/payment/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                ":id"
+              ]
             }
           }
         },
@@ -985,20 +1856,43 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "amount", "value": "0", "type": "text" },
-                { "key": "method", "value": "", "type": "text" },
-                { "key": "status", "value": "", "type": "text" }
+                {
+                  "key": "amount",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "method",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/payment/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", ":id"]
+              "raw": "{{base_url}}/api/v1/payment/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                ":id"
+              ]
             }
           }
         },
@@ -1007,12 +1901,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/payment/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "payment", ":id"]
+              "raw": "{{base_url}}/api/v1/payment/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment",
+                ":id"
+              ]
             }
           }
         }
@@ -1026,19 +1931,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Sample Prayer", "type": "text" },
-                { "key": "content", "value": "Prayer content", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Sample Prayer",
+                  "type": "text"
+                },
+                {
+                  "key": "content",
+                  "value": "Prayer content",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/prayer/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer", ""]
+              "raw": "{{base_url}}/api/v1/prayer/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer",
+                ""
+              ]
             }
           }
         },
@@ -1047,12 +1971,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer", ""]
+              "raw": "{{base_url}}/api/v1/prayer/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer",
+                ""
+              ]
             }
           }
         },
@@ -1061,12 +1996,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer/user",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer", "user"]
+              "raw": "{{base_url}}/api/v1/prayer/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer",
+                "user"
+              ]
             }
           }
         },
@@ -1075,12 +2021,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer", ":id"]
+              "raw": "{{base_url}}/api/v1/prayer/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer",
+                ":id"
+              ]
             }
           }
         },
@@ -1089,12 +2046,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer", ":id"]
+              "raw": "{{base_url}}/api/v1/prayer/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer",
+                ":id"
+              ]
             }
           }
         }
@@ -1108,19 +2076,38 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Sample Prayer Request", "type": "text" },
-                { "key": "description", "value": "Prayer request description", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Sample Prayer Request",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Prayer request description",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", ""]
+              "raw": "{{base_url}}/api/v1/prayer-request/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                ""
+              ]
             }
           }
         },
@@ -1129,12 +2116,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", ""]
+              "raw": "{{base_url}}/api/v1/prayer-request/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                ""
+              ]
             }
           }
         },
@@ -1143,12 +2141,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/user",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", "user"]
+              "raw": "{{base_url}}/api/v1/prayer-request/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                "user"
+              ]
             }
           }
         },
@@ -1157,12 +2166,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", ":id"]
+              "raw": "{{base_url}}/api/v1/prayer-request/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                ":id"
+              ]
             }
           }
         },
@@ -1171,19 +2191,38 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "title", "value": "Updated Prayer Request", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" }
+                {
+                  "key": "title",
+                  "value": "Updated Prayer Request",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", ":id"]
+              "raw": "{{base_url}}/api/v1/prayer-request/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                ":id"
+              ]
             }
           }
         },
@@ -1192,12 +2231,23 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/prayer-request/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "prayer-request", ":id"]
+              "raw": "{{base_url}}/api/v1/prayer-request/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prayer-request",
+                ":id"
+              ]
             }
           }
         }
@@ -1211,21 +2261,48 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Sample Product", "type": "text" },
-                { "key": "price", "value": "0", "type": "text" },
-                { "key": "description", "value": "Product description", "type": "text" },
-                { "key": "categoryId", "value": "", "type": "text" }
+                {
+                  "key": "name",
+                  "value": "Sample Product",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Product description",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/product/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", ""]
+              "raw": "{{base_url}}/api/v1/product/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                ""
+              ]
             }
           }
         },
@@ -1234,12 +2311,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/product/",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", ""]
+              "raw": "{{base_url}}/api/v1/product/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                ""
+              ]
             }
           }
         },
@@ -1248,12 +2336,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/product/category/:categoryId",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", "category", ":categoryId"]
+              "raw": "{{base_url}}/api/v1/product/category/:categoryId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                "category",
+                ":categoryId"
+              ]
             }
           }
         },
@@ -1262,12 +2362,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/product/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", ":id"]
+              "raw": "{{base_url}}/api/v1/product/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                ":id"
+              ]
             }
           }
         },
@@ -1276,21 +2387,48 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Updated Product", "type": "text" },
-                { "key": "price", "value": "0", "type": "text" },
-                { "key": "description", "value": "Updated description", "type": "text" },
-                { "key": "categoryId", "value": "", "type": "text" }
+                {
+                  "key": "name",
+                  "value": "Updated Product",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Updated description",
+                  "type": "text"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "type": "text"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/api/product/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", ":id"]
+              "raw": "{{base_url}}/api/v1/product/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                ":id"
+              ]
             }
           }
         },
@@ -1299,12 +2437,281 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
             ],
             "url": {
-              "raw": "{{base_url}}/api/product/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "product", ":id"]
+              "raw": "{{base_url}}/api/v1/product/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "product",
+                ":id"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Donation",
+      "item": [
+        {
+          "name": "Create Donation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/donation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "donation"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "campaign",
+                  "value": "General Fund",
+                  "type": "text"
+                },
+                {
+                  "key": "amount",
+                  "value": "100.00",
+                  "type": "text"
+                },
+                {
+                  "key": "currency",
+                  "value": "USD",
+                  "type": "text"
+                },
+                {
+                  "key": "transactionRef",
+                  "value": "TX123456789",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Donations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/donation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "donation"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Info",
+      "item": [
+        {
+          "name": "Get Ministry Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "info"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Membership",
+      "item": [
+        {
+          "name": "Register Membership",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/membership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "membership"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "baptismInterest",
+                  "value": "false",
+                  "type": "text"
+                },
+                {
+                  "key": "communionAlert",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Memberships",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/membership",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "membership"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "displayName",
+                  "value": "John Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "A faithful member.",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "New York, USA",
+                  "type": "text"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "+1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "birthdate",
+                  "value": "1990-01-01",
+                  "type": "text"
+                }
+              ]
             }
           }
         }
@@ -1313,8 +2720,17 @@
   ],
   "event": [],
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000" },
-    { "key": "email", "value": "user@example.com" },
-    { "key": "password", "value": "password" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "email",
+      "value": "user@example.com"
+    },
+    {
+      "key": "password",
+      "value": "password"
+    }
   ]
 }

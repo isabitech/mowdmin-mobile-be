@@ -2,11 +2,11 @@ import { MediaRepository } from "../repositories/MediaRepository.js";
 import { MediaBookmarkRepository } from "../repositories/MediaBookmarkRepository.js";
 
 class MediaBookmarkService {
-    async create(data) {
+    async createMediaBookmark(data) {
         return await MediaBookmarkRepository.create(data);
     }
 
-    async update(id, data) {
+    async updateMediaBookmark(id, data) {
         const res = await this.findById(id);
         if (!res) return null;
         await res.update(data);
@@ -14,26 +14,23 @@ class MediaBookmarkService {
     }
 
     async findById(id) {
-        // Note: If you need media info, fetch it separately using MediaRepository
         return await MediaBookmarkRepository.findById(id);
     }
 
-    async getAll() {
-        // Note: If you need media info, fetch it separately using MediaRepository
+    async getAllMediaBookmarks() {
         return await MediaBookmarkRepository.findAll({
             order: [["createdAt", "ASC"]],
         });
     }
 
-    async delete(id) {
+    async deleteMediaBookmark(id) {
         const res = await this.findById(id);
         if (!res) return null;
         await res.destroy();
         return true;
     }
 
-    async getAllByUserId(userId) {
-        // Note: If you need media info, fetch it separately using MediaRepository
+    async getAllMediaBookmarksByUserId(userId) {
         return await MediaBookmarkRepository.findAllByUserId(userId, {
             order: [["createdAt", "ASC"]],
         });

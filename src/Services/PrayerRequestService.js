@@ -2,6 +2,22 @@ import { PrayerRequestRepository } from "../repositories/PrayerRequestRepository
 
 
 class PrayerRequestService {
+    async getModels() {
+        let User, Profile;
+        if (process.env.DB_CONNECTION !== 'mongodb') {
+            User = (await import("../Models/UserModel.js")).default;
+            Profile = (await import("../Models/ProfileModel.js")).default;
+        } else {
+            User = (await import("../MongoModels/UserMongoModel.js")).default;
+            Profile = (await import("../MongoModels/ProfileMongoModel.js")).default;
+        }
+        return { User, Profile };
+    }
+
+    async createPrayerRequest(data) {
+        return this.create(data);
+    }
+
     async create(data) {
         return PrayerRequestRepository.create(data);
     }
@@ -16,6 +32,7 @@ class PrayerRequestService {
         return PrayerRequestRepository.findOne({ id, userId });
     }
     async getAll() {
+        const { User, Profile } = await this.getModels();
         const res = await PrayerRequestRepository.findAll({
             order: [["createdAt", "ASC"]],
             include: [

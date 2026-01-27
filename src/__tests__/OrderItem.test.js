@@ -1,10 +1,22 @@
 // MUST BE AT TOP
-jest.mock('express-validator', () => ({
-    validationResult: () => ({
-        isEmpty: () => true,
-        array: () => [],
-    }),
-}));
+jest.mock('express-validator', () => {
+    const middleware = (req, res, next) => next();
+    const chain = () => new Proxy(middleware, {
+        get: (target, prop) => {
+            if (prop === 'then') return undefined;
+            return chain;
+        }
+    });
+    return {
+        body: chain,
+        param: chain,
+        query: chain,
+        validationResult: () => ({
+            isEmpty: () => true,
+            array: () => [],
+        }),
+    };
+});
 
 jest.mock('nodemailer', () => ({
     createTransport: () => ({
@@ -32,7 +44,7 @@ describe('Order Item Routes', () => {
     });
 
     it('should fetch order items successfully', async () => {
-        OrderItemService.getByOrderId.mockResolvedValue([]);
+        OrderItemService.getItemsByOrderId.mockResolvedValue([]);
         const response = await request(app).get('/api/v1/order-item/order/1');
         expect(response.status).toBe(200);
     });

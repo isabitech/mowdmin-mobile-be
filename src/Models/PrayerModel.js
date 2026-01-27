@@ -17,6 +17,10 @@ const Prayer = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    prayer_request_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
     isPublic: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

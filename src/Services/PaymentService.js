@@ -1,18 +1,18 @@
 import { PaymentRepository } from "../repositories/PaymentRepository.js";
 import { OrderRepository } from "../repositories/OrderRepository.js";
-let Order;
-if (process.env.DB_CONNECTION !== 'mongodb') {
-    Order = (await import("../Models/OrderModel.js")).default;
-}else{
-    Order = (await import("../MongoModels/OrderMongoModel.js")).default;
-}
-let User;
-if (process.env.DB_CONNECTION !== 'mongodb') {
-    User = (await import("../Models/UserModel.js")).default;
-}else{
-    User = (await import("../MongoModels/UserMongoModel.js")).default;
-}
 class PaymentService {
+    async getModels() {
+        let Order, User;
+        if (process.env.DB_CONNECTION !== 'mongodb') {
+            Order = (await import("../Models/OrderModel.js")).default;
+            User = (await import("../Models/UserModel.js")).default;
+        } else {
+            Order = (await import("../MongoModels/OrderMongoModel.js")).default;
+            User = (await import("../MongoModels/UserMongoModel.js")).default;
+        }
+        return { Order, User };
+    }
+
 
     // Initialize a new payment record
     async createPayment(data) {
@@ -21,6 +21,7 @@ class PaymentService {
 
     // Fetch all payments (admin/global)
     async getAllPayments() {
+        const { Order, User } = await this.getModels();
         return PaymentRepository.findAll({
             include: [
                 { model: Order, as: "order", attributes: ["id", "status", "total_amount"] },
@@ -32,6 +33,7 @@ class PaymentService {
 
     // Fetch all payments by user
     async getPaymentsByUser(userId) {
+        const { Order } = await this.getModels();
         return PaymentRepository.findAll({
             where: { userId },
             include: [{ model: Order, as: "order" }],
@@ -41,6 +43,7 @@ class PaymentService {
 
     // Fetch single payment
     async getPaymentById(id) {
+        const { Order, User } = await this.getModels();
         return PaymentRepository.findById(id, {
             include: [
                 { model: Order, as: "order" },

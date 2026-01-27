@@ -1,10 +1,22 @@
 // MUST BE AT TOP
-jest.mock('express-validator', () => ({
-    validationResult: () => ({
-        isEmpty: () => true,
-        array: () => [],
-    }),
-}));
+jest.mock('express-validator', () => {
+    const middleware = (req, res, next) => next();
+    const chain = () => new Proxy(middleware, {
+        get: (target, prop) => {
+            if (prop === 'then') return undefined;
+            return chain;
+        }
+    });
+    return {
+        body: chain,
+        param: chain,
+        query: chain,
+        validationResult: () => ({
+            isEmpty: () => true,
+            array: () => [],
+        }),
+    };
+});
 
 jest.mock('nodemailer', () => ({
     createTransport: () => ({
@@ -37,7 +49,13 @@ describe('Media Routes', () => {
 
         const response = await request(app)
             .post('/api/v1/media/create')
-            .send({ title: 'Test Audio', categoryId: 1, type: 'audio' });
+            .send({
+                title: 'Test Audio',
+                category_id: '1',
+                type: 'audio',
+                description: 'test',
+                media_url: 'http://example.com/test.mp3'
+            });
 
         expect(response.status).toBe(201);
         expect(response.body.status).toBe('success');

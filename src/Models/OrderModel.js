@@ -1,9 +1,9 @@
 // OrderModel.js
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
-import User from "./UserModel.js";
+import getSequelize from "../Config/db.js"; // your sequelize instance
 
-const Order = sequelize.define(
+
+const Order = getSequelize().define(
   "Order",
   {
     id: {
@@ -39,6 +39,6 @@ const Order = sequelize.define(
   }
 );
 
-Order.belongsTo(User, { foreignKey: "userId", as: "user" });
+// Order.belongsTo(User, { foreignKey: "userId", as: "user" }); -> Moved to associations.js
 
 export default Order;

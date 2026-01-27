@@ -1,43 +1,62 @@
 
 let EventModel;
+let EventRegistrationModel;
+
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const EventRepository = {
-  async getModel() {
-    if (!EventModel) {
+  async getModels() {
+    if (!EventModel || (!isMongo && !EventRegistrationModel)) {
       if (isMongo) {
         EventModel = (await import('../MongoModels/EventMongoModel.js')).default;
+        EventRegistrationModel = (await import('../MongoModels/EventRegistrationMongoModel.js')).default;
       } else {
         EventModel = (await import('../Models/EventModel.js')).default;
+        EventRegistrationModel = (await import('../Models/EventRegistration.js')).default;
       }
     }
-    return EventModel;
+    return { EventModel, EventRegistrationModel };
   },
 
   async create(payload) {
-    const Model = await this.getModel();
-    return Model.create(payload);
+    const { EventModel } = await this.getModels();
+    return EventModel.create(payload);
   },
+
   async findAll(options = {}) {
-    const Model = await this.getModel();
+    const { EventModel } = await this.getModels();
     if (isMongo) {
       // Only use filter for Mongo, ignore order/include
-      return Model.find({});
+      return EventModel.find({});
     } else {
-      return Model.findAll(options);
+      return EventModel.findAll(options);
     }
   },
+
   async findById(id, options = {}) {
-    const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id, options);
-  },
-  async deleteById(id, options = {}) {
-    const Model = await this.getModel();
+    const { EventModel, EventRegistrationModel } = await this.getModels();
     if (isMongo) {
-      const result = await Model.findByIdAndDelete(id);
+      return EventModel.findById(id).populate('registrations');
+    } else {
+      return EventModel.findByPk(id, {
+        ...options,
+        include: [
+          {
+            model: EventRegistrationModel,
+            as: 'registrations' // Ensure this matches model association alias
+          }
+        ]
+      });
+    }
+  },
+
+  async deleteById(id, options = {}) {
+    const { EventModel } = await this.getModels();
+    if (isMongo) {
+      const result = await EventModel.findByIdAndDelete(id);
       return !!result;
     } else {
-      return Model.destroy({ where: { id }, ...options });
+      return EventModel.destroy({ where: { id }, ...options });
     }
   },
 };

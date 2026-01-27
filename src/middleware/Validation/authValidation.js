@@ -1,5 +1,5 @@
 import { body, validationResult } from "express-validator";
-import User from "../../Models/UserModel.js";
+import { UserRepository } from "../../repositories/UserRepository.js";
 // ✅ Password complexity regex
 export const validatePassword = (password) => {
   const re =
@@ -21,7 +21,7 @@ export const validateUserRegistration = [
     .isEmail()
     .withMessage("Invalid email format")
     .custom(async (value) => {
-      const existing = await User.findOne({ where: { email: value } });
+      const existing = await UserRepository.findByEmail(value);
       if (existing) throw new Error("Email already exists");
     }),
 
@@ -45,7 +45,7 @@ export const validateUserLogin = [
     .isEmail()
     .withMessage("Valid email is required")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("No account found with this email");
     }),
 
@@ -68,8 +68,69 @@ export const validateForgotPassword = [
     .isEmail()
     .withMessage("Invalid email")
     .custom(async (email) => {
+      const user = await UserRepository.findByEmail(email);
+      if (!user) throw new Error("Email not found");
+    }),
+];
+
+// ✅ Reset password validation
+export const validateResetPassword = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email")
+    .custom(async (email) => {
       const user = await User.findOne({ where: { email } });
       if (!user) throw new Error("Email not found");
+    }),
+  body("otp")
+    .isLength({ min: 4, max: 4 })
+    .isNumeric()
+    .withMessage("OTP must be a 4-digit number"),
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
+    .custom((value) => {
+      if (!validatePassword(value)) {
+        throw new Error(
+          "Password must include uppercase, lowercase, number, and special character"
+        );
+      }
+      return true;
+    }),
+  body("confirmPassword")
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error("Password confirmation does not match");
+      }
+      return true;
+    }),
+];
+
+// ✅ Email verification validation
+export const validateEmailVerification = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email")
+    .custom(async (email) => {
+      const user = await UserRepository.findByEmail(email);
+      if (!user) throw new Error("Email not found");
+      if (user.emailVerified) throw new Error("Email is already verified");
+    }),
+  body("otp")
+    .isLength({ min: 4, max: 4 })
+    .isNumeric()
+    .withMessage("OTP must be a 4-digit number"),
+];
+
+// ✅ Resend verification validation
+export const validateResendVerification = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email")
+    .custom(async (email) => {
+      const user = await UserRepository.findByEmail(email);
+      if (!user) throw new Error("Email not found");
+      if (user.emailVerified) throw new Error("Email is already verified");
     }),
 ];
 // middleware to check validation errors

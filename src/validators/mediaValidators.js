@@ -31,3 +31,14 @@ export const validateUpdateMedia = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+export const middlewareValidateCreateMedia = (req, res, next) => {
+  const { error } = validateCreateMedia(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdateMedia = (req, res, next) => {
+  const { error } = validateUpdateMedia(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

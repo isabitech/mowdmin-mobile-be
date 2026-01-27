@@ -1,10 +1,22 @@
 // MUST BE AT TOP
-jest.mock('express-validator', () => ({
-    validationResult: () => ({
-        isEmpty: () => true,
-        array: () => [],
-    }),
-}));
+jest.mock('express-validator', () => {
+    const middleware = (req, res, next) => next();
+    const chain = () => new Proxy(middleware, {
+        get: (target, prop) => {
+            if (prop === 'then') return undefined;
+            return chain;
+        }
+    });
+    return {
+        body: chain,
+        param: chain,
+        query: chain,
+        validationResult: () => ({
+            isEmpty: () => true,
+            array: () => [],
+        }),
+    };
+});
 
 jest.mock('nodemailer', () => ({
     createTransport: () => ({
@@ -15,10 +27,10 @@ jest.mock('nodemailer', () => ({
 import request from 'supertest';
 import express from 'express';
 import profileRoutes from '../Routes/ProfileRoute.js';
-import profileService from '../Services/profileService.js';
+import profileService from '../Services/ProfileService.js';
 import { protectUser } from '../middleware/authMiddleware.js';
 
-jest.mock('../Services/profileService.js');
+jest.mock('../Services/ProfileService.js');
 jest.mock('../middleware/authMiddleware.js');
 
 const app = express();

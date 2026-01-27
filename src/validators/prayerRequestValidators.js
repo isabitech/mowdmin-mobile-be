@@ -15,3 +15,15 @@ export const validateUpdatePrayerRequest = (payload) =>
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
+
+export const middlewareValidateCreatePrayerRequest = (req, res, next) => {
+  const { error } = validateCreatePrayerRequest(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdatePrayerRequest = (req, res, next) => {
+  const { error } = validateUpdatePrayerRequest(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

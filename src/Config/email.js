@@ -1,17 +1,28 @@
-import nodemailer from "nodemailer";
-
+import * as brevo from '@getbrevo/brevo';
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for port 465
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// Initialize Brevo API client
+const apiInstance = new brevo.TransactionalEmailsApi();
 
-export default transporter;
+// Configure API key authentication
+const rawKey = process.env.BREVO_API_KEY;
+const apiKeyValue = typeof rawKey === 'string' ? rawKey.trim() : '';
+
+if (!apiKeyValue) {
+	console.warn('⚠️ BREVO_API_KEY is not set (email sending will fail)');
+} else {
+	// Prefer the SDK helper if available
+	if (typeof apiInstance.setApiKey === 'function' && brevo.TransactionalEmailsApiApiKeys?.apiKey) {
+		apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, apiKeyValue);
+	} else if (apiInstance.authentications?.apiKey) {
+		apiInstance.authentications.apiKey.apiKey = apiKeyValue;
+	} else if (apiInstance.authentications?.['apiKey']) {
+		apiInstance.authentications['apiKey'].apiKey = apiKeyValue;
+	} else {
+		console.warn('⚠️ Brevo SDK authentication hook not found; email sending may fail');
+	}
+}
+
+export default apiInstance;

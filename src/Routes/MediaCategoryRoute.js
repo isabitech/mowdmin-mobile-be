@@ -2,15 +2,15 @@ import { Router } from "express";
 import MediaCategoryController from "../Controllers/MediaCategoryController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { validateCreateMediaCategory, validateUpdateMediaCategory } from "../validators/mediaCategoryValidators.js";
+import { middlewareValidateCreateMediaCategory, middlewareValidateUpdateMediaCategory } from "../validators/mediaCategoryValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
 const mediaCategory = Router();
 
 mediaCategory.post(
-	"/",
+	"/create",
 	protectUser,
-	validateCreateMediaCategory,
+	middlewareValidateCreateMediaCategory,
 	handleValidationErrors,
 	tryCatch(MediaCategoryController.create)
 );
@@ -19,7 +19,7 @@ mediaCategory.get("/:id", protectUser, tryCatch(MediaCategoryController.getOne))
 mediaCategory.put(
 	"/:id",
 	protectUser,
-	validateUpdateMediaCategory,
+	middlewareValidateUpdateMediaCategory,
 	handleValidationErrors,
 	tryCatch(MediaCategoryController.update)
 );

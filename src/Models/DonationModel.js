@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 
-const Donation = sequelize.define(
+const Donation = getSequelize().define(
   "Donation",
   {
     id: {

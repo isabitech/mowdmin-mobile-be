@@ -1,9 +1,11 @@
 import PrayerService from "../Services/PrayerService.js";
-import { sendSuccess, sendError } from "../core/response.js";class PrayerController {
+import { sendSuccess, sendError } from "../core/response.js";
+
+class PrayerController {
   async create(req, res) {
     const data = { ...req.body, userId: req.user.id };
-    const prayer = await PrayerService.create(data);
-    return sendSuccess(res, { message: "Prayer Created Successfully", data: prayer });
+    const prayer = await PrayerService.createPrayer(data);
+    return sendSuccess(res, { message: "Prayer Created Successfully", data: prayer, statusCode: 201 });
   }
   async getAll(req, res) {
     const prayers = await PrayerService.getAll();

@@ -1,13 +1,9 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 import bcrypt from "bcryptjs";
-import EventRegistration from "./EventRegistration.js";
-import Profile from "./ProfileModel.js";
-import MediaBookmark from "./MediaBookmarksModel.js";
-import Payment from "./PaymentModel.js";
-import Order from "./OrderModel.js";
+// import Order from "./OrderModel.js"; -> Moved to associations.js
 
-const User = sequelize.define(
+const User = getSequelize().define(
   "User",
   {
     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
@@ -15,6 +11,9 @@ const User = sequelize.define(
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: DataTypes.STRING,
     language: { type: DataTypes.ENUM("EN", "FR", "DE"), defaultValue: "EN" },
+    emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    emailVerifiedAt: { type: DataTypes.DATE, allowNull: true },
+    isAdmin: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     tableName: "users",
@@ -36,10 +35,5 @@ const User = sequelize.define(
   }
 );
 
-// Associations
-User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
-User.hasOne(Profile, { foreignKey: "userId", as: "profile" })
-User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmark" })
-User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
-User.hasMany(Order,{foreignKey:"userId", as : "order"})
+// Associations are defined centrally in Models/associations.js
 export default User;
