@@ -65,6 +65,8 @@ class AuthService {
         );
         const userDataSafe = newUser.toJSON();
         delete userDataSafe.password;
+        delete userDataSafe.isAdmin;
+        delete userDataSafe.emailVerifiedAt;
 
         return {
             user: userDataSafe,
@@ -93,10 +95,10 @@ class AuthService {
             ipAddress: meta.ip,
             deviceInfo: meta.userAgent
         });
-
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
-
+        delete userDataSafe.isAdmin;
+        delete userDataSafe.emailVerifiedAt;
         return { user: userDataSafe, token };
     }
 
@@ -211,7 +213,7 @@ class AuthService {
 
     // Resend email verification OTP
     static async resendEmailVerification(email) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findOne({ where: { email } });
         if (!user) throw new AppError("User not found", 404);
 
         if (user.emailVerified) {
@@ -255,7 +257,7 @@ class AuthService {
 
     // Get user profile
     static async getProfile(userId) {
-        const profile = await Profile.findOne({
+        const profile = await ProfileRepository.findOne({
             where: { userId },
             include: [{ model: User, as: "user", attributes: ["id", "name", "email", "emailVerified"] }]
         });
@@ -269,7 +271,7 @@ class AuthService {
 
     // Delete user profile
     static async deleteProfile(userId) {
-        const profile = await Profile.findOne({ where: { userId } });
+        const profile = await ProfileRepository.findOne({ where: { userId } });
 
         if (!profile) {
             throw new AppError("Profile not found", 404);

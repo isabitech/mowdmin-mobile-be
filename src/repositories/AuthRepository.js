@@ -60,4 +60,17 @@ export const AuthRepository = {
             return Model.update(updateData, { where: { userId } });
         }
     }
+    ,
+
+    async touchToken(tokenHash, touchedAt = new Date()) {
+        const Model = await this.getModel();
+        const updateData = { lastLogin: touchedAt };
+
+        if (isMongo) {
+            // Only touch active sessions
+            return Model.updateOne({ tokenHash, isLoggedOut: false }, updateData);
+        }
+
+        return Model.update(updateData, { where: { tokenHash, isLoggedOut: false } });
+    }
 };
