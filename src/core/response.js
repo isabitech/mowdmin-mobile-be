@@ -46,3 +46,17 @@ export const sendError = (res, { message = "Error", statusCode = 400, data = {},
     meta: mergeMeta(res, meta),
   });
 };
+
+// Validation responses in this codebase historically use { success: false, errors: [...] }.
+// This helper keeps that shape but ensures meta is consistently included.
+export const sendValidationError = (
+  res,
+  { message = "Validation failed", statusCode = 422, errors = [], meta = {} } = {}
+) => {
+  return res.status(statusCode).json({
+    success: false,
+    message,
+    errors,
+    meta: mergeMeta(res, meta),
+  });
+};

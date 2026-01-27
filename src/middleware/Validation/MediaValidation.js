@@ -1,5 +1,6 @@
 import { body, param, validationResult } from "express-validator";
 import Media from "../../Models/MediaModel.js";
+import { sendValidationError } from "../../core/response.js";
 
 // ---------------- CREATE MEDIA VALIDATION ----------------
 export const validateMediaCreate = [
@@ -10,7 +11,7 @@ export const validateMediaCreate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },
@@ -34,7 +35,7 @@ export const validateMediaUpdate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },

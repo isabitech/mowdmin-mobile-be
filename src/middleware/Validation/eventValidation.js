@@ -1,5 +1,6 @@
 import { body, param, validationResult } from "express-validator";
 import Event from "../../Models/EventModel.js"; // ensure .js extension
+import { sendValidationError } from "../../core/response.js";
 
 // ---------------- CREATE EVENT VALIDATION ----------------
 export const validateEventCreate = [
@@ -18,11 +19,20 @@ export const validateEventCreate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },
 ];
+
+export const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    
+    if (!errors.isEmpty()) {
+        return sendValidationError(res, { statusCode: 400, errors: errors.array() });
+    }
+    next();
+};
 
 
 // ---------------- UPDATE EVENT VALIDATION ----------------
@@ -56,10 +66,7 @@ export const validateEventUpdate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({
-                success: false,
-                errors: errors.array(),
-            });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },

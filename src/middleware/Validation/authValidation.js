@@ -1,4 +1,5 @@
 import { body, validationResult } from "express-validator";
+import { sendValidationError } from "../../core/response.js";
 import { UserRepository } from "../../repositories/UserRepository.js";
 // ✅ Password complexity regex
 export const validatePassword = (password) => {
@@ -137,8 +138,8 @@ export const validateResendVerification = [
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
+    return sendValidationError(res, {
+      statusCode: 400,
       message: "Validation failed",
       errors: errors.array(),
     });
