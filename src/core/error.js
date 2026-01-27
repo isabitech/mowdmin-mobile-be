@@ -40,6 +40,7 @@ const sendErrorDev = (err, res) => {
     statusCode: err.statusCode,
     status: err.status,
     message: err.message,
+    meta: err?.meta,
     data: { stack: err.stack, error: err },
   });
 };
@@ -51,6 +52,7 @@ const sendErrorProd = (err, res) => {
       statusCode: err.statusCode,
       status: err.status,
       message: err.message,
+      meta: err?.meta,
     });
   }
 
@@ -61,6 +63,7 @@ const sendErrorProd = (err, res) => {
     statusCode: 500,
     status: "error",
     message: "Something went very wrong!",
+    meta: err?.meta,
   });
 };
 
