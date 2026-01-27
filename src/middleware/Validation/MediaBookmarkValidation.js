@@ -1,6 +1,7 @@
 import { body, param, validationResult } from "express-validator";
 import MediaBookmark from "../../Models/MediaBookmarksModel.js";
 import Media from "../../Models/MediaModel.js";
+import { sendValidationError } from "../../core/response.js";
 
 // ---------------- CREATE MEDIA BOOKMARK VALIDATION ----------------
 export const validateMediaBookmarkCreate = [
@@ -17,7 +18,7 @@ export const validateMediaBookmarkCreate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },
@@ -37,7 +38,7 @@ export const validateMediaBookmarkDelete = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },

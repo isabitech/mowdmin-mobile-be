@@ -1,5 +1,6 @@
 import { body, param, validationResult } from "express-validator";
 import MediaCategory from "../../Models/MediaCategory.js";
+import { sendValidationError } from "../../core/response.js";
 
 // ---------------- CREATE MEDIA CATEGORY VALIDATION ----------------
 export const validateMediaCategoryCreate = [
@@ -8,7 +9,7 @@ export const validateMediaCategoryCreate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },
@@ -30,7 +31,7 @@ export const validateMediaCategoryUpdate = [
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
         }
         next();
     },
