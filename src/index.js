@@ -5,7 +5,6 @@ import morgan from 'morgan';
 import compression from 'compression';
 
 import './env.js';
-
 import { connectMongoDB } from './Config/mongodb.js';
 import { connectDB } from './Config/db.js';
 import { initializeRedis } from './Config/redis.js';
