@@ -1,28 +1,45 @@
-import { config } from 'dotenv';
-import path from 'path';
+import { config } from "dotenv";
+import fs from "fs";
+import path from "path";
 
-// Load environment variables from the project root
-const envPath = path.resolve(process.cwd(), '.env');
-config({ path: envPath });
-
-// Ensure critical environment variables are loaded
-const requiredVars = [
-    'DB_HOST',
-    'DB_DATABASE',
-    'DB_USERNAME',
-    'DB_PASSWORD',
-    'REDIS_HOST',
-    'REDIS_PASSWORD',
-    'BREVO_API_KEY',
-    'JWT_SECRET'
+const candidates = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "..", ".env"),
 ];
 
-for (const varName of requiredVars) {
-    if (!process.env[varName]) {
-        console.warn(`⚠️ Environment variable ${varName} is not set`);
+const envPath = candidates.find((p) => fs.existsSync(p));
+
+if (envPath) {
+    config({ path: envPath });
+    if (process.env.NODE_ENV !== "test") {
+        console.log("🔧 Environment configuration loaded from:", envPath);
+    }
+} else {
+    if (process.env.NODE_ENV !== "test") {
+        console.log("ℹ️ No .env file found. Using platform environment variables.");
     }
 }
 
-console.log('✅ Environment variables loaded successfully');
+const dbConnection = (process.env.DB_CONNECTION || "").toLowerCase();
+
+const requiredBase = ["JWT_SECRET"];
+const requiredMongo = ["MONGO_URI"]; // MONGO_DB_NAME is optional (Mongoose can infer)
+const requiredSql = ["DB_HOST", "DB_DATABASE", "DB_USERNAME", "DB_PASSWORD"];
+const requiredRedis = ["REDIS_HOST", "REDIS_PASSWORD"]; // OTP/blacklist features rely on Redis
+
+let requiredVars = [...requiredBase, ...requiredRedis];
+if (dbConnection === "mongodb") requiredVars = [...requiredVars, ...requiredMongo];
+if (dbConnection === "mysql" || dbConnection === "postgres" || dbConnection === "postgresql") {
+    requiredVars = [...requiredVars, ...requiredSql];
+}
+
+// Warn about missing env vars in non-production. In production, keep logs quiet.
+if (process.env.NODE_ENV !== "production") {
+    for (const varName of requiredVars) {
+        if (!process.env[varName]) {
+            console.warn(`⚠️ Environment variable ${varName} is not set`);
+        }
+    }
+}
 
 export default process.env;

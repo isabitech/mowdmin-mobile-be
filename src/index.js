@@ -3,16 +3,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
-import { config } from 'dotenv';
+
+import './env.js';
 
 import { connectMongoDB } from './Config/mongodb.js';
 import { connectDB } from './Config/db.js';
 import { initializeRedis } from './Config/redis.js';
 import { attachRequestMeta } from './middleware/requestMeta.js';
 import { errorHandler } from './middleware/errorHandler.js';
-
-// Load env before anything else
-config({ path: '../.env' });
 
 // Routes
 import auth from './Routes/AuthRoute.js';
