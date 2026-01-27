@@ -1,7 +1,5 @@
 import * as brevo from '@getbrevo/brevo';
-import dotenv from "dotenv";
-
-dotenv.config();
+import "../env.js";
 
 // Initialize Brevo API client
 const apiInstance = new brevo.TransactionalEmailsApi();

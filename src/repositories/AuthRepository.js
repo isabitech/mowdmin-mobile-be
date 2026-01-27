@@ -1,6 +1,4 @@
-import dotenv from 'dotenv';
-
-dotenv.config();
+import "../env.js";
 
 let AuthModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';

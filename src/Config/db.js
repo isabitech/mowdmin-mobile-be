@@ -1,5 +1,5 @@
 // Load environment configuration first
-import "./env.js";
+import "../env.js";
 import { Sequelize } from "sequelize";
 
 let sequelize = null;
