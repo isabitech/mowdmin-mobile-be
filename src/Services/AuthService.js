@@ -169,7 +169,7 @@ class AuthService {
 
     // Verify email with OTP
     static async verifyEmail(email, otp) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         if (user.emailVerified) {

@@ -2,23 +2,18 @@ import AuthService from "../Services/AuthService.js";
 import { sendSuccess, sendError } from "../core/response.js";
 
 class AuthController {
+
+
     // Register
     static async register(req, res) {
-        const meta = {
-            ip: req.ip,
-            userAgent: req.get('User-Agent')
-        };
-        const user = await AuthService.register(req.body, meta);
-        return sendSuccess(res, { message: "User registered successfully", data: user, meta, statusCode: 201 });
+
+        const user = await AuthService.register(req.body);
+        return sendSuccess(res, { message: "User registered successfully", data: user, statusCode: 201 });
     }
 
     // Login
     static async login(req, res) {
-        const meta = {
-            ip: req.ip,
-            userAgent: req.get('User-Agent')
-        };
-        const { user, token } = await AuthService.login(req.body, meta);
+        const { user, token } = await AuthService.login(req.body);
         return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
     }
 
@@ -41,7 +36,6 @@ class AuthController {
 
     // Reset Password — verify token and set new password
     static async resetPassword(req, res) {
-
         await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
         return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
 
@@ -50,13 +44,11 @@ class AuthController {
     // Verify Email with OTP
     static async verifyEmail(req, res) {
         const { email, otp } = req.body;
-
         if (!email || !otp) {
-            return error(res, "Email and verification code are required", 400);
+            return sendError(res, { message: "Email and verification code are required", statusCode: 400});
         }
-
         const result = await AuthService.verifyEmail(email, otp);
-        return success(res, result.message, result.user, 200);
+        return sendSuccess(res, { message: result.message, data: result.user,  statusCode: 200 });
     }
 
     // Resend Email Verification OTP
@@ -64,17 +56,17 @@ class AuthController {
         const { email } = req.body;
 
         if (!email) {
-            return error(res, "Email is required", 400);
+            return sendError(res, { message: "Email is required", statusCode: 400});
         }
 
         const result = await AuthService.resendEmailVerification(email);
-        return success(res, result.message, null, 200);
+        return sendSuccess(res, { message: result.message, data: null, statusCode: 200 });
     }
 
     // Change Password — for logged-in users
     static async changePassword(req, res) {
         await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
-        return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
+        return sendSuccess(res, { message: "Password changed successfully", data: {},  statusCode: 200 });
 
     }
 
@@ -83,13 +75,13 @@ class AuthController {
         const { userId } = req.params;
 
         if (!userId) {
-            return error(res, "User ID is required", 400);
+            return sendError(res, { message: "User ID is required", statusCode: 400 });
         }
 
         const profile = await AuthService.getProfile(userId);
-        
+
         if (!profile) {
-            return error(res, "Profile not found", 404);
+            return sendError(res, { message: "Profile not found", statusCode: 404 });
         }
 
         // Format image URL if exists
@@ -100,7 +92,7 @@ class AuthController {
                 : null,
         };
 
-        return success(res, "Profile retrieved successfully", profileData, 200);
+        return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
     }
 
     // Create or update user profile
@@ -122,7 +114,7 @@ class AuthController {
                 : null,
         };
 
-        return sendSuccess(res, { message: "Profile saved successfully", data: profileData });
+        return sendSuccess(res, { message: "Profile saved successfully", data: profileData, statusCode: 200 });
     }
 
     // Delete user profile
@@ -130,11 +122,11 @@ class AuthController {
         const { userId } = req.params;
 
         if (!userId) {
-            return error(res, "User ID is required", 400);
+            return sendError(res, { message: "User ID is required", statusCode: 400 });
         }
 
         await AuthService.deleteProfile(userId);
-        return success(res, "Profile deleted successfully", null, 200);
+        return sendSuccess(res, { message: "Profile deleted successfully", data: null, statusCode: 200 });
     }
 }
 

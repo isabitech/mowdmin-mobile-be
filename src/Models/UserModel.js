@@ -1,9 +1,6 @@
 import { DataTypes } from "sequelize";
 import getSequelize from "../Config/db.js";
 import bcrypt from "bcryptjs";
-import EventRegistration from "./EventRegistration.js";
-import MediaBookmark from "./MediaBookmarksModel.js";
-import Payment from "./PaymentModel.js";
 // import Order from "./OrderModel.js"; -> Moved to associations.js
 
 const User = getSequelize().define(
@@ -16,6 +13,7 @@ const User = getSequelize().define(
     language: { type: DataTypes.ENUM("EN", "FR", "DE"), defaultValue: "EN" },
     emailVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
     emailVerifiedAt: { type: DataTypes.DATE, allowNull: true },
+    isAdmin: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     tableName: "users",
@@ -37,9 +35,5 @@ const User = getSequelize().define(
   }
 );
 
-// Associations
-User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
-User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmark" })
-User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
-// User.hasMany(Order,{foreignKey:"userId", as : "order"}) -> Moved to associations.js
+// Associations are defined centrally in Models/associations.js
 export default User;

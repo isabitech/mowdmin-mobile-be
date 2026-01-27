@@ -2,6 +2,9 @@ import User from "./UserModel.js";
 import Order from "./OrderModel.js";
 import Auth from "./AuthModel.js";
 import Profile from "./ProfileModel.js";
+import EventRegistration from "./EventRegistration.js";
+import MediaBookmark from "./MediaBookmarksModel.js";
+import Payment from "./PaymentModel.js";
 
 // Define associations between models
 const setupAssociations = () => {
@@ -26,6 +29,18 @@ const setupAssociations = () => {
         as: "user",
         onDelete: "CASCADE"
     });
+
+    // User - EventRegistration Associations
+    User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
+    EventRegistration.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+    // User - MediaBookmark Associations
+    User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmarks" });
+    MediaBookmark.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+    // User - Payment Associations
+    User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
+    Payment.belongsTo(User, { foreignKey: "userId", as: "user" });
 
     console.log('✅ Model associations established');
 };

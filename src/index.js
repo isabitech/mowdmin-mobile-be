@@ -8,6 +8,7 @@ import { config } from 'dotenv';
 import { connectMongoDB } from './Config/mongodb.js';
 import { connectDB } from './Config/db.js';
 import { initializeRedis } from './Config/redis.js';
+import { attachRequestMeta } from './middleware/requestMeta.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 // Load env before anything else
@@ -43,6 +44,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
+app.use(attachRequestMeta);
 
 // API router
 const apiRouter = express.Router();

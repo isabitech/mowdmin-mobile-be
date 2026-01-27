@@ -53,7 +53,12 @@ export const protectUser = async (req, res, next) => {
   }
 };
 
-
+export const protectAdmin = async (req, res, next) => {
+  if (req.user && req.user.isAdmin) {
+    return next();
+  }
+  return next(new AppError("Admin privileges required to access this route", 403));
+}
 /**
  * Middleware to restrict access based on user roles.
  * Usage: authorize('admin', 'manager')
