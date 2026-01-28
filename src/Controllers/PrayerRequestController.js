@@ -1,6 +1,6 @@
 import PrayerRequestService from "../Services/PrayerRequestService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreatePrayerRequest, validateUpdatePrayerRequest } from "../validators/prayerRequestValidators.js";
+import { validateCreatePrayerRequest, validateUpdatePrayerRequest } from "../middleware/Validation/PrayerRequestValidation.js";
 
 class PrayerRequestController {
   async create(req, res) {

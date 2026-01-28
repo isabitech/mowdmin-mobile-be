@@ -1,6 +1,6 @@
 import MediaService from "../Services/MediaService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateMedia, validateUpdateMedia } from "../validators/mediaValidators.js";
+import { validateCreateMedia, validateUpdateMedia } from "../middleware/Validation/MediaValidation.js";
 
 class MediaController {
   async create(req, res, next) {

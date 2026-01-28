@@ -1,6 +1,5 @@
 import { body } from "express-validator";
-import Event from "../../Models/EventModel.js";
-import User from "../../Models/UserModel.js";
+import { EventRepository } from "../../repositories/EventRepository.js";
 
 /**
  * Validation rules for event registration creation.
@@ -12,7 +11,7 @@ export const validateEventRegistration = [
         .withMessage("Event ID is required")
         .bail()
         .custom(async (value) => {
-            const event = await Event.findByPk(value);
+            const event = await EventRepository.findById(value);
             if (!event) {
                 throw new Error("Invalid event ID — event not found");
             }

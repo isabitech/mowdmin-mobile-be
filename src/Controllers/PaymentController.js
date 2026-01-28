@@ -1,6 +1,6 @@
 import PaymentService from "../Services/PaymentService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreatePayment, validateUpdatePayment } from "../validators/paymentValidators.js";
+import { validateCreatePayment, validateUpdatePayment } from "../middleware/Validation/paymentValidation.js";
 
 class PaymentController {
   async create(req, res) {

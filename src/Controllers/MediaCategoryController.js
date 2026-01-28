@@ -1,6 +1,6 @@
 import MediaCategoryService from "../Services/MediaCategoryService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateMediaCategory, validateUpdateMediaCategory } from "../validators/mediaCategoryValidators.js";
+import { validateCreateMediaCategory, validateUpdateMediaCategory } from "../middleware/Validation/MediaCategoryValidation.js";
 
 class MediaCategoryController {
   async create(req, res, next) {

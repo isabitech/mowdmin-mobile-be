@@ -280,7 +280,27 @@
                 ""
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Save eventId from the response",
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  let json;",
+                  "  try { json = pm.response.json(); } catch (e) { json = null; }",
+                  "  const data = (json && json.data) ? json.data : json;",
+                  "  const eventId = (data && (data._id || data.id)) || (data && data.data && (data.data._id || data.data.id));",
+                  "  if (eventId) {",
+                  "    pm.environment.set('eventId', String(eventId));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Get All Events",

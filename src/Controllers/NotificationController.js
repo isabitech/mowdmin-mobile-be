@@ -1,6 +1,6 @@
 import NotificationService from "../Services/NotificationService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateNotification } from "../validators/notificationValidators.js";
+import { validateCreateNotification } from "../middleware/Validation/NotificationValidation.js";
 
 class NotificationController {
     async create(req, res) {

@@ -2,7 +2,7 @@ import { Router } from "express";
 import MediaController from "../Controllers/MediaController.js";
 import { protectAdmin, protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { middlewareValidateCreateMedia, middlewareValidateUpdateMedia } from "../validators/mediaValidators.js";
+import { middlewareValidateCreateMedia, middlewareValidateUpdateMedia } from "../middleware/Validation/MediaValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
 const media = Router();

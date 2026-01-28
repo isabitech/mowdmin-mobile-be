@@ -2,7 +2,7 @@ import { Router } from "express";
 import MediaCategoryController from "../Controllers/MediaCategoryController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { middlewareValidateCreateMediaCategory, middlewareValidateUpdateMediaCategory } from "../validators/mediaCategoryValidators.js";
+import { middlewareValidateCreateMediaCategory, middlewareValidateUpdateMediaCategory } from "../middleware/Validation/MediaCategoryValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
 const mediaCategory = Router();

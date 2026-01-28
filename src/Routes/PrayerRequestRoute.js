@@ -1,7 +1,7 @@
 import { Router } from "express";
 import PrayerRequestController from "../Controllers/PrayerRequestController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { middlewareValidateCreatePrayerRequest, middlewareValidateUpdatePrayerRequest } from "../validators/prayerRequestValidators.js";
+import { middlewareValidateCreatePrayerRequest, middlewareValidateUpdatePrayerRequest } from "../middleware/Validation/PrayerRequestValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
 const prayerRequest = Router();
 

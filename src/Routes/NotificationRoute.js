@@ -6,14 +6,14 @@ import { handleValidationErrors } from "../middleware/Validation/handleValidatio
 
 import { tryCatch } from "../Utils/try-catch.js";
 
-import { middlewareValidateCreateNotification } from "../validators/notificationValidators.js";
+import { createNotificationValidation } from "../middleware/Validation/NotificationValidation.js";
 
 const notification = Router();
 
 notification.post(
 	"/create",
 	protectUser,
-	middlewareValidateCreateNotification,
+	createNotificationValidation,
 	handleValidationErrors,
 	tryCatch(NotificationController.create)
 );

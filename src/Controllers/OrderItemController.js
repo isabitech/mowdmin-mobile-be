@@ -1,6 +1,6 @@
 import OrderItemService from "../Services/OrderItemService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateOrderItem, validateUpdateOrderItem } from "../validators/orderItemValidators.js";
+import { validateCreateOrderItem, validateUpdateOrderItem } from "../middleware/Validation/orderItemValidation.js";
 
 class OrderItemController {
     async create(req, res) {

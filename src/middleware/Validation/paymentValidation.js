@@ -1,24 +1,32 @@
-import { body } from "express-validator";
-import {handleValidationErrors}  from "../Validation/handleValidationErrors.js";
+import Joi from "joi";
 
-export const validatePayment = [
-  body("orderId")
-    .notEmpty().withMessage("Order ID is required")
-    .isUUID().withMessage("Invalid Order ID format"),
+export const validateCreatePayment = (payload) =>
+  Joi.object({
+    orderId: Joi.string().required(),
+    amount: Joi.number().min(0).required(),
+    method: Joi.string().required(),
+    status: Joi.string().required(),
+  })
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-  body("amount")
-    .notEmpty().withMessage("Amount is required")
-    .isFloat({ gt: 0 }).withMessage("Amount must be greater than 0"),
+export const validateUpdatePayment = (payload) =>
+  Joi.object({
+    amount: Joi.number().min(0),
+    method: Joi.string(),
+    status: Joi.string(),
+  })
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-  body("method")
-    .notEmpty().withMessage("Payment method is required")
-    .isIn(["card", "bank_transfer", "wallet", "crypto"])
-    .withMessage("Invalid payment method"),
+export const middlewareValidateCreatePayment = (req, res, next) => {
+  const { error } = validateCreatePayment(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
 
-  body("status")
-    .optional()
-    .isIn(["pending", "successful", "failed"])
-    .withMessage("Invalid payment status"),
-
-  handleValidationErrors,
-];
+export const middlewareValidateUpdatePayment = (req, res, next) => {
+  const { error } = validateUpdatePayment(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

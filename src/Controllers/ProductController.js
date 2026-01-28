@@ -1,6 +1,6 @@
 import ProductService from "../Services/ProductService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateProduct, validateUpdateProduct } from "../validators/productValidators.js";
+import { validateCreateProduct, validateUpdateProduct } from "../middleware/Validation/ProductValidation.js";
 
 class ProductController {
     async create(req, res) {

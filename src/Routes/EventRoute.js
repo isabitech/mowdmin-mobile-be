@@ -1,6 +1,6 @@
 import { Router } from "express";
 import EventController from "../Controllers/EventController.js";
-import { validateEventCreate, validateEventUpdate } from "../validators/eventValidators.js";
+import { validateEventCreate, validateEventUpdate } from "../middleware/Validation/eventValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
 import upload from "../Config/multer.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";

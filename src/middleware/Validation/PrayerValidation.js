@@ -1,6 +1,6 @@
 import { body, validationResult } from "express-validator";
-import PrayerRequest from "../../Models/PrayerRequestModel.js";
-import { error } from "../../Utils/helper.js";
+import { sendValidationError } from "../../core/response.js";
+import { PrayerRequestRepository } from "../../repositories/PrayerRequestRepository.js";
 
 export const validatePrayerCreate = [
   body("prayer_request_id")
@@ -8,14 +8,14 @@ export const validatePrayerCreate = [
     .withMessage("Prayer request ID is required")
     .bail()
     .custom(async (value) => {
-      const request = await PrayerRequest.findByPk(value);
+      const request = await PrayerRequestRepository.findById(value);
       if (!request) throw new Error("Prayer request not found");
       return true;
     }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return error(res, "Validation Error", errors.array());
+      return sendValidationError(res, { statusCode: 400, errors: errors.array() });
     }
     next();
   },

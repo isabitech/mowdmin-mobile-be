@@ -1,7 +1,7 @@
 import { Router } from "express";
 import ProductController from "../Controllers/ProductController.js";
 import { protectAdmin, protectUser } from "../middleware/authMiddleware.js";
-import { middlewareValidateCreateProduct, middlewareValidateUpdateProduct } from "../validators/productValidators.js";
+import { middlewareValidateCreateProduct, middlewareValidateUpdateProduct } from "../middleware/Validation/ProductValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
 const product = Router();
