@@ -1,6 +1,6 @@
 import MediaBookmarkService from "../Services/MediaBookmarkService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateMediaBookmark, validateUpdateMediaBookmark } from "../validators/mediaBookmarkValidators.js";
+import { validateCreateMediaBookmark, validateUpdateMediaBookmark } from "../middleware/Validation/MediaBookmarkValidation.js";
 
 class MediaBookmarkController {
     async create(req, res, next) {

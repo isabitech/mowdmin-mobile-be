@@ -1,16 +1,14 @@
 
-import { UserRepository } from "../repositories/UserRepository.js";
 import { EventRepository } from "../repositories/EventRepository.js";
 
 class EventRegistrationService {
     async createEventReg(data) {
         const registrationData = {
             eventId: data.eventId,
-            userId: data.userId,
-            ticketCode: data.ticketCode ?? null,
             status: "registered",
+            userId: data.userId,
         };
-        return await EventRepository.create(registrationData);
+        return await EventRepository.createRegistration(registrationData);
     }
 
     async getAllReg() {

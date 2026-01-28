@@ -1,22 +1,33 @@
-import { body } from "express-validator";
-import { handleValidationErrors } from "./handleValidationErrors.js";
+import Joi from "joi";
 
-export const validateOrderItem = [
-    body("orderId")
-        .notEmpty().withMessage("Order ID is required")
-        .isUUID().withMessage("Invalid Order ID format"),
+export const validateCreateOrderItem = (payload) =>
+    Joi.object({
+        orderId: Joi.string().required(),
+        productId: Joi.string().required(),
+        quantity: Joi.number().integer().min(1).required(),
+        unit_price: Joi.number().min(0),
+        subtotal: Joi.number().min(0),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
 
-    body("productId")
-        .notEmpty().withMessage("Product ID is required")
-        .isUUID().withMessage("Invalid Product ID format"),
+export const validateUpdateOrderItem = (payload) =>
+    Joi.object({
+        quantity: Joi.number().integer().min(1),
+        unit_price: Joi.number().min(0),
+        subtotal: Joi.number().min(0),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
 
-    body("quantity")
-        .notEmpty().withMessage("Quantity is required")
-        .isInt({ gt: 0 }).withMessage("Quantity must be a positive integer"),
+export const middlewareValidateCreateOrderItem = (req, res, next) => {
+    const { error } = validateCreateOrderItem(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};
 
-    body("price")
-        .notEmpty().withMessage("Price is required")
-        .isFloat({ gt: 0 }).withMessage("Price must be greater than 0"),
-
-    handleValidationErrors,
-];
+export const middlewareValidateUpdateOrderItem = (req, res, next) => {
+    const { error } = validateUpdateOrderItem(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};

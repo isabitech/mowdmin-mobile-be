@@ -1,42 +1,45 @@
-import { body, param, validationResult } from "express-validator";
-import Media from "../../Models/MediaModel.js";
-import { sendValidationError } from "../../core/response.js";
+import Joi from "joi";
 
-// ---------------- CREATE MEDIA VALIDATION ----------------
-export const validateMediaCreate = [
-    body("title").notEmpty().withMessage("Title is required"),
-    body("type").isIn(["image", "video", "audio", "document"]).withMessage("Invalid media type"),
-    body("url").notEmpty().isURL().withMessage("Valid media URL is required"),
-    body("categoryId").optional().isUUID().withMessage("Invalid category ID format"),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
-        }
-        next();
-    },
-];
+export const validateCreateMedia = (payload) =>
+    Joi.object({
+        title: Joi.string().min(2).max(255).required(),
+        description: Joi.string().allow("", null),
+        category_id: Joi.string().required(),
+        type: Joi.string().valid("audio", "video", "text").required(),
+        media_url: Joi.string().uri().allow("", null),
+        author: Joi.string().allow("", null),
+        duration: Joi.string().allow("", null),
+        is_downloadable: Joi.boolean(),
+        language: Joi.string().allow("", null),
+        thumbnail: Joi.string().uri().allow("", null),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
 
-// ---------------- UPDATE MEDIA VALIDATION ----------------
-export const validateMediaUpdate = [
-    param("id")
-        .notEmpty()
-        .withMessage("Media ID is required")
-        .bail()
-        .custom(async (value) => {
-            const media = await Media.findByPk(value);
-            if (!media) throw new Error("Media not found");
-            return true;
-        }),
-    body("title").optional().isString().withMessage("Title must be a string"),
-    body("type").optional().isIn(["image", "video", "audio", "document"]).withMessage("Invalid media type"),
-    body("url").optional().isURL().withMessage("URL must be valid"),
-    body("categoryId").optional().isUUID().withMessage("Invalid category ID format"),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
-        }
-        next();
-    },
-];
+export const validateUpdateMedia = (payload) =>
+    Joi.object({
+        title: Joi.string().min(2).max(255),
+        description: Joi.string().allow("", null),
+        category_id: Joi.string(),
+        type: Joi.string().valid("audio", "video", "text"),
+        media_url: Joi.string().uri().allow("", null),
+        author: Joi.string().allow("", null),
+        duration: Joi.string().allow("", null),
+        is_downloadable: Joi.boolean(),
+        language: Joi.string().allow("", null),
+        thumbnail: Joi.string().uri().allow("", null),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
+
+export const middlewareValidateCreateMedia = (req, res, next) => {
+    const { error } = validateCreateMedia(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};
+
+export const middlewareValidateUpdateMedia = (req, res, next) => {
+    const { error } = validateUpdateMedia(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};

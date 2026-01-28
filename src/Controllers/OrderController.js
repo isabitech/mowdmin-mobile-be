@@ -1,7 +1,7 @@
 
 import OrderService from "../Services/OrderService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { validateCreateOrder, validateUpdateOrder } from "../validators/orderValidators.js";
+import { validateCreateOrder, validateUpdateOrder } from "../middleware/Validation/orderValidation.js";
 
 class OrderController {
   async create(req, res) {

@@ -4,9 +4,10 @@ import { sendSuccess, sendError } from "../core/response.js";
 class EventRegistrationController {
 
     static async create(req, res) {
-        const { eventId, ticketCode } = req.body;
+        const { eventId } = req.body;
+        console.log("Creating registration for eventId:", eventId);
         const userId = req.user.id;
-        const data = { userId, eventId, ticketCode };
+        const data = { userId, eventId};
         const registration = await EventRegistrationService.createEventReg(data);
         return sendSuccess(res, { message: "Registration created successfully", data: registration });
     }

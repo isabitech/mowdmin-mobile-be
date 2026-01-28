@@ -1,7 +1,7 @@
 import { Router } from "express";
 import PaymentController from "../Controllers/PaymentController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { middlewareValidateCreatePayment, middlewareValidateUpdatePayment } from "../validators/paymentValidators.js";
+import { middlewareValidateCreatePayment, middlewareValidateUpdatePayment } from "../middleware/Validation/paymentValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 import { tryCatch } from "../Utils/try-catch.js";
 

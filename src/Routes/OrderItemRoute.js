@@ -1,7 +1,7 @@
 import { Router } from "express";
 import OrderItemController from "../Controllers/OrderItemController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
-import { middlewareValidateCreateOrderItem, middlewareValidateUpdateOrderItem } from "../validators/orderItemValidators.js";
+import { middlewareValidateCreateOrderItem, middlewareValidateUpdateOrderItem } from "../middleware/Validation/orderItemValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
 
 const orderItem = Router();

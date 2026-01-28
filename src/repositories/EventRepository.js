@@ -1,4 +1,3 @@
-
 let EventModel;
 let EventRegistrationModel;
 
@@ -57,6 +56,18 @@ export const EventRepository = {
       return !!result;
     } else {
       return EventModel.destroy({ where: { id }, ...options });
+    }
+  },
+  async createRegistration(payload) {
+    const { EventRegistrationModel } = await this.getModels();
+    return EventRegistrationModel.create(payload);
+  },
+  async registrationfindAll(filter = {}) {
+    const { EventRegistrationModel } = await this.getModels();
+    if (isMongo) {
+      return EventRegistrationModel.find(filter);
+    } else {
+      return EventRegistrationModel.findAll({ where: filter });
     }
   },
 };

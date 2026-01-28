@@ -1,19 +1,43 @@
-import { body } from "express-validator";
-import { handleValidationErrors } from "../Validation/handleValidationErrors.js";
+import Joi from "joi";
 
-export const validateOrder = [
-    body("userId")
-        .notEmpty().withMessage("User ID is required")
-        .isUUID().withMessage("Invalid User ID format"),
+export const validateCreateOrder = (payload) =>
+  Joi.object({
+    userId: Joi.string().required(),
+    items: Joi.array()
+      .items(
+        Joi.object({
+          productId: Joi.string().required(),
+          quantity: Joi.number().integer().min(1).required(),
+        })
+      )
+      .min(1)
+      .required(),
+    totalAmount: Joi.number().min(0).required(),
+  })
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-    body("totalAmount")
-        .notEmpty().withMessage("Total amount is required")
-        .isFloat({ gt: 0 }).withMessage("Total amount must be greater than 0"),
+export const validateUpdateOrder = (payload) =>
+  Joi.object({
+    userId: Joi.forbidden(),
+    totalAmount: Joi.number().min(0),
+    status: Joi.string().valid("pending", "paid", "cancelled", "shipped", "completed"),
+    paymentMethod: Joi.string().allow(null, ""),
+    shippingAddress: Joi.string().allow(null, ""),
+    notes: Joi.string().allow(null, ""),
+  })
+    .min(1)
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-    body("status")
-        .optional()
-        .isIn(["pending", "completed", "cancelled"])
-        .withMessage("Invalid order status"),
+export const middlewareValidateCreateOrder = (req, res, next) => {
+  const { error } = validateCreateOrder(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
 
-    handleValidationErrors,
-];
+export const middlewareValidateUpdateOrder = (req, res, next) => {
+  const { error } = validateUpdateOrder(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};

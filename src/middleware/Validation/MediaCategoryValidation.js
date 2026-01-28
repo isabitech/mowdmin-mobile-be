@@ -1,38 +1,29 @@
-import { body, param, validationResult } from "express-validator";
-import MediaCategory from "../../Models/MediaCategory.js";
-import { sendValidationError } from "../../core/response.js";
+import Joi from "joi";
 
-// ---------------- CREATE MEDIA CATEGORY VALIDATION ----------------
-export const validateMediaCategoryCreate = [
-    body("name").notEmpty().withMessage("Category name is required"),
-    body("description").optional().isString().withMessage("Description must be a string"),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
-        }
-        next();
-    },
-];
+export const validateCreateMediaCategory = (payload) =>
+    Joi.object({
+        name: Joi.string().min(2).max(255).required(),
+        description: Joi.string().allow("", null),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
 
-// ---------------- UPDATE MEDIA CATEGORY VALIDATION ----------------
-export const validateMediaCategoryUpdate = [
-    param("id")
-        .notEmpty()
-        .withMessage("Category ID is required")
-        .bail()
-        .custom(async (value) => {
-            const category = await MediaCategory.findByPk(value);
-            if (!category) throw new Error("Category not found");
-            return true;
-        }),
-    body("name").optional().isString().withMessage("Name must be a string"),
-    body("description").optional().isString().withMessage("Description must be a string"),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return sendValidationError(res, { statusCode: 400, errors: errors.array() });
-        }
-        next();
-    },
-];
+export const validateUpdateMediaCategory = (payload) =>
+    Joi.object({
+        name: Joi.string().min(2).max(255),
+        description: Joi.string().allow("", null),
+    })
+        .prefs({ stripUnknown: true })
+        .validate(payload);
+
+export const middlewareValidateCreateMediaCategory = (req, res, next) => {
+    const { error } = validateCreateMediaCategory(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};
+
+export const middlewareValidateUpdateMediaCategory = (req, res, next) => {
+    const { error } = validateUpdateMediaCategory(req.body);
+    if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+    next();
+};

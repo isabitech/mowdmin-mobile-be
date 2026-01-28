@@ -1,14 +1,9 @@
 import EventService from "../Services/EventService.js";
 import { sendSuccess, sendError } from "../core/response.js";
-import { joiValidateCreateEvent, joiValidateUpdateEvent } from "../validators/eventValidators.js";
 
 class EventController {
   async create(req, res, next) {
-    const { error, value } = joiValidateCreateEvent(req.body);
-    if (error) {
-      return sendError(res, { message: error.details[0].message, statusCode: 400 });
-    }
-
+    
     const data = { ...value };
     if (req.file) data.image = `/uploads/${req.file.filename}`;
     const event = await EventService.createEvent(data);
@@ -24,10 +19,7 @@ class EventController {
 
 
   async update(req, res, next) {
-    const { error, value } = joiValidateUpdateEvent(req.body);
-    if (error) {
-      return sendError(res, { message: error.details[0].message, statusCode: 400 });
-    }
+  
 
     let updateData = { ...value };
     if (req.file) updateData.image = `/uploads/${req.file.filename}`;

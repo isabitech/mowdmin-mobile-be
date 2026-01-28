@@ -2,15 +2,15 @@ import { Router } from "express";
 import MediaBookmarkController from "../Controllers/MediaBookmarkController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { middlewareValidateCreateMediaBookmark, middlewareValidateUpdateMediaBookmark } from "../validators/mediaBookmarkValidators.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
+import { validateMediaBookmarkCreate, validateMediaBookmarkUpdate } from "../middleware/Validation/MediaBookmarkValidation.js";
 
 const mediaBookmark = Router();
 
 mediaBookmark.post(
 	"/create",
 	protectUser,
-	middlewareValidateCreateMediaBookmark,
+	validateMediaBookmarkCreate,
 	handleValidationErrors,
 	tryCatch(MediaBookmarkController.create)
 );
@@ -20,7 +20,7 @@ mediaBookmark.get("/:id", protectUser, tryCatch(MediaBookmarkController.getOne))
 mediaBookmark.put(
 	"/:id",
 	protectUser,
-	middlewareValidateUpdateMediaBookmark,
+	validateMediaBookmarkUpdate,
 	handleValidationErrors,
 	tryCatch(MediaBookmarkController.update)
 );

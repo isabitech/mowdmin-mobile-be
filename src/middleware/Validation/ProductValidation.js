@@ -1,41 +1,40 @@
-import { body, param, validationResult } from "express-validator";
+import Joi from "joi";
 
-import { error } from "../../Utils/helper.js";
+export const validateCreateProduct = (payload) =>
+  Joi.object({
+    name: Joi.string().min(2).max(255).required(),
+    price: Joi.number().min(0).required(),
+    description: Joi.string().allow("", null),
+    categoryId: Joi.string().required(),
+  })
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-export const validateProductCreate = [
-  body("name").notEmpty().withMessage("Name is required"),
-  body("price")
-    .notEmpty()
-    .withMessage("Price is required")
-    .isNumeric()
-    .withMessage("Price must be a number"),
-  body("description").optional().isString().withMessage("Description must be a string"),
-  body("categoryId")
-    .notEmpty()
-    .withMessage("Category ID is required")
-    .isNumeric()
-    .withMessage("Category ID must be a number"),
+export const validateUpdateProduct = (payload) =>
+  Joi.object({
+    name: Joi.string().min(2).max(255),
+    price: Joi.number().min(0),
+    description: Joi.string().allow("", null),
 
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return error(res, "Validation failed", errors.array());
-    }
-    next();
-  },
-];
+    // ProductModel uses `category` not `categoryId`, but keep `categoryId` for backward compatibility
+    categoryId: Joi.string(),
+    category: Joi.string().allow("", null),
 
-export const validateProductUpdate = [
-  body("name").optional().isString().withMessage("Name must be a string"),
-  body("price").optional().isNumeric().withMessage("Price must be a number"),
-  body("description").optional().isString().withMessage("Description must be a string"),
-  body("categoryId").optional().isNumeric().withMessage("Category ID must be a number"),
+    imageUrl: Joi.string().uri().allow("", null),
+    stock: Joi.number().integer().min(0),
+  })
+    .min(1)
+    .prefs({ stripUnknown: true })
+    .validate(payload);
 
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return errorResponse(res, "Validation failed", errors.array());
-    }
-    next();
-  },
-];
+export const middlewareValidateCreateProduct = (req, res, next) => {
+  const { error } = validateCreateProduct(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
+
+export const middlewareValidateUpdateProduct = (req, res, next) => {
+  const { error } = validateUpdateProduct(req.body);
+  if (error) return res.status(400).json({ status: "error", message: error.details[0].message });
+  next();
+};
