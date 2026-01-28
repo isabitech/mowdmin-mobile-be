@@ -13,7 +13,7 @@ class ProductController {
         return sendSuccess(res, { message: "Product Created Successfully", data: product, statusCode: 201 });
     }
     async getAll(req, res) {
-        const products = await ProductService.getAllProducts();
+        const products = await ProductService.getAll();
         return sendSuccess(res, { message: "All Products Fetched Successfully", data: products });
     }
     async getOne(req, res) {
