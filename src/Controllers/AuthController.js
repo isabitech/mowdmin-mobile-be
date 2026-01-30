@@ -13,7 +13,12 @@ class AuthController {
 
     // Login
     static async login(req, res) {
-        const { user, token } = await AuthService.login(req.body);
+        const { email, password } = req.body;
+        const meta = {
+            ip: req.ip,
+            userAgent: req.headers['user-agent']
+        };
+        const { user, token } = await AuthService.login(email, password, meta);
         return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
     }
 
@@ -45,10 +50,10 @@ class AuthController {
     static async verifyEmail(req, res) {
         const { email, otp } = req.body;
         if (!email || !otp) {
-            return sendError(res, { message: "Email and verification code are required", statusCode: 400});
+            return sendError(res, { message: "Email and verification code are required", statusCode: 400 });
         }
         const result = await AuthService.verifyEmail(email, otp);
-        return sendSuccess(res, { message: result.message, data: result.user,  statusCode: 200 });
+        return sendSuccess(res, { message: result.message, data: result.user, statusCode: 200 });
     }
 
     // Resend Email Verification OTP
@@ -56,7 +61,7 @@ class AuthController {
         const { email } = req.body;
 
         if (!email) {
-            return sendError(res, { message: "Email is required", statusCode: 400});
+            return sendError(res, { message: "Email is required", statusCode: 400 });
         }
 
         const result = await AuthService.resendEmailVerification(email);
@@ -66,7 +71,7 @@ class AuthController {
     // Change Password — for logged-in users
     static async changePassword(req, res) {
         await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
-        return sendSuccess(res, { message: "Password changed successfully", data: {},  statusCode: 200 });
+        return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
 
     }
 
@@ -88,7 +93,7 @@ class AuthController {
         const profileData = {
             ...profile.toJSON(),
             photoUrl: profile.photoUrl
-                ? `${req.protocol}://${req.get("host")}${profile.photoUrl}`
+                ? `${process.env.BASE_URL}${profile.photoUrl}`
                 : null,
         };
 
@@ -110,7 +115,7 @@ class AuthController {
         const profileData = {
             ...profile.toJSON(),
             photoUrl: profile.photoUrl
-                ? `${req.protocol}://${req.get("host")}${profile.photoUrl}`
+                ? `${process.env.BASE_URL}${profile.photoUrl}`
                 : null,
         };
 
@@ -127,6 +132,55 @@ class AuthController {
 
         await AuthService.deleteProfile(userId);
         return sendSuccess(res, { message: "Profile deleted successfully", data: null, statusCode: 200 });
+    }
+
+    // LIST all users (Admin Only)
+    static async getAllUsers(req, res) {
+        const users = await AuthService.getAllUsers();
+        return sendSuccess(res, { message: "Users retrieved successfully", data: users, statusCode: 200 });
+    }
+
+    // TOGGLE admin status (Admin Only)
+    static async toggleAdminStatus(req, res) {
+        const { userId } = req.params;
+        const result = await AuthService.toggleAdminStatus(userId);
+        return sendSuccess(res, { message: `Admin status toggled successfully`, data: result, statusCode: 200 });
+    }
+
+    // Social Authentication - Google
+    static async googleAuth(req, res) {
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            throw new AppError('Google ID token is required', 400);
+        }
+
+        const SocialAuthService = (await import('../Services/SocialAuthService.js')).default;
+        const result = await SocialAuthService.authenticateWithGoogle(idToken);
+
+        return sendSuccess(res, {
+            message: 'Google authentication successful',
+            data: result,
+            statusCode: 200
+        });
+    }
+
+    // Social Authentication - Apple
+    static async appleAuth(req, res) {
+        const { identityToken, user } = req.body;
+
+        if (!identityToken) {
+            throw new AppError('Apple identity token is required', 400);
+        }
+
+        const SocialAuthService = (await import('../Services/SocialAuthService.js')).default;
+        const result = await SocialAuthService.authenticateWithApple(identityToken, user);
+
+        return sendSuccess(res, {
+            message: 'Apple authentication successful',
+            data: result,
+            statusCode: 200
+        });
     }
 }
 

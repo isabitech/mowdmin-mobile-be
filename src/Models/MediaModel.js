@@ -23,7 +23,9 @@ const Media = getSequelize().define("Media", {
   duration: DataTypes.STRING,
   is_downloadable: DataTypes.BOOLEAN,
   language: DataTypes.STRING,
-  thumbnail: DataTypes.STRING,
+  thumbnail: {
+    type: DataTypes.STRING,
+  },
 }, {
   tableName: "media",
   timestamps: true,

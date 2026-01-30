@@ -33,6 +33,12 @@ const Payment = getSequelize().define(
     method: {
       type: DataTypes.STRING,
     },
+    webhookEventId: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: true,
+      index: true,
+    },
   },
   {
     tableName: "payments",

@@ -24,6 +24,11 @@ jest.mock('nodemailer', () => ({
     }),
 }));
 
+jest.mock('../middleware/authMiddleware.js', () => ({
+    protectUser: (req, res, next) => next(),
+    protectAdmin: (req, res, next) => next(),
+}));
+
 import request from 'supertest';
 import express from 'express';
 import donationRoutes from '../Routes/DonationRoute.js';

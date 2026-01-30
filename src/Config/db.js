@@ -7,13 +7,9 @@ let sequelize = null;
 // Create sequelize instance only when needed and after env vars are loaded
 function getSequelize() {
   if (!sequelize) {
-    console.log('🔧 Creating Sequelize instance with environment variables:');
-    console.log('DB_HOST:', process.env.DB_HOST);
-    console.log('DB_PORT:', process.env.DB_PORT);
-    console.log('DB_DATABASE:', process.env.DB_DATABASE);
-    console.log('DB_USERNAME:', process.env.DB_USERNAME);
-    console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '***hidden***' : 'NOT SET');
-    
+    console.log('🔧 Creating Sequelize instance');
+    // Removed credential logging for security
+
     sequelize = new Sequelize({
       dialect: 'postgres',
       host: process.env.DB_HOST,
@@ -28,10 +24,10 @@ function getSequelize() {
         }
       },
       pool: {
-        max: 5,
-        min: 0,
+        max: process.env.NODE_ENV === 'production' ? 20 : 5,
+        min: 2,
         acquire: 30000,
-        idle: 10000,
+        idle: 10000
       },
       logging: process.env.NODE_ENV === "development" ? console.log : false
     });
@@ -43,7 +39,7 @@ export const connectDB = async () => {
   try {
     console.log("🔄 Attempting to connect to database...");
     const seq = getSequelize();
-    
+
     await seq.authenticate();
     console.log("✅ Database connection established successfully.");
 

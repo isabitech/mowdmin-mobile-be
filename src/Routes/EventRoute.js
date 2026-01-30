@@ -31,7 +31,7 @@ Event.post(
 );
 Event.get("/", protectUser, tryCatch(EventController.getAll));
 Event.get("/:id", protectUser, tryCatch(EventController.getOne));
-Event.put("/:id", protectUser, upload.single("image"), validateEventUpdate, handleValidationErrors, tryCatch(EventController.update));
-Event.delete("/:id", protectUser, tryCatch(EventController.delete));
+Event.put("/:id", protectUser, protectAdmin, upload.single("image"), validateEventUpdate, handleValidationErrors, tryCatch(EventController.update));
+Event.delete("/:id", protectUser, protectAdmin, tryCatch(EventController.delete));
 
 export default Event

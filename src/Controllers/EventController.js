@@ -3,14 +3,13 @@ import { sendSuccess, sendError } from "../core/response.js";
 
 class EventController {
   async create(req, res, next) {
-    
-    const data = { ...value };
+    const data = { ...req.body };
     if (req.file) data.image = `/uploads/${req.file.filename}`;
     const event = await EventService.createEvent(data);
     const eventJson = event.toJSON ? event.toJSON() : event;
     const eventData = {
       ...eventJson,
-      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
+      image: event.image ? `${process.env.BASE_URL}${event.image}` : null,
     };
     return sendSuccess(res, { message: "Event Created Successfully", data: eventData, statusCode: 201 });
   }
@@ -19,9 +18,7 @@ class EventController {
 
 
   async update(req, res, next) {
-  
-
-    let updateData = { ...value };
+    let updateData = { ...req.body };
     if (req.file) updateData.image = `/uploads/${req.file.filename}`;
     const event = await EventService.updateEvent(req.params.id, updateData);
     if (!event) {
@@ -30,7 +27,7 @@ class EventController {
     const eventJson = event.toJSON ? event.toJSON() : event;
     const eventData = {
       ...eventJson,
-      image: event.image ? `${req.protocol}://${req.get("host")}${event.image}` : null,
+      image: event.image ? `${process.env.BASE_URL}${event.image}` : null,
     };
     return sendSuccess(res, { message: "Event Updated Successfully", data: eventData });
   }

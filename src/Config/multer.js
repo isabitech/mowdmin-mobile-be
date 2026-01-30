@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 
 // Determine upload directory
 const __dirname = path.resolve();
@@ -17,8 +18,16 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    // Sanitize extension - only allow whitelisted extensions
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    if (!allowedExts.includes(ext)) {
+      return cb(new Error('Invalid file extension'), false);
+    }
+
+    // Use crypto for secure random filename
+    const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
     cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
   },
 });

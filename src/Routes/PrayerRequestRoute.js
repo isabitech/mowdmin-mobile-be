@@ -1,6 +1,7 @@
 import { Router } from "express";
 import PrayerRequestController from "../Controllers/PrayerRequestController.js";
 import { protectUser } from "../middleware/authMiddleware.js";
+import { checkOwnership } from "../middleware/ownershipMiddleware.js";
 import { middlewareValidateCreatePrayerRequest, middlewareValidateUpdatePrayerRequest } from "../middleware/Validation/PrayerRequestValidation.js";
 import { tryCatch } from "../Utils/try-catch.js";
 const prayerRequest = Router();
@@ -18,9 +19,10 @@ prayerRequest.get("/:id", protectUser, tryCatch(PrayerRequestController.getSingl
 prayerRequest.put(
 	"/:id",
 	protectUser,
+	checkOwnership('PrayerRequest'),
 	middlewareValidateUpdatePrayerRequest,
 	tryCatch(PrayerRequestController.update)
 );
-prayerRequest.delete("/:id", protectUser, tryCatch(PrayerRequestController.delete));
+prayerRequest.delete("/:id", protectUser, checkOwnership('PrayerRequest'), tryCatch(PrayerRequestController.delete));
 
 export default prayerRequest;

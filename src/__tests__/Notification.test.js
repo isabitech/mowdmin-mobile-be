@@ -35,7 +35,7 @@ jest.mock('../middleware/authMiddleware.js');
 
 const app = express();
 app.use(express.json());
-app.use('/api/v1/notification', notificationRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 describe('Notification Routes', () => {
     beforeEach(() => {
@@ -48,7 +48,7 @@ describe('Notification Routes', () => {
 
     it('should fetch user notifications successfully', async () => {
         NotificationService.getUserNotifications.mockResolvedValue([]);
-        const response = await request(app).get('/api/v1/notification');
+        const response = await request(app).get('/api/v1/notifications');
         expect(response.status).toBe(200);
     });
 });

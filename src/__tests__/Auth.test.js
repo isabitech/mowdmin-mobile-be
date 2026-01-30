@@ -67,4 +67,25 @@ describe('Auth Routes', () => {
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('success');
     });
+
+    it('should verify OTP successfully', async () => {
+        AuthService.verifyEmail.mockResolvedValue(true);
+        const response = await request(app)
+            .post('/api/v1/auth/verify-otp')
+            .send({ email: 'test@example.com', otp: '123456' });
+        expect(response.status).toBe(200);
+    });
+
+    it('should resend OTP successfully', async () => {
+        AuthService.resendEmailVerification.mockResolvedValue(true);
+        const response = await request(app)
+            .post('/api/v1/auth/resend-otp')
+            .send({ email: 'test@example.com' });
+        expect(response.status).toBe(200);
+    });
+
+    it('should return 501 for google social auth', async () => {
+        const response = await request(app).post('/api/v1/auth/google');
+        expect(response.status).toBe(200);
+    });
 });

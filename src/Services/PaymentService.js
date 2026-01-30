@@ -69,11 +69,31 @@ class PaymentService {
     }
 
     // Mark payment as successful
-    async markAsSuccessful(reference) {
+    async markAsSuccessful(reference, webhookEventId = null) {
+        // Check for duplicate webhook processing (idempotency)
+        if (webhookEventId) {
+            const existingPayment = await PaymentRepository.findOne({
+                where: { webhookEventId }
+            });
+            if (existingPayment) {
+                console.log(`⚠️ Duplicate webhook ${webhookEventId} ignored - payment already processed`);
+                return existingPayment;
+            }
+        }
+
         const payment = await PaymentRepository.findOne({ where: { reference } });
         if (!payment) return null;
 
+        // Idempotency: if already successful, return without changes
+        if (payment.status === "successful") {
+            console.log(`⚠️ Payment ${reference} already marked successful`);
+            return payment;
+        }
+
         payment.status = "successful";
+        if (webhookEventId) {
+            payment.webhookEventId = webhookEventId;
+        }
         await payment.save();
 
         // Optionally update related order
@@ -83,6 +103,7 @@ class PaymentService {
             await order.save();
         }
 
+        console.log(`✅ Payment ${reference} marked successful`);
         return payment;
     }
 

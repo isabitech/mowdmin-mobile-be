@@ -31,7 +31,10 @@ import MediaService from '../Services/MediaService.js';
 import { protectUser } from '../middleware/authMiddleware.js';
 
 jest.mock('../Services/MediaService.js');
-jest.mock('../middleware/authMiddleware.js');
+jest.mock('../middleware/authMiddleware.js', () => ({
+    protectUser: (req, res, next) => next(),
+    protectAdmin: (req, res, next) => next(),
+}));
 
 const app = express();
 app.use(express.json());
@@ -40,7 +43,6 @@ app.use('/api/v1/media', mediaRoutes);
 describe('Media Routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        protectUser.mockImplementation((req, res, next) => { next(); });
     });
 
     it('should create media successfully', async () => {

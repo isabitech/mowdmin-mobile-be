@@ -31,7 +31,35 @@ import ProductService from '../Services/ProductService.js';
 import { protectUser } from '../middleware/authMiddleware.js';
 
 jest.mock('../Services/ProductService.js');
-jest.mock('../middleware/authMiddleware.js');
+jest.mock('../middleware/authMiddleware.js', () => ({
+    protectUser: jest.fn((req, res, next) => {
+        req.user = { id: 1 };
+        next();
+    }),
+    protectAdmin: jest.fn((req, res, next) => next()),
+}));
+
+jest.mock('../Config/db.js', () => ({
+    __esModule: true,
+    default: jest.fn().mockReturnValue({
+        define: jest.fn().mockReturnValue({
+            hasMany: jest.fn(),
+            belongsTo: jest.fn(),
+            hasOne: jest.fn(),
+        }),
+    }),
+    connectDB: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock('../Config/mongodb.js', () => ({
+    connectMongoDB: jest.fn().mockResolvedValue(true),
+}));
+
+jest.mock('../Config/redis.js', () => ({
+    initializeRedis: jest.fn().mockResolvedValue(true),
+    getRedisClient: jest.fn().mockResolvedValue({}),
+    isRedisAvailable: jest.fn().mockReturnValue(true),
+}));
 
 const app = express();
 app.use(express.json());
@@ -40,7 +68,6 @@ app.use('/api/v1/product', productRoutes);
 describe('Product Routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        protectUser.mockImplementation((req, res, next) => { next(); });
     });
 
     it('should create a product successfully', async () => {

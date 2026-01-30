@@ -80,7 +80,7 @@ export const validateResetPassword = [
     .isEmail()
     .withMessage("Invalid email")
     .custom(async (email) => {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserRepository.findByEmail(email);
       if (!user) throw new Error("Email not found");
     }),
   body("otp")
@@ -102,6 +102,31 @@ export const validateResetPassword = [
     .custom((value, { req }) => {
       if (value !== req.body.newPassword) {
         throw new Error("Password confirmation does not match");
+      }
+      return true;
+    }),
+];
+
+// ✅ Change password validation
+export const validateChangePassword = [
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email")
+    .custom(async (email) => {
+      const user = await UserRepository.findByEmail(email);
+      if (!user) throw new Error("User not found");
+    }),
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required"),
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters long")
+    .custom((value) => {
+      if (!validatePassword(value)) {
+        throw new Error(
+          "Password must include uppercase, lowercase, number, and special character"
+        );
       }
       return true;
     }),
