@@ -52,7 +52,33 @@ export const UserRepository = {
 
   async create(payload) {
     const { UserModel } = await this.getModels();
-
     return UserModel.create(payload);
+  },
+
+  async findAll(filters = {}) {
+    const { UserModel } = await this.getModels();
+    if (isMongo) {
+      return UserModel.find(filters);
+    }
+    return UserModel.findAll({ where: filters });
+  },
+
+  async update(id, data) {
+    const { UserModel } = await this.getModels();
+    if (isMongo) {
+      return UserModel.findByIdAndUpdate(id, data, { new: true });
+    }
+    const user = await UserModel.findByPk(id);
+    if (user) {
+      return user.update(data);
+    }
+    return null;
+  },
+
+  async findOne(where) {
+    const { UserModel } = await this.getModels();
+    return isMongo
+      ? UserModel.findOne(where)
+      : UserModel.findOne({ where });
   }
 };

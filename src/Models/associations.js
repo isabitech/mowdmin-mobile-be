@@ -5,6 +5,12 @@ import Profile from "./ProfileModel.js";
 import EventRegistration from "./EventRegistration.js";
 import MediaBookmark from "./MediaBookmarksModel.js";
 import Payment from "./PaymentModel.js";
+import Media from "./MediaModel.js";
+import BibleStory from "./BibleStoryModel.js";
+import BibleVerse from "./BibleVerseModel.js";
+import Ministry from "./MinistryModel.js";
+import BibleStoryMedia from "./BibleStoryMediaModel.js";
+import { Group, GroupMember, GroupMessage } from "./GroupModels.js";
 
 // Define associations between models
 const setupAssociations = () => {
@@ -41,6 +47,29 @@ const setupAssociations = () => {
     // User - Payment Associations
     User.hasMany(Payment, { foreignKey: "userId", as: "payments" });
     Payment.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+    // Group Associations
+    Group.belongsTo(User, { foreignKey: "creatorId", as: "creator" });
+    Group.hasMany(GroupMember, { foreignKey: "groupId", as: "members" });
+    GroupMember.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+    GroupMember.belongsTo(User, { foreignKey: "userId", as: "user" });
+    Group.hasMany(GroupMessage, { foreignKey: "groupId", as: "messages" });
+    GroupMessage.belongsTo(Group, { foreignKey: "groupId", as: "group" });
+    GroupMessage.belongsTo(User, { foreignKey: "senderId", as: "sender" });
+
+    // BibleStory - Media Associations (Many-to-Many via Join Table)
+    BibleStory.belongsToMany(Media, {
+        through: BibleStoryMedia,
+        foreignKey: "bible_story_id",
+        otherKey: "media_id",
+        as: "media"
+    });
+    Media.belongsToMany(BibleStory, {
+        through: BibleStoryMedia,
+        foreignKey: "media_id",
+        otherKey: "bible_story_id",
+        as: "stories"
+    });
 
     console.log('✅ Model associations established');
 };

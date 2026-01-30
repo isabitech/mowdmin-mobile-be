@@ -76,14 +76,22 @@ class AuthService {
     }
 
     // Login user
-    static async login(credentials, meta = {}) {
-        const { email, password } = credentials;
-
+    static async login(email, password, meta = {}) {
         const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("Invalid email", 401);
+        if (!user) throw new AppError("Invalid email or password", 401);
 
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) throw new AppError("Invalid password", 401);
+        // Check if user has a password (not a social-only account)
+        if (!user.password || user.password === null) {
+            // User signed up with social auth (Google/Apple)
+            const authMethod = user.googleId ? 'Google' : user.appleId ? 'Apple' : 'social';
+            throw new AppError(
+                `This account uses ${authMethod} sign-in. Please use the "${authMethod} Sign-In" button instead.`,
+                400
+            );
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
 
         const token = new AuthService().generateToken(user.id);
 
@@ -137,7 +145,7 @@ class AuthService {
 
     // Reset password using OTP
     static async resetPassword(email, otp, newPassword) {
-        const user = await User.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         // Verify OTP from Redis
@@ -213,7 +221,7 @@ class AuthService {
 
     // Resend email verification OTP
     static async resendEmailVerification(email) {
-        const user = await UserRepository.findOne({ where: { email } });
+        const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         if (user.emailVerified) {
@@ -241,7 +249,7 @@ class AuthService {
         return { message: "Verification code sent to your email" };
     }
 
-    async createOrUpdateProfile(userId, profileData) {
+    static async createOrUpdateProfile(userId, profileData) {
         let profile = await ProfileRepository.findByUserId(userId);
 
         if (profile) {
@@ -250,17 +258,14 @@ class AuthService {
             profile = await ProfileRepository.create({ ...profileData, userId });
         }
 
-        profile = await ProfileRepository.findByIdWithUser(profile.id, User);
+        profile = await ProfileRepository.findByUserIdWithUser(userId);
 
         return profile;
     }
 
     // Get user profile
     static async getProfile(userId) {
-        const profile = await ProfileRepository.findOne({
-            where: { userId },
-            include: [{ model: User, as: "user", attributes: ["id", "name", "email", "emailVerified"] }]
-        });
+        const profile = await ProfileRepository.findByUserIdWithUser(userId);
 
         if (!profile) {
             throw new AppError("Profile not found", 404);
@@ -271,7 +276,7 @@ class AuthService {
 
     // Delete user profile
     static async deleteProfile(userId) {
-        const profile = await ProfileRepository.findOne({ where: { userId } });
+        const profile = await ProfileRepository.findByUserId(userId);
 
         if (!profile) {
             throw new AppError("Profile not found", 404);
@@ -281,6 +286,60 @@ class AuthService {
         return { message: "Profile deleted successfully" };
     }
 
+    // LIST all users (Admin Only)
+    static async getAllUsers() {
+        return await UserRepository.findAll();
+    }
+
+    // TOGGLE admin status (Admin Only)
+    static async toggleAdminStatus(userId) {
+        const user = await UserRepository.findById(userId);
+        if (!user) throw new AppError("User not found", 404);
+
+        const newAdminStatus = !user.isAdmin;
+        return await UserRepository.update(userId, { isAdmin: newAdminStatus });
+    }
+
+    // Social Auth Helper Methods
+    static async findUserByGoogleId(googleId) {
+        return await UserRepository.findOne({ googleId });
+    }
+
+    static async findUserByAppleId(appleId) {
+        return await UserRepository.findOne({ appleId });
+    }
+
+    static async linkGoogleAccount(userId, googleId, profilePicture) {
+        return await UserRepository.update(userId, {
+            googleId,
+            profilePicture: profilePicture || undefined
+        });
+    }
+
+    static async linkAppleAccount(userId, appleId) {
+        return await UserRepository.update(userId, { appleId });
+    }
+
+    static async createUserFromGoogle(data) {
+        return await UserRepository.create({
+            email: data.email,
+            name: data.name,
+            googleId: data.googleId,
+            profilePicture: data.profilePicture,
+            emailVerified: true,
+            password: null, // No password for social auth
+        });
+    }
+
+    static async createUserFromApple(data) {
+        return await UserRepository.create({
+            email: data.email,
+            name: data.name,
+            appleId: data.appleId,
+            emailVerified: true,
+            password: null, // No password for social auth
+        });
+    }
 }
 
 export default AuthService;

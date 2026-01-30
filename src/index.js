@@ -29,16 +29,96 @@ import profile from './Routes/ProfileRoute.js';
 import donation from './Routes/DonationRoute.js';
 import info from './Routes/InfoRoute.js';
 import payment from './Routes/PaymentRoute.js';
+import group from './Routes/GroupRoute.js';
+import ministry from './Routes/MinistryRoute.js';
+import { bibleStoryRouter, bibleVerseRouter } from './Routes/BibleRoute.js';
 
 const PORT = process.env.PORT || 3000;
+
+// Validate NODE_ENV is set correctly
+if (!process.env.NODE_ENV) {
+  console.error('❌ FATAL: NODE_ENV is not set. Set to "production" for production deployments.');
+  process.exit(1);
+}
+
+if (process.env.NODE_ENV === 'production') {
+  console.log('✅ Running in PRODUCTION mode - security hardened');
+} else {
+  console.warn('⚠️ Running in NON-PRODUCTION mode - additional debugging enabled');
+}
+
 const app = express();
 
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    }
+  },
+  crossOriginEmbedderPolicy: false, // Allow embedding for mobile apps
+}));
+
 // Core middleware
-app.use(cors());
-app.use(helmet());
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : ['http://localhost:3000', 'http://localhost:3001']; // Default for development
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400 // 24 hours
+}));
 app.use(morgan('combined'));
 app.use(compression());
-app.use(express.json());
+app.use(express.json()); // Moved this line up as per instruction's implied order
+
+// Health check endpoint (before routes)
+app.get('/health', async (req, res) => {
+  try {
+    const sequelize = (await import('./Config/db.js')).default();
+    await sequelize.authenticate();
+
+    let redisStatus = 'not configured';
+    try {
+      const { redisClient, isRedisAvailable } = await import('./Config/redis.js');
+      redisStatus = isRedisAvailable() ? 'connected' : 'disconnected';
+    } catch (err) {
+      redisStatus = 'not configured';
+    }
+
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      services: {
+        database: 'connected',
+        redis: redisStatus
+      }
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error.message
+    });
+  }
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 app.use(attachRequestMeta);
@@ -47,9 +127,10 @@ app.use(attachRequestMeta);
 const apiRouter = express.Router();
 apiRouter.use('/auth', auth);
 apiRouter.use('/event', Event);
+apiRouter.use('/events', Event); // Alias for plural events
 apiRouter.use('/event-registration', registration);
 apiRouter.use('/media-bookmark', mediaBookmark);
-apiRouter.use('/notification', notification);
+apiRouter.use('/notifications', notification); // Pluralized
 apiRouter.use('/prayer', prayer);
 apiRouter.use('/orders', Orders);
 apiRouter.use('/product', Product);
@@ -57,11 +138,16 @@ apiRouter.use('/media-category', mediaCategory);
 apiRouter.use('/order-item', orderItem);
 apiRouter.use('/prayer-request', prayerRequest);
 apiRouter.use('/media', media);
+apiRouter.use('/videos', media); // Alias for videos
+apiRouter.use('/bible-stories', bibleStoryRouter);
+apiRouter.use('/bible-verses', bibleVerseRouter);
+apiRouter.use('/ministries', ministry);
 apiRouter.use('/membership', membership);
 apiRouter.use('/profile', profile);
 apiRouter.use('/donation', donation);
 apiRouter.use('/info', info);
 apiRouter.use('/payment', payment);
+apiRouter.use('/groups', group);
 
 app.use('/api/v1', apiRouter);
 
@@ -105,10 +191,53 @@ async function bootstrap() {
     console.log('🔄 Connecting to Redis...');
     await initializeRedis();
 
-    server = app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
+    // Start server
+    const server = app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
     });
 
+    // Graceful shutdown handlers
+    const gracefulShutdown = async (signal) => {
+      console.log(`\n${signal} received, shutting down gracefully...`);
+
+      server.close(async () => {
+        console.log('HTTP server closed');
+
+        try {
+          // Close database connection
+          const sequelize = (await import('./Config/db.js')).default();
+          await sequelize.close();
+          console.log('Database connection closed');
+
+          // Close Redis connection if available
+          try {
+            const { redisClient } = await import('./Config/redis.js');
+            if (redisClient && redisClient.isOpen) {
+              await redisClient.quit();
+              console.log('Redis connection closed');
+            }
+          } catch (err) {
+            // Redis might not be configured
+          }
+
+          console.log('✅ Graceful shutdown complete');
+          process.exit(0);
+        } catch (error) {
+          console.error('❌ Error during shutdown:', error);
+          process.exit(1);
+        }
+      });
+
+      // Force shutdown after 10 seconds
+      setTimeout(() => {
+        console.error('⚠️ Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   } catch (err) {
     console.error('❌ Startup failed:', err);
     process.exit(1);

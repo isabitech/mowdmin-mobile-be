@@ -20,6 +20,7 @@ media.get("/:id", protectUser, tryCatch(MediaController.getOne));
 media.put(
 	"/:id",
 	protectUser,
+	protectAdmin,
 	middlewareValidateUpdateMedia,
 	handleValidationErrors,
 	tryCatch(MediaController.update)
