@@ -104,9 +104,33 @@
 
 ---
 
-## Roadmap & Stubs
-The following prefixes are mounted but currently return `501 Not Implemented` for all children:
-- `/api/v1/groups/*` (Chat & Community)
-- `/api/v1/ministries` (Detailed Department info)
-- `/api/v1/bible-stories` (Bible Stories - includes `imageUrl`, `videoUrl`)
-- `/api/v1/bible-verses` (Bible Verses)
+## 8. Community & Groups (`/groups`)
+| Method | Endpoint | Description | Data Requirements |
+| :--- | :--- | :--- | :--- |
+| POST | `/create` | Create Group | `name`, `description`, `type` |
+| GET | `/me` | My Groups | List groups I've joined |
+| GET | `/discover` | Discover | List public groups |
+| GET | `/:id` | Group Detail | Group ID in Path |
+| POST | `/:id/join` | Join Group | Group ID in Path |
+| GET | `/:id/messages` | Chat History | Group ID in Path |
+| POST | `/:id/messages` | Send Message | `content` |
+
+---
+
+## 9. Ministries (`/ministries`)
+| Method | Endpoint | Description | Data Requirements |
+| :--- | :--- | :--- | :--- |
+| GET | `/` | List All | Detailed Department info |
+| GET | `/:id` | Ministry Detail | ID in Path |
+| POST | `/` | Create | **Admin**. `name`, `description`, `leader` |
+
+---
+
+## 10. Bible Content (`/bible-stories`, `/bible-verses`)
+| Method | Endpoint | Description | Data Requirements |
+| :--- | :--- | :--- | :--- |
+| GET | `/bible-stories` | Stories | List all stories |
+| POST | `/bible-stories` | Add Story | **Admin**. `title`, `content`, `imageUrl`, `videoUrl` |
+| GET | `/bible-verses` | Verses | List all verses |
+| GET | `/bible-verses/daily`| Daily Verse | Get today's verse |
+| POST | `/bible-verses` | Add Verse | **Admin**. `book`, `chapter`, `verse`, `content` |
