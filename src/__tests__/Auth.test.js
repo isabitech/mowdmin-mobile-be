@@ -30,6 +30,12 @@ import authRoutes from '../Routes/AuthRoute.js';
 import AuthService from '../Services/AuthService.js';
 
 jest.mock('../Services/AuthService.js');
+jest.mock('../Services/SocialAuthService.js', () => ({
+    authenticateWithGoogle: jest.fn(),
+    authenticateWithApple: jest.fn(),
+}));
+
+import SocialAuthService from '../Services/SocialAuthService.js';
 
 const app = express();
 app.use(express.json());
@@ -84,8 +90,25 @@ describe('Auth Routes', () => {
         expect(response.status).toBe(200);
     });
 
-    it('should return 501 for google social auth', async () => {
-        const response = await request(app).post('/api/v1/auth/google');
+    it('should authenticate with Google successfully', async () => {
+        const mockUser = { id: 1, email: 'google@example.com', name: 'Google User' };
+        const mockToken = 'mock-jwt-token';
+
+        SocialAuthService.authenticateWithGoogle.mockResolvedValue({
+            user: mockUser,
+            token: mockToken
+        });
+
+        const response = await request(app)
+            .post('/api/v1/auth/google')
+            .send({ idToken: 'valid-google-id-token' });
+
         expect(response.status).toBe(200);
+        expect(response.body.status).toBe('success');
+        expect(response.body.data).toEqual({
+            user: mockUser,
+            token: mockToken
+        });
+        expect(SocialAuthService.authenticateWithGoogle).toHaveBeenCalledWith('valid-google-id-token');
     });
 });

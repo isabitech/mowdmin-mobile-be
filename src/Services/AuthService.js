@@ -11,7 +11,7 @@ import { AuthRepository } from "../repositories/AuthRepository.js";
 
 class AuthService {
     // Generate JWT token
-    generateToken(id) {
+    static generateToken(id) {
         return jwt.sign({ id }, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN || "1d",
         });
@@ -93,7 +93,7 @@ class AuthService {
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
 
-        const token = new AuthService().generateToken(user.id);
+        const token = AuthService.generateToken(user.id);
 
         // Store session
         const tokenHash = AuthService.hashToken(token);
@@ -309,10 +309,9 @@ class AuthService {
         return await UserRepository.findOne({ appleId });
     }
 
-    static async linkGoogleAccount(userId, googleId, profilePicture) {
+    static async linkGoogleAccount(userId, googleId) {
         return await UserRepository.update(userId, {
             googleId,
-            profilePicture: profilePicture || undefined
         });
     }
 
@@ -325,7 +324,6 @@ class AuthService {
             email: data.email,
             name: data.name,
             googleId: data.googleId,
-            profilePicture: data.profilePicture,
             emailVerified: true,
             password: null, // No password for social auth
         });

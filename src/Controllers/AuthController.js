@@ -90,11 +90,15 @@ class AuthController {
         }
 
         // Format image URL if exists
+        const formatPhotoUrl = (url) => {
+            if (!url) return null;
+            if (url.startsWith('http')) return url;
+            return `${process.env.BASE_URL}${url}`;
+        };
+
         const profileData = {
             ...profile.toJSON(),
-            photoUrl: profile.photoUrl
-                ? `${process.env.BASE_URL}${profile.photoUrl}`
-                : null,
+            photoUrl: formatPhotoUrl(profile.photoUrl),
         };
 
         return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });

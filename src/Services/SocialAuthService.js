@@ -1,6 +1,9 @@
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
-import { AppError } from '../core/error.js';
+import jwksClient from 'jwks-rsa';
+import { AppError } from '../Utils/AppError.js';
+import { UserRepository } from '../repositories/UserRepository.js';
+import { AuthRepository } from '../repositories/AuthRepository.js';
 import AuthService from './AuthService.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -31,33 +34,45 @@ class SocialAuthService {
 
             if (!user) {
                 // Check if user exists with this email
-                user = await AuthService.findUserByEmail(email);
+                user = await UserRepository.findByEmail(email);
 
                 if (user) {
                     // Link Google account to existing user
-                    user = await AuthService.linkGoogleAccount(user.id, googleId, picture);
+                    user = await AuthService.linkGoogleAccount(user.id, googleId);
                 } else {
                     // Create new user with Google account
                     user = await AuthService.createUserFromGoogle({
                         googleId,
                         email,
                         name,
-                        profilePicture: picture,
                         isEmailVerified: true,
                     });
                 }
             }
 
+            // Update or create profile with picture
+            if (picture) {
+                await AuthService.createOrUpdateProfile(user.id, { photoUrl: picture });
+            }
+
             // Generate JWT token
             const token = AuthService.generateToken(user.id);
+
+            // Store session
+            const tokenHash = AuthService.hashToken(token);
+            await AuthRepository.create({
+                userId: user.id,
+                tokenHash,
+                ipAddress: null, // Can be passed as parameter if needed
+                deviceInfo: null
+            });
 
             return {
                 user: {
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    profilePicture: user.profilePicture,
-                    isEmailVerified: user.isEmailVerified,
+                    emailVerified: user.emailVerified,
                 },
                 token,
             };
@@ -81,8 +96,6 @@ class SocialAuthService {
     static async authenticateWithApple(identityToken, appleUserData = null) {
         try {
             // Verify Apple token with Apple's public keys
-            // Apple uses RS256 algorithm and rotates keys
-            const jwksClient = require('jwks-rsa');
             const appleClient = jwksClient({
                 jwksUri: 'https://appleid.apple.com/auth/keys',
                 cache: true,
@@ -128,7 +141,7 @@ class SocialAuthService {
                 }
 
                 // Check if user exists with this email
-                user = await AuthService.findUserByEmail(email);
+                user = await UserRepository.findByEmail(email);
 
                 if (user) {
                     // Link Apple account to existing user
@@ -151,12 +164,21 @@ class SocialAuthService {
             // Generate JWT token
             const token = AuthService.generateToken(user.id);
 
+            // Store session
+            const tokenHash = AuthService.hashToken(token);
+            await AuthRepository.create({
+                userId: user.id,
+                tokenHash,
+                ipAddress: null, // Can be passed as parameter if needed
+                deviceInfo: null
+            });
+
             return {
                 user: {
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    isEmailVerified: user.isEmailVerified,
+                    emailVerified: user.emailVerified,
                 },
                 token,
             };

@@ -1,9 +1,7 @@
 import { DataTypes } from "sequelize";
-import getSequelizeInstance from "../Config/db.js";
+import getSequelize from "../Config/db.js";
 
-const sequelize = getSequelizeInstance();
-
-const BibleVerse = sequelize.define("BibleVerse", {
+const BibleVerse = getSequelize().define("BibleVerse", {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
