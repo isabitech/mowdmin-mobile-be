@@ -18,7 +18,7 @@ const seedAdmin = async () => {
         const newAdmin = await UserRepository.create({
             name: "Super Admin",
             email: adminEmail,
-            password: "password123", // Will be hashed by beforeCreate hook
+            password: "Password123!", // Will be hashed by beforeCreate hook
             role: "admin",
             isAdmin: true,
             emailVerified: true,
