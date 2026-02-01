@@ -26,6 +26,12 @@ const bibleStorySchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+bibleStorySchema.virtual('media', {
+    ref: 'MediaMongo',
+    localField: 'mediaIds',
+    foreignField: '_id'
+});
+
 const BibleStory = mongoose.model('BibleStory', bibleStorySchema);
 
 export default BibleStory;

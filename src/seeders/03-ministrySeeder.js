@@ -38,6 +38,7 @@ const seedMinistries = async (count = 5) => {
                 isActive: true,
                 logo: faker.image.url(),
             });
+            console.log(`   bf Created Ministry: ${ministry.name}`);
 
             if (slicedUsers.length > 0) {
                 // Partnerships (Direct Model Fallback)

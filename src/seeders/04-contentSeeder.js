@@ -29,7 +29,7 @@ const seedContent = async () => {
         for (const cat of categoryInstances) {
             const numMedia = faker.number.int({ min: 3, max: 8 });
             for (let i = 0; i < numMedia; i++) {
-                await MediaRepository.create({
+                const media = await MediaRepository.create({
                     title: faker.lorem.sentence(3),
                     description: faker.lorem.paragraph(),
                     category_id: cat.id,
@@ -42,7 +42,8 @@ const seedContent = async () => {
                     thumbnail: faker.image.urlPicsumPhotos(),
                     isLive: false
                 });
-            }
+                console.log(`       🎵/🎬 Created Media in ${cat.name}: ${media.title}`);
+            } // end media loop
         }
 
         // 3. Seed Bible Stories
@@ -73,5 +74,32 @@ const seedContent = async () => {
         console.error("❌ Error seeding content:", error);
     }
 };
+
+
+// Standalone execution support
+import { connectMongoDB } from '../Config/mongodb.js';
+import { connectDB } from '../Config/db.js';
+import "../env.js";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const entryFile = process.argv[1];
+
+if (entryFile === __filename || entryFile?.endsWith('04-contentSeeder.js')) {
+    (async () => {
+        try {
+            if (process.env.DB_CONNECTION === 'mongodb') {
+                await connectMongoDB();
+            } else {
+                await connectDB();
+            }
+            await seedContent();
+            process.exit(0);
+        } catch (e) {
+            console.error(e);
+            process.exit(1);
+        }
+    })();
+}
 
 export default seedContent;

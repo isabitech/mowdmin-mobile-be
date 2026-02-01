@@ -38,6 +38,9 @@ class AuthService {
             emailVerified: false,
         });
 
+        // Initialize empty profile for the user
+        await ProfileRepository.create({ userId: newUser.id });
+
         // Generate and send email verification OTP
         try {
             const otp = await OTPService.storeOTP(email, 'email_verification', 10);

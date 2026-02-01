@@ -21,6 +21,7 @@ const seedUsers = async (count = 10) => {
                 emailVerified: true,
                 emailVerifiedAt: new Date(),
             });
+            console.log(`   👤 Created user: ${user.email} (${user.id})`);
 
             // Create Profile
             // ProfileRepository has create method
@@ -42,5 +43,32 @@ const seedUsers = async (count = 10) => {
         console.error("❌ Error seeding users:", error);
     }
 };
+
+
+// Standalone execution support
+import { connectMongoDB } from '../Config/mongodb.js';
+import { connectDB } from '../Config/db.js';
+import "../env.js";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const entryFile = process.argv[1];
+
+if (entryFile === __filename || entryFile?.endsWith('02-userSeeder.js')) {
+    (async () => {
+        try {
+            if (process.env.DB_CONNECTION === 'mongodb') {
+                await connectMongoDB();
+            } else {
+                await connectDB();
+            }
+            await seedUsers();
+            process.exit(0);
+        } catch (e) {
+            console.error(e);
+            process.exit(1);
+        }
+    })();
+}
 
 export default seedUsers;

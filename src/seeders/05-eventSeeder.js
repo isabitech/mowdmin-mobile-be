@@ -18,6 +18,7 @@ const seedEvents = async (count = 5) => {
                 type: faker.helpers.arrayElement(["Crusade", "Baptism", "Communion", "Concert"]),
                 // Description not in model, omitting
             });
+            console.log(`   📅 Created Event: ${event.title} on ${event.date}`);
 
             // Register some users
             if (slicedUsers.length > 0) {
@@ -47,5 +48,32 @@ const seedEvents = async (count = 5) => {
         console.error("❌ Error seeding events:", error);
     }
 };
+
+
+// Standalone execution support
+import { connectMongoDB } from '../Config/mongodb.js';
+import { connectDB } from '../Config/db.js';
+import "../env.js";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const entryFile = process.argv[1];
+
+if (entryFile === __filename || entryFile?.endsWith('05-eventSeeder.js')) {
+    (async () => {
+        try {
+            if (process.env.DB_CONNECTION === 'mongodb') {
+                await connectMongoDB();
+            } else {
+                await connectDB();
+            }
+            await seedEvents();
+            process.exit(0);
+        } catch (e) {
+            console.error(e);
+            process.exit(1);
+        }
+    })();
+}
 
 export default seedEvents;
