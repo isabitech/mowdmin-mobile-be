@@ -21,26 +21,56 @@ export const MediaRepository = {
   async findAll(options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
-      // In Mongo, options are the filter query directly
-      return Model.find(options).sort({ createdAt: -1 });
+      // Extract filter from 'where' or use the whole object if it doesn't look like Sequelize options
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+
+      let query = Model.find(filter).populate('category_id').sort({ createdAt: -1 });
+
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
     } else {
-      // In SQL, options might be filters. We need to wrap them in { where: ... } if they are simple key-values
-      // But findAll usually takes { where: {}, order: [] }.
-      // Let's assume options maps to 'where' if it contains simple keys.
-      // Or we standardize: Service passes { where: filters }?
-      // For simplicity here, let's treat options as the WHERE clause essentialy, or merge standard options.
-      // But wait, the Service passed `filters` directly.
-      // Let's restructure:
-      const query = { order: [["createdAt", "DESC"]] };
-      if (Object.keys(options).length > 0) {
+      const MediaCategory = (await import('../Models/MediaCategory.js')).default;
+      const query = {
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: MediaCategory,
+            as: 'category'
+          }
+        ]
+      };
+
+      if (options.where) {
+        query.where = options.where;
+      } else if (Object.keys(options).length > 0 && !options.limit && !options.offset && !options.order) {
         query.where = options;
       }
+
+      if (options.limit) query.limit = options.limit;
+      if (options.offset) query.offset = options.offset;
+      if (options.order) query.order = options.order;
+
       return Model.findAll(query);
     }
   },
   async findById(id, options = {}) {
     const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id, options);
+    if (isMongo) {
+      return Model.findById(id).populate('category_id');
+    } else {
+      const MediaCategory = (await import('../Models/MediaCategory.js')).default;
+      return Model.findByPk(id, {
+        ...options,
+        include: [
+          {
+            model: MediaCategory,
+            as: 'category'
+          }
+        ]
+      });
+    }
   },
   async updateById(id, payload, options = {}) {
     const Model = await this.getModel();
