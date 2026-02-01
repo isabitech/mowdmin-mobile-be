@@ -25,10 +25,25 @@ export const EventRepository = {
   async findAll(options = {}) {
     const { EventModel } = await this.getModels();
     if (isMongo) {
-      // Use the options as filter if it's not a complex Sequelize object,
-      // or extract the where clause if it is.
-      const filter = options.where || options;
-      return EventModel.find(filter);
+      // Extract filter from 'where' or use the whole object if it doesn't look like Sequelize options
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+
+      let query = EventModel.find(filter);
+
+      // Handle ordering/sorting
+      if (options.order) {
+        // Convert Sequelize order [[field, direction], ...] to Mongoose sort { field: direction }
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
     } else {
       return EventModel.findAll(options);
     }
@@ -64,12 +79,28 @@ export const EventRepository = {
     const { EventRegistrationModel } = await this.getModels();
     return EventRegistrationModel.create(payload);
   },
-  async registrationfindAll(filter = {}) {
+  async registrationfindAll(options = {}) {
     const { EventRegistrationModel } = await this.getModels();
     if (isMongo) {
-      return EventRegistrationModel.find(filter);
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+      let query = EventRegistrationModel.find(filter);
+
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
     } else {
-      return EventRegistrationModel.findAll({ where: filter });
+      // If it's already a sequelize options object (has where/order/etc), use it as is.
+      // Otherwise, wrap the filter in a where clause.
+      const seqOptions = options.where || options.order || options.limit ? options : { where: options };
+      return EventRegistrationModel.findAll(seqOptions);
     }
   },
 };

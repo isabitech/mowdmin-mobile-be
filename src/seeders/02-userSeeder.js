@@ -16,7 +16,7 @@ const seedUsers = async (count = 10) => {
             const user = await UserRepository.create({
                 name: faker.person.fullName(),
                 email: email,
-                password: "password123", // Will be hashed, same for all test users
+                password: "Password123!", // Will be hashed, same for all test users
                 isAdmin: false,
                 emailVerified: true,
                 emailVerifiedAt: new Date(),

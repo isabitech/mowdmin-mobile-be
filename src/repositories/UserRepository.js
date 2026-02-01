@@ -55,12 +55,26 @@ export const UserRepository = {
     return UserModel.create(payload);
   },
 
-  async findAll(filters = {}) {
+  async findAll(options = {}) {
     const { UserModel } = await this.getModels();
     if (isMongo) {
-      return UserModel.find(filters);
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+      let query = UserModel.find(filter);
+
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
     }
-    return UserModel.findAll({ where: filters });
+    const seqOptions = options.where || options.order || options.limit ? options : { where: options };
+    return UserModel.findAll(seqOptions);
   },
 
   async update(id, data) {
