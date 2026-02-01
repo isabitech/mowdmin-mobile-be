@@ -6,6 +6,8 @@ export const MediaRepository = {
   async getModel() {
     if (!MediaModel) {
       if (isMongo) {
+        // Ensure Category model is registered before population
+        await import('../MongoModels/MediaCategoryMongoModel.js');
         MediaModel = (await import('../MongoModels/MediaMongoModel.js')).default;
       } else {
         MediaModel = (await import('../Models/MediaModel.js')).default;
