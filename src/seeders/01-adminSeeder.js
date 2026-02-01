@@ -25,7 +25,11 @@ const seedAdmin = async () => {
             emailVerifiedAt: new Date(),
         });
 
-        console.log("✅ Admin user created successfully:", newAdmin.email);
+        console.log("✅ Admin user created successfully:", {
+            id: newAdmin.id,
+            email: newAdmin.email,
+            role: newAdmin.role
+        });
     } catch (error) {
         console.error("❌ Error seeding admin:", error);
     }

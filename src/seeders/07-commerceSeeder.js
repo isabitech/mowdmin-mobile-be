@@ -25,6 +25,7 @@ const seedCommerce = async () => {
                 isActive: true,
             });
             products.push(product);
+            console.log(`   bf Created Product: ${product.name} ($${product.price})`);
         }
 
         // 2. Seed Orders
@@ -88,5 +89,32 @@ const seedCommerce = async () => {
         console.error("❌ Error seeding commerce:", error);
     }
 };
+
+
+// Standalone execution support
+import { connectMongoDB } from '../Config/mongodb.js';
+import { connectDB } from '../Config/db.js';
+import "../env.js";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const entryFile = process.argv[1];
+
+if (entryFile === __filename || entryFile?.endsWith('07-commerceSeeder.js')) {
+    (async () => {
+        try {
+            if (process.env.DB_CONNECTION === 'mongodb') {
+                await connectMongoDB();
+            } else {
+                await connectDB();
+            }
+            await seedCommerce();
+            process.exit(0);
+        } catch (e) {
+            console.error(e);
+            process.exit(1);
+        }
+    })();
+}
 
 export default seedCommerce;

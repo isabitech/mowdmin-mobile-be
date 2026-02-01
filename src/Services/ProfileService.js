@@ -6,6 +6,10 @@ class ProfileService {
   }
 
   async updateProfile(userId, dto) {
+    const existingProfile = await ProfileRepository.findByUserId(userId);
+    if (!existingProfile) {
+      return ProfileRepository.create({ ...dto, userId });
+    }
     return ProfileRepository.updateByUserId(userId, dto);
   }
 }

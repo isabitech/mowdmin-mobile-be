@@ -11,7 +11,14 @@ export class ProfileController {
 
   static async updateProfile(req, res, next) {
     const userId = req.user.id;
-    const dto = req.body;
+    const { displayName, bio, location, phoneNumber, phone_number, birthdate } = req.body;
+    const dto = {
+      displayName,
+      bio,
+      location,
+      phone_number: phoneNumber || phone_number,
+      birthdate
+    };
     const updated = await profileService.updateProfile(userId, dto);
     return sendSuccess(res, { message: "Profile updated successfully", data: updated });
   }
