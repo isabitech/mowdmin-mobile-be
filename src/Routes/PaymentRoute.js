@@ -22,11 +22,11 @@ payment.get("/:id", protectUser, checkOwnership('Payment'), tryCatch(PaymentCont
 payment.put(
 	"/:id",
 	protectUser,
-	checkOwnership('Payment'),
+	protectAdmin,
 	middlewareValidateUpdatePayment,
 	handleValidationErrors,
 	tryCatch(PaymentController.update)
 );
-payment.delete("/:id", protectUser, checkOwnership('Payment'), tryCatch(PaymentController.delete));
+payment.delete("/:id", protectUser, protectAdmin, tryCatch(PaymentController.delete));
 
 export default payment;

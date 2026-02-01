@@ -26,6 +26,11 @@ const Media = getSequelize().define("Media", {
   thumbnail: {
     type: DataTypes.STRING,
   },
+  youtubeLiveLink: DataTypes.STRING,
+  isLive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 }, {
   tableName: "media",
   timestamps: true,

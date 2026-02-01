@@ -28,5 +28,19 @@ export const MinistryRepository = {
     async create(data) {
         const { MinistryModel } = await this.getModels();
         return MinistryModel.create(data);
+    },
+    async update(id, data) {
+        const { MinistryModel } = await this.getModels();
+        if (isMongo) {
+            return await MinistryModel.findByIdAndUpdate(id, data, { new: true });
+        }
+        await MinistryModel.update(data, { where: { id } });
+        return await MinistryModel.findByPk(id);
+    },
+
+    async delete(id) {
+        const { MinistryModel } = await this.getModels();
+        if (isMongo) return await MinistryModel.findByIdAndDelete(id);
+        return await MinistryModel.destroy({ where: { id } });
     }
 };

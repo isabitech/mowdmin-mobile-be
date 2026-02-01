@@ -17,6 +17,17 @@ class MinistryController {
         const ministry = await MinistryService.createMinistry(req.body);
         return sendSuccess(res, { message: "Ministry created successfully", data: ministry, statusCode: 201 });
     }
+
+    async updateMinistry(req, res) {
+        const ministry = await MinistryService.updateMinistry(req.params.id, req.body);
+        if (!ministry) return sendError(res, { message: "Ministry not found", statusCode: 404 });
+        return sendSuccess(res, { message: "Ministry updated successfully", data: ministry });
+    }
+
+    async deleteMinistry(req, res) {
+        await MinistryService.deleteMinistry(req.params.id);
+        return sendSuccess(res, { message: "Ministry deleted successfully", data: null });
+    }
 }
 
 export default new MinistryController();

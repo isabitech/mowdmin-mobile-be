@@ -28,11 +28,9 @@ class MediaService {
     return await MediaRepository.findById(id);
   }
 
-  async getAll() {
+  async getAll(filters = {}) {
     // Note: If you need category info, fetch it separately using MediaCategoryRepository
-    return await MediaRepository.findAll({
-      order: [["createdAt", "ASC"]],
-    });
+    return await MediaRepository.findAll(filters);
   }
 
   async delete(id) {

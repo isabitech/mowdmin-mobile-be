@@ -8,5 +8,7 @@ const router = Router();
 router.get("/", protectUser, tryCatch(MinistryController.getAllMinistries));
 router.get("/:id", protectUser, tryCatch(MinistryController.getMinistryById));
 router.post("/", protectUser, protectAdmin, tryCatch(MinistryController.createMinistry));
+router.put("/:id", protectUser, protectAdmin, tryCatch(MinistryController.updateMinistry));
+router.delete("/:id", protectUser, protectAdmin, tryCatch(MinistryController.deleteMinistry));
 
 export default router;

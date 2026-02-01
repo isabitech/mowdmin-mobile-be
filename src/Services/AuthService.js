@@ -300,6 +300,38 @@ class AuthService {
         return await UserRepository.update(userId, { isAdmin: newAdminStatus });
     }
 
+    // UPDATE user by Admin (Exclude password)
+    static async updateUserByAdmin(userId, updateData) {
+        const user = await UserRepository.findById(userId);
+        if (!user) throw new AppError("User not found", 404);
+
+        // Explicitly prevent password updates via this method
+        if (updateData.password) {
+            delete updateData.password;
+        }
+
+        // Prevent modification of critical system fields if needed
+        // For now, only password is strictly forbidden as per requirements
+
+        return await UserRepository.update(userId, updateData);
+    }
+
+    // ADMIN Trigger OTP (Password Reset)
+    static async adminTriggerPasswordReset(userId) {
+        const user = await UserRepository.findById(userId);
+        if (!user) throw new AppError("User not found", 404);
+
+        if (!user.email) throw new AppError("User does not have an email address", 400);
+
+        // Generate and send reset OTP
+        // Logic same as forgotPassword but initiated by admin (bypassing rate limit if strictly needed, but better to keep it safer)
+        // Here we just reuse forgotPassword logic but maybe we skip the public rate limit?
+        // Let's call forgotPassword logic directly for simplicity, or reimplement to ensure it works for admin context
+        // The requirement says "admin should just help to trigger otp", implying sending it to the USER.
+
+        return await AuthService.forgotPassword(user.email);
+    }
+
     // Social Auth Helper Methods
     static async findUserByGoogleId(googleId) {
         return await UserRepository.findOne({ googleId });

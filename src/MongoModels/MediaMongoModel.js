@@ -17,6 +17,13 @@ const MediaMongoSchema = new mongoose.Schema({
   thumbnail: {
     type: String,
   },
+  youtubeLiveLink: {
+    type: String,
+  },
+  isLive: {
+    type: Boolean,
+    default: false,
+  },
 }, {
   timestamps: true,
   collection: 'media',

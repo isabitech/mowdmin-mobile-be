@@ -13,7 +13,8 @@ class MediaController {
     return sendSuccess(res, { message: "Media Created Successfully", data: media, statusCode: 201 });
   }
   async getAll(req, res, next) {
-    const mediaList = await MediaService.getAll();
+    const filters = req.query; // Capture query parameters like ?isLive=true
+    const mediaList = await MediaService.getAll(filters);
     return sendSuccess(res, { message: "All Media Fetched Successfully", data: mediaList });
   }
   async getOne(req, res, next) {
