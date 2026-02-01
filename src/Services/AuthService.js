@@ -68,7 +68,6 @@ class AuthService {
         );
         const userDataSafe = newUser.toJSON();
         delete userDataSafe.password;
-        delete userDataSafe.isAdmin;
         delete userDataSafe.emailVerifiedAt;
 
         return {
@@ -108,7 +107,6 @@ class AuthService {
         });
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
-        delete userDataSafe.isAdmin;
         delete userDataSafe.emailVerifiedAt;
         return { user: userDataSafe, token };
     }

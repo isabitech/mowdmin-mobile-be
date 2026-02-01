@@ -77,8 +77,11 @@ export const UserRepository = {
 
   async findOne(where) {
     const { UserModel } = await this.getModels();
-    return isMongo
-      ? UserModel.findOne(where)
-      : UserModel.findOne({ where });
+    if (isMongo) {
+      // Handle Sequelize-style { where: { ... } } or direct filter
+      const filter = where.where || where;
+      return UserModel.findOne(filter);
+    }
+    return UserModel.findOne({ where });
   }
 };

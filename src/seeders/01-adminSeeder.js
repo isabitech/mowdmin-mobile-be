@@ -8,10 +8,16 @@ import { fileURLToPath } from 'url';
 const seedAdmin = async () => {
     try {
         const adminEmail = "admin@mowdmin.com";
-        const existingAdmin = await UserRepository.findOne({ where: { email: adminEmail } });
+        const existingAdmin = await UserRepository.findByEmail(adminEmail);
 
         if (existingAdmin) {
-            console.log("⚠️ Admin user already exists.");
+            if (!existingAdmin.isAdmin) {
+                console.log("⚠️ User exists but is not an admin. Updating to admin status...");
+                await UserRepository.update(existingAdmin.id, { isAdmin: true, role: "admin" });
+                console.log("✅ Admin status granted to existing user.");
+            } else {
+                console.log("⚠️ Admin user already exists and is correctly configured.");
+            }
             return;
         }
 

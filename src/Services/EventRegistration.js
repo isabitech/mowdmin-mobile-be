@@ -13,7 +13,7 @@ class EventRegistrationService {
 
     async getAllReg() {
         // For MongoDB, populate userId and eventId manually if needed
-        return await EventRepository.findAll();
+        return await EventRepository.registrationfindAll();
     }
 
     async getRegById(id) {
@@ -35,14 +35,14 @@ class EventRegistrationService {
     }
 
     async getByEventId(eventId) {
-        const registrations = await EventRepository.findAll({ eventId });
+        const registrations = await EventRepository.registrationfindAll({ eventId });
         if (!registrations || registrations.length === 0)
             throw new Error("No registrations found for this event");
         return registrations;
     }
 
     async getByUserId(userId) {
-        return await EventRepository.findAll({ userId });
+        return await EventRepository.registrationfindAll({ userId });
     }
 }
 
