@@ -26,6 +26,8 @@
 | POST | `/apple` | Apple Sign-In | `identityToken`, `user` (optional, first sign-in only) |
 | GET | `/admin/users` | List All Users | **Admin Only**. Returns all registered users |
 | PATCH | `/admin/users/:userId/promote` | Toggle Admin | **Admin Only**. Grant/revoke admin privileges |
+| PUT | `/admin/users/:userId` | Update User | **Admin Only**. Update user details (cannot change password) |
+| POST | `/admin/users/:userId/otp` | Trigger OTP | **Admin Only**. Triggers password reset OTP for user |
 
 ---
 
@@ -57,9 +59,12 @@
 ## 4. Media & Content (`/media`, `/notifications`, `/media-bookmark`, `/media-category`)
 | Method | Endpoint | Description | Data Requirements |
 | :--- | :--- | :--- | :--- |
-| GET | `/videos` | All Media | Alias for `/media` |
-| POST | `/media/create` | Add Content | **Admin Only**. `title`, `description`, `url`, `categoryId` |
-| GET | `/media-category` | Categories | List content categories |
+| GET | `/media` | All Media | List content. Supports `?isLive=true` filter to fetch live stream link. |
+| POST | `/media/create` | Add Content | **Admin Only**. `title`, `description`, `url`, `categoryId`, `youtubeLiveLink`, `isLive` |
+| GET | `/media-category` | Categories | **Admin Only**. List content categories |
+| POST | `/media-category/create` | Add Category | **Admin Only**. `name`, `description` |
+| PUT | `/media-category/:id` | Update Category | **Admin Only**. |
+| DELETE | `/media-category/:id` | Delete Category | **Admin Only**. |
 | POST | `/media-bookmark/create` | Bookmark | `mediaId` |
 | GET | `/notifications` | My Inbox | Alias for `/notification`. List unread |
 | PUT | `/notifications/:id/read` | Mark Read | ID in Path |
@@ -85,6 +90,7 @@
 | GET | `/orders/user` | My History | **Ownership validated**. List my orders only |
 | GET | `/orders/:id` | Order Detail | **Ownership validated**. User can only view their own orders |
 | GET | `/orders` | All Orders | **Admin Only**. Returns all orders from all users |
+| POST | `/orders/:id/cancel` | Cancel Order | **Admin Only**. Force cancel an order |
 | POST | `/payment/create` | Init Payment | `orderId`, `amount`, `paymentMethod` |
 | GET | `/payment/:id` | Payment Detail | **Ownership validated**. User can only view their own payments |
 | GET | `/payment/order/:id` | Payments by Order | **Ownership validated**. User must own the order |
@@ -114,6 +120,7 @@
 | POST | `/:id/join` | Join Group | Group ID in Path |
 | GET | `/:id/messages` | Chat History | Group ID in Path |
 | POST | `/:id/messages` | Send Message | `content` |
+| DELETE | `/:id/admin-delete` | Delete Group | **Admin Only**. Moderation/cleanup |
 
 ---
 
@@ -123,6 +130,8 @@
 | GET | `/` | List All | Detailed Department info |
 | GET | `/:id` | Ministry Detail | ID in Path |
 | POST | `/` | Create | **Admin**. `name`, `description`, `leader` |
+| PUT | `/:id` | Update | **Admin**. `name`, `description`, `leader` |
+| DELETE | `/:id` | Delete | **Admin**. Delete ministry |
 
 ---
 

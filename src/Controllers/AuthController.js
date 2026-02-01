@@ -151,6 +151,25 @@ class AuthController {
         return sendSuccess(res, { message: `Admin status toggled successfully`, data: result, statusCode: 200 });
     }
 
+    // UPDATE User (Admin Only)
+    static async adminUpdateUser(req, res) {
+        const { userId } = req.params;
+        const updateData = req.body;
+
+        // Remove password from body if present, just to be double safe at controller level too
+        delete updateData.password;
+
+        const result = await AuthService.updateUserByAdmin(userId, updateData);
+        return sendSuccess(res, { message: "User updated successfully (Admin)", data: result, statusCode: 200 });
+    }
+
+    // TRIGGER OTP (Admin Only)
+    static async adminTriggerOTP(req, res) {
+        const { userId } = req.params;
+        await AuthService.adminTriggerPasswordReset(userId);
+        return sendSuccess(res, { message: "OTP sent to user's email", data: null, statusCode: 200 });
+    }
+
     // Social Authentication - Google
     static async googleAuth(req, res) {
         const { idToken } = req.body;

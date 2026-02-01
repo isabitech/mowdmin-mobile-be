@@ -20,10 +20,13 @@ order.get("/:id", protectUser, checkOwnership('Order'), tryCatch(OrderController
 order.put(
 	"/:id",
 	protectUser,
-	checkOwnership('Order'),
+	protectAdmin,
 	middlewareValidateUpdateOrder,
 	tryCatch(OrderController.update)
 );
-order.delete("/:id", protectUser, checkOwnership('Order'), tryCatch(OrderController.delete));
+order.delete("/:id", protectUser, protectAdmin, tryCatch(OrderController.delete));
+
+// Admin Cancellation
+order.post("/:id/cancel", protectUser, protectAdmin, tryCatch(OrderController.cancel));
 
 export default order;

@@ -21,9 +21,21 @@ export const MediaRepository = {
   async findAll(options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
-      return Model.find({});
+      // In Mongo, options are the filter query directly
+      return Model.find(options).sort({ createdAt: -1 });
     } else {
-      return Model.findAll(options);
+      // In SQL, options might be filters. We need to wrap them in { where: ... } if they are simple key-values
+      // But findAll usually takes { where: {}, order: [] }.
+      // Let's assume options maps to 'where' if it contains simple keys.
+      // Or we standardize: Service passes { where: filters }?
+      // For simplicity here, let's treat options as the WHERE clause essentialy, or merge standard options.
+      // But wait, the Service passed `filters` directly.
+      // Let's restructure:
+      const query = { order: [["createdAt", "DESC"]] };
+      if (Object.keys(options).length > 0) {
+        query.where = options;
+      }
+      return Model.findAll(query);
     }
   },
   async findById(id, options = {}) {

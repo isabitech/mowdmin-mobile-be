@@ -36,7 +36,13 @@ class OrderController {
   }
   async delete(req, res) {
     await OrderService.deleteOrder(req.params.id);
-    return sendSuccess(res, { message: "Order Deleted Successfully", data: {} });
+    return sendSuccess(res, { message: "Order deleted successfully", data: {} });
+  }
+
+  async cancel(req, res) {
+    const order = await OrderService.cancelOrder(req.params.id);
+    if (!order) return sendError(res, { message: "Order not found", statusCode: 404 });
+    return sendSuccess(res, { message: "Order cancelled successfully (Admin)", data: order });
   }
 }
 

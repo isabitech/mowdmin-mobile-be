@@ -73,6 +73,8 @@ auth.delete("/profile/:userId", protectUser, validateUserId, handleValidationErr
 
 // Admin Management (Admin Only)
 auth.get("/admin/users", protectUser, protectAdmin, tryCatch(AuthController.getAllUsers));
+auth.put("/admin/users/:userId", protectUser, protectAdmin, tryCatch(AuthController.adminUpdateUser));
 auth.patch("/admin/users/:userId/promote", protectUser, protectAdmin, tryCatch(AuthController.toggleAdminStatus));
+auth.post("/admin/users/:userId/otp", protectUser, protectAdmin, tryCatch(AuthController.adminTriggerOTP));
 
 export default auth;

@@ -18,13 +18,18 @@ export const MediaCategoryRepository = {
     const Model = await this.getModel();
     return Model.create(payload);
   },
-  async findAll() {
+  async findAll(options = {}) {
     const Model = await this.getModel();
-     if (isMongo) {
-       return Model.find({});
-     } else {
-       return Model.findAll(options);
-     }
+    if (isMongo) {
+      return Model.find({});
+    } else {
+      return Model.findAll(options);
+    }
+  },
+
+  async findOne(options = {}) {
+    const Model = await this.getModel();
+    return isMongo ? Model.findOne(options) : Model.findOne({ where: options });
   },
   async findById(id) {
     const Model = await this.getModel();

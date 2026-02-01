@@ -61,5 +61,11 @@ export const GroupRepository = {
         const { MessageModel } = await this.getModels();
         if (isMongo) return await MessageModel.find({ groupId }).sort({ createdAt: 1 });
         return await MessageModel.findAll({ where: { groupId }, order: [['createdAt', 'ASC']] });
+    },
+
+    async deleteGroup(id) {
+        const { GroupModel } = await this.getModels();
+        if (isMongo) return await GroupModel.findByIdAndDelete(id);
+        return await GroupModel.destroy({ where: { id } });
     }
 };

@@ -12,6 +12,8 @@ export const validateCreateMedia = (payload) =>
         is_downloadable: Joi.boolean(),
         language: Joi.string().allow("", null),
         thumbnail: Joi.string().uri().allow("", null),
+        youtubeLiveLink: Joi.string().uri().allow("", null),
+        isLive: Joi.boolean(),
     })
         .prefs({ stripUnknown: true })
         .validate(payload);
@@ -28,6 +30,8 @@ export const validateUpdateMedia = (payload) =>
         is_downloadable: Joi.boolean(),
         language: Joi.string().allow("", null),
         thumbnail: Joi.string().uri().allow("", null),
+        youtubeLiveLink: Joi.string().uri().allow("", null),
+        isLive: Joi.boolean(),
     })
         .prefs({ stripUnknown: true })
         .validate(payload);

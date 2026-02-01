@@ -38,6 +38,11 @@ class GroupController {
         const messages = await GroupService.getGroupMessages(req.params.id);
         return sendSuccess(res, { message: "Group messages fetched", data: messages });
     }
+
+    async deleteGroup(req, res) {
+        await GroupService.deleteGroup(req.params.id);
+        return sendSuccess(res, { message: "Group deleted successfully (Admin)", data: null, statusCode: 200 });
+    }
 }
 
 export default new GroupController();
