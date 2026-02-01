@@ -25,8 +25,10 @@ export const EventRepository = {
   async findAll(options = {}) {
     const { EventModel } = await this.getModels();
     if (isMongo) {
-      // Only use filter for Mongo, ignore order/include
-      return EventModel.find({});
+      // Use the options as filter if it's not a complex Sequelize object,
+      // or extract the where clause if it is.
+      const filter = options.where || options;
+      return EventModel.find(filter);
     } else {
       return EventModel.findAll(options);
     }
