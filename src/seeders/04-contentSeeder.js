@@ -32,7 +32,7 @@ const seedContent = async () => {
                 const media = await MediaRepository.create({
                     title: faker.lorem.sentence(3),
                     description: faker.lorem.paragraph(),
-                    category_id: cat.id,
+                    category_id: cat.id || cat._id, // Ensure we get the ID regardless of DB type
                     type: faker.helpers.arrayElement(["audio", "video"]),
                     media_url: faker.internet.url(), // Placeholder
                     author: faker.person.fullName(),
@@ -42,7 +42,7 @@ const seedContent = async () => {
                     thumbnail: faker.image.urlPicsumPhotos(),
                     isLive: false
                 });
-                console.log(`       🎵/🎬 Created Media in ${cat.name}: ${media.title}`);
+                console.log(`       🎵/🎬 Created Media in ${cat.name} (CatID: ${cat.id || cat._id}): ${media.title}`);
             } // end media loop
         }
 

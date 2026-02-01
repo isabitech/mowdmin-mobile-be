@@ -24,12 +24,10 @@ class MediaService {
   }
 
   async findById(id) {
-    // Note: If you need category info, fetch it separately using MediaCategoryRepository
     return await MediaRepository.findById(id);
   }
 
   async getAll(filters = {}) {
-    // Note: If you need category info, fetch it separately using MediaCategoryRepository
     return await MediaRepository.findAll(filters);
   }
 

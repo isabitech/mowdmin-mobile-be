@@ -7,9 +7,9 @@ const MediaMongoSchema = new mongoose.Schema({
   description: {
     type: String,
   },
-  category: {
-    type: String,
-    enum: ['Sermon', 'Album', 'Teaching'],
+  category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MediaCategoryMongo',
   },
   url: {
     type: String,
