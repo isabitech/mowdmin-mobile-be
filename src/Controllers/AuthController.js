@@ -205,6 +205,12 @@ class AuthController {
             statusCode: 200
         });
     }
+
+    // Create Admin
+    static async createAdmin(req, res) {
+        const admin = await AuthService.createAdmin(req.body);
+        return sendSuccess(res, { message: "Admin created successfully", data: admin, statusCode: 201 });
+    }
 }
 
 export default AuthController;
