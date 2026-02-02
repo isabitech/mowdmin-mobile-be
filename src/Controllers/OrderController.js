@@ -6,6 +6,7 @@ import { validateCreateOrder, validateUpdateOrder } from "../middleware/Validati
 class OrderController {
   async create(req, res) {
     const { error, value } = validateCreateOrder(req.body);
+    value.userId = req.user.id;
     if (error) {
       return sendError(res, { message: error.details[0].message, statusCode: 400 });
     }

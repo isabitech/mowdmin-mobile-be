@@ -77,7 +77,7 @@ class AuthController {
 
     // Get user profile
     static async getProfile(req, res) {
-        const { userId } = req.params;
+        const userId = req.user.id;
 
         if (!userId) {
             return sendError(res, { message: "User ID is required", statusCode: 400 });
@@ -106,7 +106,7 @@ class AuthController {
 
     // Create or update user profile
     static async createOrUpdateProfile(req, res) {
-        const userId = req.params.userId; // assuming userId comes from route
+        const userId = req.user.id;
         const data = { ...req.body };
 
         // Attach uploaded file path if it exists
@@ -128,7 +128,7 @@ class AuthController {
 
     // Delete user profile
     static async deleteProfile(req, res) {
-        const { userId } = req.params;
+        const userId = req.user.id;
 
         if (!userId) {
             return sendError(res, { message: "User ID is required", statusCode: 400 });
