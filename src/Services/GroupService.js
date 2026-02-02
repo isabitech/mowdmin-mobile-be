@@ -17,9 +17,7 @@ class GroupService {
     }
 
     async getUserGroups(userId) {
-        // This would ideally be a join or a specific member query
-        // For now, let's keep it simple
-        return await GroupRepository.findAllGroups();
+        return await GroupRepository.findGroupsByUserId(userId);
     }
 
     async getGroupById(id) {
@@ -27,7 +25,19 @@ class GroupService {
     }
 
     async joinGroup(groupId, userId) {
+        const existingMember = await GroupRepository.findMember(groupId, userId);
+        if (existingMember) {
+            throw new Error("You are already a member of this group");
+        }
         return await GroupRepository.addMember({ groupId, userId, role: 'Member' });
+    }
+
+    async leaveGroup(groupId, userId) {
+        const existingMember = await GroupRepository.findMember(groupId, userId);
+        if (!existingMember) {
+            throw new Error("You are not a member of this group");
+        }
+        return await GroupRepository.removeMember(groupId, userId);
     }
 
     async sendMessage(groupId, senderId, content, type = 'text') {
