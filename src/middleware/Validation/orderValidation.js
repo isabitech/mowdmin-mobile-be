@@ -2,7 +2,6 @@ import Joi from "joi";
 
 export const validateCreateOrder = (payload) =>
   Joi.object({
-    userId: Joi.string().required(),
     items: Joi.array()
       .items(
         Joi.object({
