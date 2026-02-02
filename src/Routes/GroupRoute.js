@@ -10,6 +10,7 @@ group.get("/me", protectUser, tryCatch(GroupController.getMyGroups));
 group.get("/discover", protectUser, tryCatch(GroupController.getDiscoverGroups));
 group.get("/:id", protectUser, tryCatch(GroupController.getGroupDetails));
 group.post("/:id/join", protectUser, tryCatch(GroupController.joinGroup));
+group.delete("/:id/leave", protectUser, tryCatch(GroupController.leaveGroup));
 group.get("/:id/messages", protectUser, tryCatch(GroupController.getGroupMessages));
 group.post("/:id/messages", protectUser, tryCatch(GroupController.sendMessage));
 

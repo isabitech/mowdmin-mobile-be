@@ -51,6 +51,34 @@ export const GroupRepository = {
         return await MemberModel.findAll({ where: { groupId } });
     },
 
+    async findMember(groupId, userId) {
+        const { MemberModel } = await this.getModels();
+        if (isMongo) return await MemberModel.findOne({ groupId, userId });
+        return await MemberModel.findOne({ where: { groupId, userId } });
+    },
+
+    async removeMember(groupId, userId) {
+        const { MemberModel } = await this.getModels();
+        if (isMongo) return await MemberModel.findOneAndDelete({ groupId, userId });
+        return await MemberModel.destroy({ where: { groupId, userId } });
+    },
+
+    async findGroupsByUserId(userId) {
+        const { MemberModel, GroupModel } = await this.getModels();
+        if (isMongo) {
+            const memberships = await MemberModel.find({ userId }).populate('groupId');
+            return memberships.map(m => m.groupId).filter(g => g !== null);
+        }
+        // For SQL, we assume a belongsTo/hasMany relationship is set up or use a join
+        return await GroupModel.findAll({
+            include: [{
+                model: MemberModel,
+                where: { userId },
+                required: true
+            }]
+        });
+    },
+
     // Message Operations
     async createMessage(data) {
         const { MessageModel } = await this.getModels();

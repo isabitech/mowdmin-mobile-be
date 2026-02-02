@@ -29,6 +29,11 @@ class GroupController {
         return sendSuccess(res, { message: "Joined group successfully", data: membership });
     }
 
+    async leaveGroup(req, res) {
+        await GroupService.leaveGroup(req.params.id, req.user.id);
+        return sendSuccess(res, { message: "Left group successfully", data: null });
+    }
+
     async sendMessage(req, res) {
         const message = await GroupService.sendMessage(req.params.id, req.user.id, req.body.content, req.body.type);
         return sendSuccess(res, { message: "Message sent", data: message, statusCode: 201 });
