@@ -32,6 +32,8 @@ import payment from './Routes/PaymentRoute.js';
 import group from './Routes/GroupRoute.js';
 import ministry from './Routes/MinistryRoute.js';
 import { bibleStoryRouter, bibleVerseRouter } from './Routes/BibleRoute.js';
+import prayerLike from './Routes/PrayerLikeRoute.js';
+import prayerComment from './Routes/PrayerCommentRoute.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -132,6 +134,9 @@ apiRouter.use('/event-registration', registration);
 apiRouter.use('/media-bookmark', mediaBookmark);
 apiRouter.use('/notifications', notification); // Pluralized
 apiRouter.use('/prayer', prayer);
+
+apiRouter.use('/prayer-like', prayerLike);
+apiRouter.use('/prayer-comment', prayerComment);
 apiRouter.use('/orders', Orders);
 apiRouter.use('/product', Product);
 apiRouter.use('/media-category', mediaCategory);

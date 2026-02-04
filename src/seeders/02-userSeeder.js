@@ -2,10 +2,11 @@
 import { faker } from "@faker-js/faker";
 import { UserRepository } from "../repositories/UserRepository.js";
 import ProfileRepository from "../repositories/ProfileRepository.js";
+import { PrayerRequestRepository } from "../repositories/PrayerRequestRepository.js";
 
 const seedUsers = async (count = 10) => {
     try {
-        console.log(`🌱 Seeding ${count} users...`);
+        console.log(`🌱 Seeding ${count} users and their prayer requests...`);
 
         for (let i = 0; i < count; i++) {
             const email = faker.internet.email();
@@ -21,12 +22,11 @@ const seedUsers = async (count = 10) => {
                 emailVerified: true,
                 emailVerifiedAt: new Date(),
             });
-            console.log(`   👤 Created user: ${user.email} (${user.id})`);
+            console.log(`   👤 Created user: ${user.email} (${user.id || user._id})`);
 
             // Create Profile
-            // ProfileRepository has create method
             await ProfileRepository.create({
-                userId: user.id,
+                userId: user.id || user._id,
                 phoneNumber: faker.phone.number(),
                 address: faker.location.streetAddress(),
                 city: faker.location.city(),
@@ -36,6 +36,19 @@ const seedUsers = async (count = 10) => {
                 bio: faker.lorem.sentence(),
                 avatar: faker.image.avatar(),
             });
+
+            // Create 1-3 Prayer Requests per user
+            const requestCount = faker.number.int({ min: 1, max: 3 });
+            for (let j = 0; j < requestCount; j++) {
+                await PrayerRequestRepository.create({
+                    userId: user.id || user._id,
+                    title: faker.lorem.sentence(4),
+                    description: faker.lorem.paragraph(),
+                    images: [faker.image.urlPicsumPhotos()],
+                    isPublic: faker.datatype.boolean()
+                });
+            }
+            console.log(`      🙏 Created ${requestCount} prayer requests for ${user.email}`);
         }
 
         console.log("✅ Users seeded successfully.");

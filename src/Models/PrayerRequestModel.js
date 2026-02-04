@@ -11,21 +11,24 @@ const PrayerRequest = getSequelize().define(
     },
     userId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
     },
     title: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
-    content: {
+    description: {
       type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    images: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
     },
     isPublic: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    prayedCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
     },
   },
   {

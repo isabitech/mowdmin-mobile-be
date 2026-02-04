@@ -13,17 +13,35 @@ const Prayer = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    content: {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    prayer_request_id: {
+    prayerRequestId: {
       type: DataTypes.UUID,
       allowNull: true,
+      field: 'prayer_request_id',
     },
     isPublic: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    images: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+    },
+    likeCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    commentCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   },
   {

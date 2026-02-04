@@ -16,6 +16,12 @@ prayer.post(
 prayer.get("/", protectUser, tryCatch(PrayerController.getAll));
 prayer.get("/user", protectUser, tryCatch(PrayerController.getAllByUser));
 prayer.get("/:id", protectUser, tryCatch(PrayerController.getSingle));
+prayer.put("/:id", protectUser, protectAdmin, tryCatch(PrayerController.update));
 prayer.delete("/:id", protectUser, protectAdmin, tryCatch(PrayerController.delete));
+prayer.post(
+	"/attach-request/:requestId",
+	protectAdmin,
+	tryCatch(PrayerController.attachRequest)
+);
 
 export default prayer;

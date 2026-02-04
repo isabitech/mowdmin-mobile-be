@@ -1121,7 +1121,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"title\": \"Healing for Friend\",\n    \"description\": \"Please pray for recovery\"\n}",
+                  "raw": "{\n    \"title\": \"Healing for Friend\",\n    \"description\": \"Please pray for recovery\",\n    \"images\": [\"https://example.com/image.jpg\"],\n    \"isPublic\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1138,30 +1138,6 @@
                     "v1",
                     "prayer-request",
                     "create"
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Get All Prayer Requests",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/prayer-request",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "prayer-request"
                   ]
                 }
               }
@@ -1296,10 +1272,10 @@
           ]
         },
         {
-          "name": "Prayers",
+          "name": "Prayer Wall",
           "item": [
             {
-              "name": "Get All Prayers",
+              "name": "Get Prayer Wall",
               "request": {
                 "method": "GET",
                 "header": [
@@ -1318,31 +1294,6 @@
                     "api",
                     "v1",
                     "prayer"
-                  ]
-                }
-              }
-            },
-            {
-              "name": "Get My Prayers",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/prayer/user",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "prayer",
-                    "user"
                   ]
                 }
               }
@@ -1368,6 +1319,79 @@
                     "v1",
                     "prayer",
                     ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{prayerId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Like Prayer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/prayer-like/:id/like",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "prayer-like",
+                    ":id",
+                    "like"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{prayerId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Comment on Prayer",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"comment\": \"Amen! praying with you.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/prayer-comment/:id/comment",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "prayer-comment",
+                    ":id",
+                    "comment"
                   ],
                   "variable": [
                     {
@@ -2141,10 +2165,34 @@
           ]
         },
         {
-          "name": "Prayer",
+          "name": "Prayer Management",
           "item": [
             {
-              "name": "Pray for Request",
+              "name": "Get All Prayer Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/prayer-request",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "prayer-request"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Prayer (Direct)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -2156,7 +2204,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"prayer_request_id\": \"{{prayerRequestId}}\"\n}",
+                  "raw": "{\n    \"title\": \"Daily Inspiration\",\n    \"description\": \"He who dwells in the secret place...\",\n    \"images\": [],\n    \"isPublic\": true\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2173,6 +2221,78 @@
                     "v1",
                     "prayer",
                     "create"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Attach Request to Wall",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/prayer/attach-request/:requestId",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "prayer",
+                    "attach-request",
+                    ":requestId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "requestId",
+                      "value": "{{prayerRequestId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Prayer",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Updated Inspiration\",\n    \"description\": \"New description text\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/prayer/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "prayer",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{prayerId}}"
+                    }
                   ]
                 }
               }

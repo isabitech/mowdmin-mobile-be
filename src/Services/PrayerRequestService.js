@@ -22,8 +22,7 @@ class PrayerRequestService {
         return PrayerRequestRepository.create(data);
     }
     async update(id, data) {
-        const updated = await PrayerRequestRepository.updateById(id, data);
-        return updated;
+        return PrayerRequestRepository.updateById(id, data);
     }
     async findById(id) {
         return PrayerRequestRepository.findById(id);
@@ -32,34 +31,16 @@ class PrayerRequestService {
         return PrayerRequestRepository.findOne({ id, userId });
     }
     async getAll() {
-        const { User, Profile } = await this.getModels();
-        const res = await PrayerRequestRepository.findAll({
-            order: [["createdAt", "ASC"]],
-            include: [
-                {
-                    model: User,
-                    as: "user",
-                    attributes: ["id", "name", "email", "photo"],
-                    include: [
-                        {
-                            model: Profile,
-                            as: "profile",
-                            attributes: ["id", "displayName", "photoUrl", "bio", "location"],
-                        },
-                    ],
-                },
-            ],
+        return PrayerRequestRepository.findAll({
+            order: [["createdAt", "DESC"]],
         });
-
-        return res;
     }
     async delete(id) {
-        const deleted = await PrayerRequestRepository.deleteById(id);
-        return deleted;
+        return PrayerRequestRepository.deleteById(id);
     }
     async getAllByUserId(userId) {
         return PrayerRequestRepository.findAllByUserId(userId, {
-            order: [["createdAt", "ASC"]],
+            order: [["createdAt", "DESC"]],
         });
     }
 

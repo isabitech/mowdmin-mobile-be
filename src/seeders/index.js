@@ -10,6 +10,7 @@ import seedContent from "./04-contentSeeder.js";
 import seedEvents from "./05-eventSeeder.js";
 import seedCommunity from "./06-communitySeeder.js";
 import seedCommerce from "./07-commerceSeeder.js";
+import seedPrayers from "./08-prayerSeeder.js";
 
 const runSeeders = async () => {
     try {
@@ -30,6 +31,7 @@ const runSeeders = async () => {
         await seedEvents();
         await seedCommunity();
         await seedCommerce();
+        await seedPrayers();
 
         console.log("🎉 All seeders executed successfully!");
         process.exit(0);

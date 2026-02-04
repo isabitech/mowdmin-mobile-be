@@ -6,8 +6,17 @@ const PrayerMongoSchema = new mongoose.Schema({
     ref: 'UserMongo',
     required: true,
   },
-  content: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  images: [{ type: String }],
   isPublic: { type: Boolean, default: true },
+  likeCount: { type: Number, default: 0 },
+  commentCount: { type: Number, default: 0 },
+  prayerRequestId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PrayerRequestMongo',
+    required: false,
+  },
 }, {
   timestamps: true,
   collection: 'prayers',

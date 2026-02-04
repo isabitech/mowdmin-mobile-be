@@ -67,9 +67,9 @@ auth.post("/google", authLimiter, tryCatch(AuthController.googleAuth));
 auth.post("/apple", authLimiter, tryCatch(AuthController.appleAuth));
 
 // Profile routes
-auth.get("/profile/:userId", protectUser, validateUserId, handleValidationErrors, tryCatch(AuthController.getProfile));
-auth.put("/profile/:userId", protectUser, validateProfileUpdate, handleValidationErrors, upload.single('photo'), tryCatch(AuthController.createOrUpdateProfile));
-auth.delete("/profile/:userId", protectUser, validateUserId, handleValidationErrors, tryCatch(AuthController.deleteProfile));
+auth.get("/profile", protectUser, tryCatch(AuthController.getProfile));
+auth.put("/profile", protectUser, validateProfileUpdate, handleValidationErrors, upload.single('photo'), tryCatch(AuthController.createOrUpdateProfile));
+auth.delete("/profile", protectUser, tryCatch(AuthController.deleteProfile));
 
 // Admin Management (Admin Only)
 auth.get("/admin/users", protectUser, protectAdmin, tryCatch(AuthController.getAllUsers));

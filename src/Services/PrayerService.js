@@ -1,52 +1,85 @@
 import { PrayerRepository } from "../repositories/PrayerRepository.js";
-
+//import { NotificationService } from "./NotificationService.js";
 
 class PrayerService {
+    async notify(userId, title, message, type = "info", metadata = {}) {
+        const NotificationService = (await import("./NotificationService.js")).default;
+        await NotificationService.create(userId, title, message, type, metadata);
+    }
+
     async createPrayer(data) {
-        return this.create(data);
+        const prayer = await this.create(data);
+        await this.notify(data.userId, "New Prayer Created", `Your prayer '${data.title}' was created.`, "prayer", { prayerId: prayer.id });
+        return prayer;
+    }
+
+    async createFromRequest(requestId, adminId) {
+        const PrayerRequestService = (await import("./PrayerRequestService.js")).default;
+        const request = await PrayerRequestService.findById(requestId);
+        if (!request) return null;
+
+        const prayerData = {
+            title: request.title,
+            description: request.description,
+            images: request.images || [],
+            isPublic: true,
+            prayerRequestId: request.id,
+            userId: adminId, // Published by admin
+        };
+        return this.create(prayerData);
+    }
+
+    async likePrayer(id, userId) {
+        const prayer = await this.findById(id);
+        if (!prayer) return null;
+        prayer.likeCount = (prayer.likeCount || 0) + 1;
+        await prayer.save();
+        if (prayer.userId && prayer.userId !== userId) {
+            await this.notify(prayer.userId, "Prayer Liked", `Your prayer was liked.`, "like", { prayerId: prayer.id });
+        }
+        return prayer;
+    }
+
+    async commentPrayer(id, userId, comment) {
+        const prayer = await this.findById(id);
+        if (!prayer) return null;
+        prayer.commentCount = (prayer.commentCount || 0) + 1;
+        await prayer.save();
+        if (prayer.userId && prayer.userId !== userId) {
+            await this.notify(prayer.userId, "New Comment on Prayer", `Your prayer received a new comment.`, "comment", { prayerId: prayer.id, comment });
+        }
+        return prayer;
     }
 
     async create(data) {
-        const res = await PrayerRepository.create(data);
-        return res;
+        return PrayerRepository.create(data);
     }
     async update(id, data) {
-        const res = await this.findById(id);
-        if (!res) return null;
-        await res.update(data);
-        return res;
-
+        const prayer = await this.findById(id);
+        if (!prayer) return null;
+        return PrayerRepository.updateById ? PrayerRepository.updateById(id, data) : prayer.update(data);
     }
     async findById(id) {
-        const res = await PrayerRepository.findById(id);
-        return res;
+        return PrayerRepository.findById(id);
     }
     async findByIdForAUser(id, userId) {
-        const res = await PrayerRepository.findOne({ id, userId });
-        return res;
+        return PrayerRepository.findOne({ id, userId });
     }
     async getAll() {
-        const res = await PrayerRepository.findAll({
-            order: [["createdAt", "ASC"]],
+        return PrayerRepository.findAll({
+            where: { isPublic: true },
+            order: [["createdAt", "DESC"]],
         });
-
-        return res;
     }
     async delete(id) {
-        const res = await this.findById(id);
-        if (!res) return null;
-        await res.destroy();
-        return true;
+        return PrayerRepository.deleteById(id);
     }
     async getAllByUserId(userId) {
-        const res = await PrayerRepository.findAll({
+        return PrayerRepository.findAll({
             where: { userId: userId },
-            order: [["createdAt", "ASC"]],
+            order: [["createdAt", "DESC"]],
         });
-
-        return res;
     }
-
 }
 
 export default new PrayerService();
