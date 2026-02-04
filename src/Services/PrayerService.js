@@ -18,14 +18,24 @@ class PrayerService {
         const request = await PrayerRequestService.findById(requestId);
         if (!request) return null;
 
+        // Handle both MongoDB (_id) and SQL (id) primary keys
+        const requestIdValue = request.id || request._id;
+
+        console.log('🔍 DEBUG - Request object:', JSON.stringify(request, null, 2));
+        console.log('🔍 DEBUG - Request title:', request.title);
+        console.log('🔍 DEBUG - Request description:', request.description);
+
         const prayerData = {
             title: request.title,
             description: request.description,
             images: request.images || [],
             isPublic: true,
-            prayerRequestId: request.id,
+            prayerRequestId: requestIdValue,
             userId: adminId, // Published by admin
         };
+
+        console.log('🔍 DEBUG - Prayer data to create:', JSON.stringify(prayerData, null, 2));
+
         return this.create(prayerData);
     }
 
