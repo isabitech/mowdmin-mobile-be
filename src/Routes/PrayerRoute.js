@@ -20,6 +20,7 @@ prayer.put("/:id", protectUser, protectAdmin, tryCatch(PrayerController.update))
 prayer.delete("/:id", protectUser, protectAdmin, tryCatch(PrayerController.delete));
 prayer.post(
 	"/attach-request/:requestId",
+	protectUser,
 	protectAdmin,
 	tryCatch(PrayerController.attachRequest)
 );
