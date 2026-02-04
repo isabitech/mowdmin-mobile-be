@@ -25,37 +25,17 @@ class PrayerService {
         // Handle both MongoDB (_id) and SQL (id) primary keys  
         const requestIdValue = requestData.id || requestData._id;
 
-        // Validate required fields and provide detailed error
-        if (!requestData.title || !requestData.description) {
-            const errorDetails = {
-                message: 'Prayer request is missing required fields',
-                requestId: requestIdValue,
-                hasTitle: !!requestData.title,
-                hasDescription: !!requestData.description,
-                titleValue: requestData.title || 'MISSING',
-                descriptionValue: requestData.description || 'MISSING',
-                availableFields: Object.keys(requestData),
-                sampleData: {
-                    _id: requestData._id,
-                    id: requestData.id,
-                    userId: requestData.userId,
-                    title: requestData.title,
-                    description: requestData.description,
-                    images: requestData.images,
-                    isPublic: requestData.isPublic
-                }
-            };
-
-            console.error('❌ Prayer Request Validation Failed:', JSON.stringify(errorDetails, null, 2));
-
-            throw new Error(`Prayer request validation failed: ${!requestData.title ? 'title is missing' : ''
-                }${!requestData.title && !requestData.description ? ' and ' : ''}${!requestData.description ? 'description is missing' : ''
-                }. Available fields: ${Object.keys(requestData).join(', ')}`);
+        // Validate that at least title exists
+        if (!requestData.title) {
+            throw new Error(`Prayer request validation failed: title is missing. Request ID: ${requestIdValue}`);
         }
+
+        // Use title as description fallback for old prayer requests without description
+        const description = requestData.description || requestData.title;
 
         const prayerData = {
             title: requestData.title,
-            description: requestData.description,
+            description: description,
             images: requestData.images || [],
             isPublic: true,
             prayerRequestId: requestIdValue,
