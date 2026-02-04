@@ -7,7 +7,7 @@ const PrayerRequestMongoSchema = new mongoose.Schema({
     required: true,
   },
   title: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String, required: false }, // Made optional for backward compatibility
   images: [{ type: String }],
   isPublic: { type: Boolean, default: false },
 }, {
