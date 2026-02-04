@@ -18,8 +18,17 @@ class PrayerService {
         const request = await PrayerRequestService.findById(requestId);
         if (!request) return null;
 
+        // Log the raw request to see its structure
+        console.log('🔍 Raw request:', request);
+        console.log('🔍 Request keys:', Object.keys(request));
+
         // Convert Mongoose document to plain object if needed
         const requestData = request.toObject ? request.toObject() : request;
+
+        console.log('🔍 Converted requestData:', requestData);
+        console.log('🔍 RequestData keys:', Object.keys(requestData));
+        console.log('🔍 Title:', requestData.title);
+        console.log('🔍 Description:', requestData.description);
 
         // Handle both MongoDB (_id) and SQL (id) primary keys
         const requestIdValue = requestData.id || requestData._id;
@@ -29,7 +38,8 @@ class PrayerService {
             console.error('❌ Missing required fields in prayer request:', {
                 title: requestData.title,
                 description: requestData.description,
-                requestId: requestIdValue
+                requestId: requestIdValue,
+                allFields: Object.keys(requestData)
             });
             throw new Error('Prayer request is missing required fields (title or description)');
         }
