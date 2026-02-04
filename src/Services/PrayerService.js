@@ -18,23 +18,30 @@ class PrayerService {
         const request = await PrayerRequestService.findById(requestId);
         if (!request) return null;
 
-        // Handle both MongoDB (_id) and SQL (id) primary keys
-        const requestIdValue = request.id || request._id;
+        // Convert Mongoose document to plain object if needed
+        const requestData = request.toObject ? request.toObject() : request;
 
-        console.log('🔍 DEBUG - Request object:', JSON.stringify(request, null, 2));
-        console.log('🔍 DEBUG - Request title:', request.title);
-        console.log('🔍 DEBUG - Request description:', request.description);
+        // Handle both MongoDB (_id) and SQL (id) primary keys
+        const requestIdValue = requestData.id || requestData._id;
+
+        // Validate required fields
+        if (!requestData.title || !requestData.description) {
+            console.error('❌ Missing required fields in prayer request:', {
+                title: requestData.title,
+                description: requestData.description,
+                requestId: requestIdValue
+            });
+            throw new Error('Prayer request is missing required fields (title or description)');
+        }
 
         const prayerData = {
-            title: request.title,
-            description: request.description,
-            images: request.images || [],
+            title: requestData.title,
+            description: requestData.description,
+            images: requestData.images || [],
             isPublic: true,
             prayerRequestId: requestIdValue,
             userId: adminId, // Published by admin
         };
-
-        console.log('🔍 DEBUG - Prayer data to create:', JSON.stringify(prayerData, null, 2));
 
         return this.create(prayerData);
     }
