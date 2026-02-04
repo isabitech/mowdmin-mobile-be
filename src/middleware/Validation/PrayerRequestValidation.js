@@ -3,7 +3,9 @@ import Joi from "joi";
 export const validateCreatePrayerRequest = (payload) =>
     Joi.object({
         title: Joi.string().min(2).max(255).required(),
-        description: Joi.string().allow("", null),
+        description: Joi.string().required(),
+        images: Joi.array().items(Joi.string().uri()).optional(),
+        isPublic: Joi.boolean().default(false),
     })
         .prefs({ stripUnknown: true })
         .validate(payload);
@@ -11,7 +13,9 @@ export const validateCreatePrayerRequest = (payload) =>
 export const validateUpdatePrayerRequest = (payload) =>
     Joi.object({
         title: Joi.string().min(2).max(255),
-        description: Joi.string().allow("", null),
+        description: Joi.string(),
+        images: Joi.array().items(Joi.string().uri()),
+        isPublic: Joi.boolean(),
     })
         .prefs({ stripUnknown: true })
         .validate(payload);

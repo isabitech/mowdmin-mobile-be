@@ -1,0 +1,32 @@
+[
+  {
+    "passage": "Genesis 1:1",
+    "text": "In the beginning God created the heavens and the earth.",
+    "version": "KJV",
+    "isDaily": true
+  },
+  {
+    "passage": "Genesis 1:2",
+    "text": "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
+    "version": "KJV",
+    "isDaily": false
+  },
+  {
+    "passage": "John 3:16",
+    "text": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+    "version": "KJV",
+    "isDaily": true
+  },
+  {
+    "passage": "Psalm 23:1",
+    "text": "The LORD is my shepherd; I shall not want.",
+    "version": "KJV",
+    "isDaily": true
+  },
+  {
+    "passage": "Proverbs 3:5",
+    "text": "Trust in the LORD with all thine heart; and lean not unto thine own understanding.",
+    "version": "KJV",
+    "isDaily": false
+  }
+]

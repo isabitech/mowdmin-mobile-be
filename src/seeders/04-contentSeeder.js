@@ -59,14 +59,31 @@ const seedContent = async () => {
         }
 
         // 4. Seed Bible Verses (Daily verses)
-        for (let i = 0; i < 10; i++) {
-            await BibleRepository.createVerse({
-                text: `${faker.lorem.sentence()} - ${faker.person.firstName()}`, // Changed from verse to text
-                passage: `${faker.helpers.arrayElement(['Psalms', 'Proverbs', 'Matthew'])} ${faker.number.int({ min: 1, max: 150 })}:${faker.number.int({ min: 1, max: 20 })}`, // Changed from reference to passage
-                isDaily: true, // Ensuring this field is standard as per default
-                // date field is not in Mongo schema shown (timestamps used), but isDaily is.
-                // SQL model has isDaily too. Seeder had 'date' which is not in schema.
-            });
+        let bibleVerses = [];
+        try {
+            const verseData = await import("./bible-verses.json", { assert: { type: "json" } });
+            bibleVerses = verseData.default;
+        } catch (e) {
+            console.log("⚠️ Could not load bible-verses.json, using faker instead.");
+        }
+
+        if (bibleVerses.length > 0) {
+            for (const verse of bibleVerses) {
+                await BibleRepository.createVerse({
+                    text: verse.text,
+                    passage: verse.passage,
+                    isDaily: verse.isDaily || false,
+                    version: verse.version || 'KJV'
+                });
+            }
+        } else {
+            for (let i = 0; i < 10; i++) {
+                await BibleRepository.createVerse({
+                    text: `${faker.lorem.sentence()} - ${faker.person.firstName()}`,
+                    passage: `${faker.helpers.arrayElement(['Psalms', 'Proverbs', 'Matthew'])} ${faker.number.int({ min: 1, max: 150 })}:${faker.number.int({ min: 1, max: 20 })}`,
+                    isDaily: true,
+                });
+            }
         }
 
         console.log("✅ Content seeded successfully.");

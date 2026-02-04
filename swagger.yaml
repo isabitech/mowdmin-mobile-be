@@ -1,0 +1,193 @@
+openapi: 3.0.0
+info:
+  title: Mowdmin Mobile BE API
+  version: 1.1.0
+  description: API documentation for user prayer requests, admin prayers, prayer wall, likes, comments, and attaching requests.
+servers:
+  - url: /api/v1
+paths:
+  /prayer-request:
+    post:
+      summary: Create a prayer request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrayerRequestCreate'
+      responses:
+        '201':
+          description: Prayer request created
+    get:
+      summary: Admin fetch all prayer requests
+      responses:
+        '200':
+          description: List of prayer requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrayerRequest'
+  /prayer-request/user:
+    get:
+      summary: Get user's own prayer requests
+      responses:
+        '200':
+          description: List of user's prayer requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrayerRequest'
+  /prayer:
+    post:
+      summary: Admin create prayer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrayerCreate'
+      responses:
+        '201':
+          description: Prayer created
+    get:
+      summary: Get public prayers
+      responses:
+        '200':
+          description: List of prayers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prayer'
+  /prayer/user:
+    get:
+      summary: Get user's own prayers
+      responses:
+        '200':
+          description: List of user's prayers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prayer'
+  /prayer-wall/attach-request/{requestId}:
+    post:
+      summary: Admin attach user prayer request to prayer wall
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Prayer published from request
+  /prayer-like/{id}/like:
+    post:
+      summary: Like a prayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Prayer liked
+  /prayer-comment/{id}/comment:
+    post:
+      summary: Comment on a prayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Comment added
+components:
+  schemas:
+    PrayerRequestCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+    PrayerRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+    PrayerCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+        prayerRequestId:
+          type: string
+    Prayer:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        isPublic:
+          type: boolean
+        prayerRequestId:
+          type: string
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer

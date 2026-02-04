@@ -4,28 +4,24 @@ import { validateCreatePrayerRequest, validateUpdatePrayerRequest } from "../mid
 
 class PrayerRequestController {
   async create(req, res) {
-    const { error, value } = validateCreatePrayerRequest(req.body);
-    if (error) {
-      return sendError(res, { message: error.details[0].message, statusCode: 400 });
-    }
-
-    const data = { ...value, userId: req.user.id };
-    const result = await PrayerRequestService.createPrayerRequest(data);
+    const data = { ...req.body, userId: req.user.id };
+    const result = await PrayerRequestService.create(data);
     return sendSuccess(res, { message: "Prayer Request Created Successfully", data: result, statusCode: 201 });
   }
 
   async update(req, res) {
     const { id } = req.params;
-    const request = await PrayerRequestService.findByIdForAUser(id, req.user.id);
+    const request = await PrayerRequestService.findById(id);
 
     if (!request)
       return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
-    const { error, value } = validateUpdatePrayerRequest(req.body);
-    if (error) {
-      return sendError(res, { message: error.details[0].message, statusCode: 400 });
+
+    // Check ownership or admin role
+    if (req.user.role !== 'admin' && request.userId.toString() !== req.user.id.toString()) {
+      return sendError(res, { message: "Unauthorized to update this prayer request", statusCode: 403 });
     }
 
-    const updated = await request.update(value);
+    const updated = await PrayerRequestService.update(id, req.body);
     return sendSuccess(res, { message: "Prayer Request Updated Successfully", data: updated });
   }
 
@@ -36,7 +32,7 @@ class PrayerRequestController {
 
   async getAllByUser(req, res) {
     const requests = await PrayerRequestService.getAllByUserId(req.user.id);
-    return sendSuccess(res, { message: "User Prayer Requests Fetched Successfully", data: requests });
+    return sendSuccess(res, { message: "My Prayer Requests Fetched Successfully", data: requests });
   }
 
   async getSingle(req, res) {
@@ -50,12 +46,17 @@ class PrayerRequestController {
 
   async delete(req, res) {
     const { id } = req.params;
-    const request = await PrayerRequestService.findByIdForAUser(id, req.user.id);
+    const request = await PrayerRequestService.findById(id);
 
     if (!request)
       return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
 
-    await request.destroy();
+    // Check ownership or admin role
+    if (req.user.role !== 'admin' && request.userId.toString() !== req.user.id.toString()) {
+      return sendError(res, { message: "Unauthorized to delete this prayer request", statusCode: 403 });
+    }
+
+    await PrayerRequestService.delete(id);
     return sendSuccess(res, { message: "Prayer Request Deleted Successfully", data: {} });
   }
 }

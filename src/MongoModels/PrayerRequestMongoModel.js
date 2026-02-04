@@ -4,12 +4,12 @@ const PrayerRequestMongoSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserMongo',
-    required: false,
+    required: true,
   },
-  title: { type: String },
-  content: { type: String },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  images: [{ type: String }],
   isPublic: { type: Boolean, default: false },
-  prayedCount: { type: Number, default: 0 },
 }, {
   timestamps: true,
   collection: 'prayer_requests',
