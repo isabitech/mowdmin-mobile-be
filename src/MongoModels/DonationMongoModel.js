@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 
 const DonationMongoSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.UUID,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserMongo',
     required: true,
   },
   campaign: {
