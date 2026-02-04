@@ -16,32 +16,41 @@ class PrayerService {
     async createFromRequest(requestId, adminId) {
         const PrayerRequestService = (await import("./PrayerRequestService.js")).default;
         const request = await PrayerRequestService.findById(requestId);
-        if (!request) return null;
 
-        // Log the raw request to see its structure
-        console.log('🔍 Raw request:', request);
-        console.log('🔍 Request keys:', Object.keys(request));
+        if (!request) return null;
 
         // Convert Mongoose document to plain object if needed
         const requestData = request.toObject ? request.toObject() : request;
 
-        console.log('🔍 Converted requestData:', requestData);
-        console.log('🔍 RequestData keys:', Object.keys(requestData));
-        console.log('🔍 Title:', requestData.title);
-        console.log('🔍 Description:', requestData.description);
-
-        // Handle both MongoDB (_id) and SQL (id) primary keys
+        // Handle both MongoDB (_id) and SQL (id) primary keys  
         const requestIdValue = requestData.id || requestData._id;
 
-        // Validate required fields
+        // Validate required fields and provide detailed error
         if (!requestData.title || !requestData.description) {
-            console.error('❌ Missing required fields in prayer request:', {
-                title: requestData.title,
-                description: requestData.description,
+            const errorDetails = {
+                message: 'Prayer request is missing required fields',
                 requestId: requestIdValue,
-                allFields: Object.keys(requestData)
-            });
-            throw new Error('Prayer request is missing required fields (title or description)');
+                hasTitle: !!requestData.title,
+                hasDescription: !!requestData.description,
+                titleValue: requestData.title || 'MISSING',
+                descriptionValue: requestData.description || 'MISSING',
+                availableFields: Object.keys(requestData),
+                sampleData: {
+                    _id: requestData._id,
+                    id: requestData.id,
+                    userId: requestData.userId,
+                    title: requestData.title,
+                    description: requestData.description,
+                    images: requestData.images,
+                    isPublic: requestData.isPublic
+                }
+            };
+
+            console.error('❌ Prayer Request Validation Failed:', JSON.stringify(errorDetails, null, 2));
+
+            throw new Error(`Prayer request validation failed: ${!requestData.title ? 'title is missing' : ''
+                }${!requestData.title && !requestData.description ? ' and ' : ''}${!requestData.description ? 'description is missing' : ''
+                }. Available fields: ${Object.keys(requestData).join(', ')}`);
         }
 
         const prayerData = {
