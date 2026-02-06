@@ -33,7 +33,6 @@ class AuthController {
 
     // Forgot Password — send token
     static async forgotPassword(req, res) {
-
         await AuthService.forgotPassword(req.body.email);
         return sendSuccess(res, { message: "Password reset token sent to your email", data: {}, statusCode: 200 });
 
@@ -43,7 +42,6 @@ class AuthController {
     static async resetPassword(req, res) {
         await AuthService.resetPassword(req.body.email, req.body.token, req.body.newPassword);
         return sendSuccess(res, { message: "Password reset successfully", data: {}, statusCode: 200 });
-
     }
 
     // Verify Email with OTP
@@ -59,11 +57,9 @@ class AuthController {
     // Resend Email Verification OTP
     static async resendEmailVerification(req, res) {
         const { email } = req.body;
-
         if (!email) {
             return sendError(res, { message: "Email is required", statusCode: 400 });
         }
-
         const result = await AuthService.resendEmailVerification(email);
         return sendSuccess(res, { message: result.message, data: null, statusCode: 200 });
     }
@@ -72,35 +68,28 @@ class AuthController {
     static async changePassword(req, res) {
         await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
         return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
-
     }
 
     // Get user profile
     static async getProfile(req, res) {
         const userId = req.user.id;
-
         if (!userId) {
             return sendError(res, { message: "User ID is required", statusCode: 400 });
         }
-
         const profile = await AuthService.getProfile(userId);
-
         if (!profile) {
             return sendError(res, { message: "Profile not found", statusCode: 404 });
         }
-
         // Format image URL if exists
         const formatPhotoUrl = (url) => {
             if (!url) return null;
             if (url.startsWith('http')) return url;
             return `${process.env.BASE_URL}${url}`;
         };
-
         const profileData = {
             ...profile.toJSON(),
             photoUrl: formatPhotoUrl(profile.photoUrl),
         };
-
         return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
     }
 
@@ -108,13 +97,10 @@ class AuthController {
     static async createOrUpdateProfile(req, res) {
         const userId = req.user.id;
         const data = { ...req.body };
-
         // Attach uploaded file path if it exists
         if (req.file) data.photoUrl = `/uploads/${req.file.filename}`;
-
         // Call service to create or update the profile
         const profile = await AuthService.createOrUpdateProfile(userId, data);
-
         // Format image URL if exists
         const profileData = {
             ...profile.toJSON(),
@@ -122,18 +108,15 @@ class AuthController {
                 ? `${process.env.BASE_URL}${profile.photoUrl}`
                 : null,
         };
-
         return sendSuccess(res, { message: "Profile saved successfully", data: profileData, statusCode: 200 });
     }
 
     // Delete user profile
     static async deleteProfile(req, res) {
         const userId = req.user.id;
-
         if (!userId) {
             return sendError(res, { message: "User ID is required", statusCode: 400 });
         }
-
         await AuthService.deleteProfile(userId);
         return sendSuccess(res, { message: "Profile deleted successfully", data: null, statusCode: 200 });
     }
@@ -142,6 +125,19 @@ class AuthController {
     static async getAllUsers(req, res) {
         const users = await AuthService.getAllUsers();
         return sendSuccess(res, { message: "Users retrieved successfully", data: users, statusCode: 200 });
+    }
+
+    // GET user by ID (Admin or viewing public profiles)
+    static async getUserById(req, res) {
+        const { userId } = req.params;
+        if (!userId) {
+            return sendError(res, { message: "User ID is required", statusCode: 400 });
+        }
+        const user = await AuthService.getUserById(userId);
+        if (!user) {
+            return sendError(res, { message: "User not found", statusCode: 404 });
+        }
+        return sendSuccess(res, { message: "User retrieved successfully", data: user, statusCode: 200 });
     }
 
     // TOGGLE admin status (Admin Only)
@@ -155,10 +151,8 @@ class AuthController {
     static async adminUpdateUser(req, res) {
         const { userId } = req.params;
         const updateData = req.body;
-
         // Remove password from body if present, just to be double safe at controller level too
         delete updateData.password;
-
         const result = await AuthService.updateUserByAdmin(userId, updateData);
         return sendSuccess(res, { message: "User updated successfully (Admin)", data: result, statusCode: 200 });
     }
@@ -205,7 +199,6 @@ class AuthController {
             statusCode: 200
         });
     }
-
     // Create Admin
     static async createAdmin(req, res) {
         const admin = await AuthService.createAdmin(req.body);

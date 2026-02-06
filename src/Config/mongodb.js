@@ -12,9 +12,11 @@ export const connectMongoDB = async () => {
     } catch (error) {
         if (error instanceof Error) {
             console.error('❌ Unable to connect to MongoDB:', error.message);
+            console.warn('⚠️  App will continue without MongoDB. Some features may not work.');
         } else {
             console.error('❌ An unknown error occurred while connecting to MongoDB.');
         }
+        // Don't exit - allow app to continue running
         process.exit(1);
     }
 };

@@ -1,10 +1,19 @@
 import PrayerService from "../Services/PrayerService.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import mongoose from "mongoose";
 
 class PrayerController {
+  // Helper to validate ObjectId
+  isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
+  }
+
   // Admin: Attach a user prayer request to the prayer wall
   async attachRequest(req, res) {
     const { requestId } = req.params;
+    if (!this.isValidId(requestId)) {
+      return sendError(res, { message: "Invalid Prayer Request ID format", statusCode: 400 });
+    }
     const prayer = await PrayerService.createFromRequest(requestId, req.user.id);
     if (!prayer) return sendError(res, { message: "Prayer Request Not Found", statusCode: 404 });
     return sendSuccess(res, { message: "Prayer published from request", data: prayer });
@@ -28,6 +37,9 @@ class PrayerController {
 
   async getSingle(req, res) {
     const { id } = req.params;
+    if (!this.isValidId(id)) {
+      return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
+    }
     const prayer = await PrayerService.findById(id);
     if (!prayer)
       return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
@@ -37,6 +49,9 @@ class PrayerController {
 
   async update(req, res) {
     const { id } = req.params;
+    if (!this.isValidId(id)) {
+      return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
+    }
     const prayer = await PrayerService.findById(id);
     if (!prayer)
       return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
@@ -47,6 +62,9 @@ class PrayerController {
 
   async delete(req, res) {
     const { id } = req.params;
+    if (!this.isValidId(id)) {
+      return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
+    }
     const prayer = await PrayerService.findById(id); // Admin can delete any prayer
     if (!prayer)
       return sendError(res, { message: "Prayer Not Found", statusCode: 404 });

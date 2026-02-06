@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 
 let PrayerRequestModel;
 let UserModel;
@@ -5,6 +6,10 @@ let UserModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const PrayerRequestRepository = {
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
   async getModels() {
     if (!PrayerRequestModel || (!isMongo && !UserModel)) {
       if (isMongo) {
@@ -26,6 +31,7 @@ export const PrayerRequestRepository = {
   async findById(id, options = {}) {
     const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
+      if (!this.isValidId(id)) return null;
       return PrayerRequestModel.findById(id).populate('userId', 'name email');
     } else {
       return PrayerRequestModel.findByPk(id, {

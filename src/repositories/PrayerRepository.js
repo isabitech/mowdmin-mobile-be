@@ -1,8 +1,13 @@
+import mongoose from 'mongoose';
 
 let PrayerModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const PrayerRepository = {
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
   async getModel() {
     if (!PrayerModel) {
       if (isMongo) {
@@ -20,7 +25,11 @@ export const PrayerRepository = {
   },
   async findById(id, options = {}) {
     const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id, options);
+    if (isMongo) {
+      if (!this.isValidId(id)) return null;
+      return Model.findById(id);
+    }
+    return Model.findByPk(id, options);
   },
   async findOne(where, options = {}) {
     const Model = await this.getModel();

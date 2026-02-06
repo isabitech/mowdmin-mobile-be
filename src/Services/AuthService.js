@@ -283,13 +283,27 @@ class AuthService {
             throw new AppError("Profile not found", 404);
         }
 
-        await profile.destroy();
+        await ProfileRepository.deleteByUserId(userId);
         return { message: "Profile deleted successfully" };
     }
 
     // LIST all users (Admin Only)
     static async getAllUsers() {
         return await UserRepository.findAll();
+    }
+
+    // GET user by ID
+    static async getUserById(userId) {
+        const user = await UserRepository.findById(userId);
+        if (!user) {
+            throw new AppError("User not found", 404);
+        }
+
+        // Remove sensitive data
+        const userDataSafe = user.toJSON ? user.toJSON() : user;
+        delete userDataSafe.password;
+
+        return userDataSafe;
     }
 
     // TOGGLE admin status (Admin Only)
