@@ -60,6 +60,8 @@ auth.post("/forgot-password", passwordResetLimiter, validateForgotPassword, hand
 auth.post("/reset-password", otpLimiter, validateResetPassword, handleValidationErrors, tryCatch(AuthController.resetPassword));
 auth.post("/change-password", protectUser, validateChangePassword, handleValidationErrors, tryCatch(AuthController.changePassword));
 auth.post("/verify-otp", otpLimiter, validateEmailVerification, handleValidationErrors, tryCatch(AuthController.verifyEmail));
+auth.post("/verify-email", otpLimiter, validateEmailVerification, handleValidationErrors, tryCatch(AuthController.verifyEmail));
+
 auth.post("/resend-otp", passwordResetLimiter, validateResendVerification, handleValidationErrors, tryCatch(AuthController.resendEmailVerification));
 
 // Social Authentication
@@ -73,6 +75,7 @@ auth.delete("/profile", protectUser, tryCatch(AuthController.deleteProfile));
 
 // Admin Management (Admin Only)
 auth.get("/admin/users", protectUser, protectAdmin, tryCatch(AuthController.getAllUsers));
+auth.get("/admin/users/:userId", protectUser, protectAdmin, tryCatch(AuthController.getUserById));
 auth.put("/admin/users/:userId", protectUser, protectAdmin, tryCatch(AuthController.adminUpdateUser));
 auth.patch("/admin/users/:userId/promote", protectUser, protectAdmin, tryCatch(AuthController.toggleAdminStatus));
 auth.post("/admin/users/:userId/otp", protectUser, protectAdmin, tryCatch(AuthController.adminTriggerOTP));

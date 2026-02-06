@@ -1,7 +1,13 @@
+import mongoose from 'mongoose';
+
 let MinistryModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const MinistryRepository = {
+    isValidId(id) {
+        if (!isMongo) return true;
+        return mongoose.Types.ObjectId.isValid(id);
+    },
     async getModels() {
         if (!MinistryModel) {
             if (isMongo) {
@@ -21,7 +27,10 @@ export const MinistryRepository = {
 
     async findById(id) {
         const { MinistryModel } = await this.getModels();
-        if (isMongo) return MinistryModel.findById(id);
+        if (isMongo) {
+            if (!this.isValidId(id)) return null;
+            return MinistryModel.findById(id);
+        }
         return MinistryModel.findByPk(id);
     },
 
@@ -32,6 +41,7 @@ export const MinistryRepository = {
     async update(id, data) {
         const { MinistryModel } = await this.getModels();
         if (isMongo) {
+            if (!this.isValidId(id)) return null;
             return await MinistryModel.findByIdAndUpdate(id, data, { new: true });
         }
         await MinistryModel.update(data, { where: { id } });
@@ -40,7 +50,10 @@ export const MinistryRepository = {
 
     async delete(id) {
         const { MinistryModel } = await this.getModels();
-        if (isMongo) return await MinistryModel.findByIdAndDelete(id);
+        if (isMongo) {
+            if (!this.isValidId(id)) return null;
+            return await MinistryModel.findByIdAndDelete(id);
+        }
         return await MinistryModel.destroy({ where: { id } });
     }
 };
