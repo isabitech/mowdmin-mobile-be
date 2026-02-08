@@ -11,6 +11,9 @@ import BibleVerse from "./BibleVerseModel.js";
 import Ministry from "./MinistryModel.js";
 import BibleStoryMedia from "./BibleStoryMediaModel.js";
 import { Group, GroupMember, GroupMessage } from "./GroupModels.js";
+import Prayer from "./PrayerModel.js";
+import PrayerComment from "./PrayerCommentModel.js";
+import PrayerLike from "./PrayerLikeModel.js";
 
 // Define associations between models
 const setupAssociations = () => {
@@ -70,6 +73,18 @@ const setupAssociations = () => {
         otherKey: "bible_story_id",
         as: "stories"
     });
+
+    // Prayer - PrayerComment Associations
+    Prayer.hasMany(PrayerComment, { foreignKey: "prayerId", as: "comments" });
+    PrayerComment.belongsTo(Prayer, { foreignKey: "prayerId", as: "prayer" });
+    User.hasMany(PrayerComment, { foreignKey: "userId", as: "prayerComments" });
+    PrayerComment.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+    // Prayer - PrayerLike Associations
+    Prayer.hasMany(PrayerLike, { foreignKey: "prayerId", as: "prayerLikes" });
+    PrayerLike.belongsTo(Prayer, { foreignKey: "prayerId", as: "prayer" });
+    User.hasMany(PrayerLike, { foreignKey: "userId", as: "likedPrayers" });
+    PrayerLike.belongsTo(User, { foreignKey: "userId", as: "user" });
 
     console.log('✅ Model associations established');
 };
