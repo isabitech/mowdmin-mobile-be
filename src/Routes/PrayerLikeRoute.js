@@ -6,5 +6,6 @@ import { tryCatch } from "../Utils/try-catch.js";
 const router = Router();
 
 router.post("/:id/like", protectUser, tryCatch(PrayerLikeController.like));
+router.get("/my-likes", protectUser, tryCatch(PrayerLikeController.getUserLikes));
 
 export default router;
