@@ -2,25 +2,21 @@ import { ProductRepository } from "../repositories/ProductRepository.js";
 
 class ProductService {
     async createProduct(data) {
-        return this.create(data);
-    }
-
-    async create(data) {
         return ProductRepository.create(data);
     }
 
-    async update(id, data) {
+    async updateProduct(id, data) {
         const updated = await ProductRepository.updateById(id, data);
         if (!updated) throw new Error("Product not found");
         return updated;
     }
 
-    async findById(id) {
+    async getProductById(id) {
         return ProductRepository.findById(id);
     }
 
-    async findByIdForAUser(id, userId) {
-        return ProductRepository.findOne({ id, userId });
+    async getProductsByCategory(categoryId) {
+        return ProductRepository.findAll({ category: categoryId });
     }
 
     async getAll() {
@@ -29,7 +25,7 @@ class ProductService {
         });
     }
 
-    async delete(id) {
+    async deleteProduct(id) {
         const deleted = await ProductRepository.deleteById(id);
         if (!deleted) throw new Error("Product not found");
         return deleted;
