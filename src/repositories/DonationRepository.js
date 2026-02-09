@@ -1,4 +1,5 @@
 // DonationRepository.js
+import mongoose from 'mongoose';
 let DonationModel;
 let UserModel;
 
