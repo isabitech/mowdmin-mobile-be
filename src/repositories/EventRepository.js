@@ -43,7 +43,7 @@ export const EventRepository = {
       if (options.limit) query = query.limit(options.limit);
       if (options.offset) query = query.skip(options.offset);
 
-      return query;
+      return query.populate('registrations');
     } else {
       return EventModel.findAll(options);
     }
@@ -76,8 +76,16 @@ export const EventRepository = {
     }
   },
   async createRegistration(payload) {
-    const { EventRegistrationModel } = await this.getModels();
-    return EventRegistrationModel.create(payload);
+    const { EventModel, EventRegistrationModel } = await this.getModels();
+    const registration = await EventRegistrationModel.create(payload);
+
+    if (isMongo) {
+      await EventModel.findByIdAndUpdate(payload.eventId, {
+        $push: { registrations: registration._id }
+      });
+    }
+
+    return registration;
   },
   async registrationfindAll(options = {}) {
     const { EventRegistrationModel } = await this.getModels();
@@ -101,6 +109,22 @@ export const EventRepository = {
       // Otherwise, wrap the filter in a where clause.
       const seqOptions = options.where || options.order || options.limit ? options : { where: options };
       return EventRegistrationModel.findAll(seqOptions);
+    }
+  },
+
+  async unregister(eventId, userId) {
+    const { EventModel, EventRegistrationModel } = await this.getModels();
+    if (isMongo) {
+      const registration = await EventRegistrationModel.findOneAndDelete({ eventId, userId });
+      if (registration) {
+        await EventModel.findByIdAndUpdate(eventId, {
+          $pull: { registrations: registration._id }
+        });
+      }
+      return !!registration;
+    } else {
+      const result = await EventRegistrationModel.destroy({ where: { eventId, userId } });
+      return result > 0;
     }
   },
 };

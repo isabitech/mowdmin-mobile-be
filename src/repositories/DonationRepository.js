@@ -24,19 +24,44 @@ export const DonationRepository = {
     return DonationModel.create(dto);
   },
 
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
+
+  async findById(id) {
+    const { DonationModel } = await this.getModels();
+    if (isMongo) {
+      if (!this.isValidId(id)) return null;
+      return DonationModel.findById(id).populate('userId', 'name email');
+    } else {
+      return DonationModel.findByPk(id, {
+        include: [{ model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] }]
+      });
+    }
+  },
+
   async findAll(filters = {}, pagination = { page: 1, limit: 10 }) {
     const { DonationModel, UserModel } = await this.getModels();
     const { page, limit } = pagination;
 
+    // Handle MongoDB filters (convert userId string to ObjectId if present)
+    const processedFilters = { ...filters };
+    if (isMongo && processedFilters.userId && typeof processedFilters.userId === 'string') {
+      if (mongoose.Types.ObjectId.isValid(processedFilters.userId)) {
+        processedFilters.userId = new mongoose.Types.ObjectId(processedFilters.userId);
+      }
+    }
+
     if (isMongo) {
       const skip = (page - 1) * limit;
       const [data, total] = await Promise.all([
-        DonationModel.find(filters)
+        DonationModel.find(processedFilters)
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit)
-          .populate('userId', 'name email'), // Assuming we want basic user info
-        DonationModel.countDocuments(filters)
+          .populate('userId', 'name email'),
+        DonationModel.countDocuments(processedFilters)
       ]);
       return {
         data,
@@ -50,7 +75,7 @@ export const DonationRepository = {
     } else {
       const offset = (page - 1) * limit;
       const { rows, count } = await DonationModel.findAndCountAll({
-        where: filters,
+        where: processedFilters,
         offset,
         limit,
         order: [['createdAt', 'DESC']],
@@ -72,6 +97,10 @@ export const DonationRepository = {
         }
       };
     }
+  },
+
+  async findAllByUserId(userId, pagination = { page: 1, limit: 10 }) {
+    return this.findAll({ userId }, pagination);
   }
 };
 

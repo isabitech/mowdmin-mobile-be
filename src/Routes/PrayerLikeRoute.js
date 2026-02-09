@@ -7,5 +7,6 @@ const router = Router();
 
 router.post("/:id/like", protectUser, tryCatch(PrayerLikeController.like));
 router.get("/my-likes", protectUser, tryCatch(PrayerLikeController.getUserLikes));
+router.post("/:id/unlike", protectUser, tryCatch(PrayerLikeController.unlike)); // Toggle like/unlike
 
 export default router;

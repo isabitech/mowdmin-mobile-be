@@ -69,7 +69,20 @@ export const PrayerRequestRepository = {
   async findAll(options = {}) {
     const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return PrayerRequestModel.find({}).populate('userId', 'name email');
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+      let query = PrayerRequestModel.find(filter).populate('userId', 'name email');
+
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
     } else {
       return PrayerRequestModel.findAll({
         ...options,
@@ -110,6 +123,22 @@ export const PrayerRequestRepository = {
 
   async findAllByUserId(userId, options = {}) {
     const { PrayerRequestModel } = await this.getModels();
-    return isMongo ? PrayerRequestModel.find({ userId, ...options }) : PrayerRequestModel.findAll({ where: { userId }, ...options });
+    if (isMongo) {
+      let query = PrayerRequestModel.find({ userId });
+
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.skip(options.offset);
+
+      return query;
+    } else {
+      return PrayerRequestModel.findAll({ where: { userId }, ...options });
+    }
   },
 };

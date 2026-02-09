@@ -44,6 +44,10 @@ class EventRegistrationService {
     async getByUserId(userId) {
         return await EventRepository.registrationfindAll({ userId });
     }
+
+    async unregister(eventId, userId) {
+        return await EventRepository.unregister(eventId, userId);
+    }
 }
 
 export default new EventRegistrationService();
