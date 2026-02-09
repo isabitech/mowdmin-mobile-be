@@ -1,4 +1,6 @@
 import { PrayerRepository } from "../repositories/PrayerRepository.js";
+import { PrayerLikeRepository } from "../repositories/PrayerLikeRepository.js";
+import { PrayerCommentRepository } from "../repositories/PrayerCommentRepository.js";
 //import { NotificationService } from "./NotificationService.js";
 
 class PrayerService {
