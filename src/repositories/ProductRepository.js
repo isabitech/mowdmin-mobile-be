@@ -31,7 +31,9 @@ export const ProductRepository = {
   async findAll(options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
-      return Model.find({});
+      // If options.where exists, use it, otherwise use the options object itself as filter if it doesn't look like Sequelize options
+      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+      return Model.find(filter);
     } else {
       return Model.findAll(options);
     }
