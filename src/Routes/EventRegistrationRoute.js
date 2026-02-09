@@ -1,7 +1,7 @@
 import { Router } from "express";
 import EventRegistrationController from "../Controllers/EventRegistration.js";
 import { tryCatch } from "../Utils/try-catch.js";
-import { protectUser ,protectAdmin} from "../middleware/authMiddleware.js";
+import { protectUser, protectAdmin } from "../middleware/authMiddleware.js";
 import { validateEventRegistration } from "../middleware/Validation/eventRegistrationValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
@@ -14,6 +14,13 @@ registration.post(
     validateEventRegistration,
     handleValidationErrors,
     tryCatch(EventRegistrationController.create)
+);
+
+// Unregister from an event
+registration.delete(
+    "/unregister/:eventId",
+    protectUser,
+    tryCatch(EventRegistrationController.Unregister)
 );
 
 // Get all registrations (admin or global)

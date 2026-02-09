@@ -59,4 +59,26 @@ describe('Event Registration Routes', () => {
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('success');
     });
+
+    it('should unregister from an event successfully', async () => {
+        EventRegistrationService.unregister.mockResolvedValue(true);
+
+        const response = await request(app)
+            .delete(`/api/v1/event-registration/unregister/${validUUID}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe('success');
+        expect(response.body.message).toBe('Unregistered successfully');
+    });
+
+    it('should return 404 if registration not found when unregistering', async () => {
+        EventRegistrationService.unregister.mockResolvedValue(false);
+
+        const response = await request(app)
+            .delete(`/api/v1/event-registration/unregister/${validUUID}`);
+
+        expect(response.status).toBe(404);
+        expect(response.body.status).toBe('error');
+        expect(response.body.message).toBe('Registration not found or already removed');
+    });
 });

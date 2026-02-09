@@ -7,7 +7,7 @@ class EventRegistrationController {
         const { eventId } = req.body;
         console.log("Creating registration for eventId:", eventId);
         const userId = req.user.id;
-        const data = { userId, eventId};
+        const data = { userId, eventId };
         const registration = await EventRegistrationService.createEventReg(data);
         return sendSuccess(res, { message: "Registration created successfully", data: registration });
     }
@@ -39,7 +39,7 @@ class EventRegistrationController {
         }
         return sendSuccess(res, { message: "Registration updated successfully", data: registration });
     }
-   static async Delete(req, res) {
+    static async Delete(req, res) {
         const { id } = req.params;
         const deleted = await EventRegistrationService.deleteEventReg(id);
         if (!deleted) {
@@ -51,6 +51,16 @@ class EventRegistrationController {
         const userId = req.user.id;
         const registrations = await EventRegistrationService.getByUserId(userId);
         return sendSuccess(res, { message: "User registrations fetched successfully", data: registrations });
+    }
+
+    static async Unregister(req, res) {
+        const { eventId } = req.params;
+        const userId = req.user.id;
+        const result = await EventRegistrationService.unregister(eventId, userId);
+        if (!result) {
+            return sendError(res, { message: "Registration not found or already removed", statusCode: 404 });
+        }
+        return sendSuccess(res, { message: "Unregistered successfully" });
     }
 
 }
