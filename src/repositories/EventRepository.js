@@ -1,9 +1,15 @@
+import mongoose from 'mongoose';
+
 let EventModel;
 let EventRegistrationModel;
 
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const EventRepository = {
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
   async getModels() {
     if (!EventModel || (!isMongo && !EventRegistrationModel)) {
       if (isMongo) {
@@ -52,6 +58,7 @@ export const EventRepository = {
   async findById(id, options = {}) {
     const { EventModel, EventRegistrationModel } = await this.getModels();
     if (isMongo) {
+      if (!this.isValidId(id)) return null;
       return EventModel.findById(id).populate('registrations');
     } else {
       return EventModel.findByPk(id, {
@@ -69,6 +76,7 @@ export const EventRepository = {
   async deleteById(id, options = {}) {
     const { EventModel } = await this.getModels();
     if (isMongo) {
+      if (!this.isValidId(id)) return false;
       const result = await EventModel.findByIdAndDelete(id);
       return !!result;
     } else {

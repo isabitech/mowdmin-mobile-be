@@ -1,5 +1,5 @@
 import { body, param, validationResult } from "express-validator";
-import Event from "../../Models/EventModel.js"; // ensure .js extension
+import { EventRepository } from "../../repositories/EventRepository.js";
 import { sendValidationError } from "../../core/response.js";
 
 // ---------------- CREATE EVENT VALIDATION ----------------
@@ -27,7 +27,7 @@ export const validateEventCreate = [
 
 export const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
-    
+
     if (!errors.isEmpty()) {
         return sendValidationError(res, { statusCode: 400, errors: errors.array() });
     }
@@ -42,7 +42,7 @@ export const validateEventUpdate = [
         .withMessage("Event ID is required")
         .bail()
         .custom(async (value) => {
-            const event = await Event.findByPk(value);
+            const event = await EventRepository.findById(value);
             if (!event) {
                 throw new Error("Event not found");
             }
