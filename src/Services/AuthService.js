@@ -123,14 +123,11 @@ class AuthService {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
-
         const { token, expiresAt } = AuthService.generateToken(user.id);
         const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
-
         // Store session
         const tokenHash = AuthService.hashToken(token);
         const refreshTokenHash = AuthService.hashToken(refreshToken);
-
         await AuthRepository.create({
             userId: user.id,
             tokenHash,

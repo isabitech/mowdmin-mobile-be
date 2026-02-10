@@ -25,13 +25,13 @@ const runSeeders = async () => {
         console.log("🚀 Starting Seeder...");
 
         await seedAdmin();
-        await seedUsers(20);
-        await seedMinistries();
-        await seedContent();
-        await seedEvents();
-        await seedCommunity();
-        await seedCommerce();
-        await seedPrayers();
+        // await seedUsers(20);
+        // await seedMinistries();
+        // await seedContent();
+        // await seedEvents();
+        // await seedCommunity();
+        // await seedCommerce();
+        // await seedPrayers();
 
         console.log("🎉 All seeders executed successfully!");
         process.exit(0);

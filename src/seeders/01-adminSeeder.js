@@ -11,13 +11,14 @@ const seedAdmin = async () => {
         const existingAdmin = await UserRepository.findByEmail(adminEmail);
 
         if (existingAdmin) {
-            if (!existingAdmin.isAdmin) {
-                console.log("⚠️ User exists but is not an admin. Updating to admin status...");
-                await UserRepository.update(existingAdmin.id, { isAdmin: true, role: "admin" });
-                console.log("✅ Admin status granted to existing user.");
-            } else {
-                console.log("⚠️ Admin user already exists and is correctly configured.");
-            }
+            console.log("⚠️ Admin user already exists. Syncing password and roles...");
+            await UserRepository.update(existingAdmin.id, {
+                password: "Password123!",
+                isAdmin: true,
+                role: "admin",
+                emailVerified: true
+            });
+            console.log("✅ Admin credentials synchronized.");
             return;
         }
 
