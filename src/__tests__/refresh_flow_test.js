@@ -139,7 +139,6 @@ describe('Refresh Token Rotation & Reuse Detection', () => {
 
         // 3. Verify Security Response
         console.log('DEBUG RESPONSE BODY:', JSON.stringify(response.body, null, 2));
-        throw new Error('FORCE FAIL TO SEE LOGS');
         expect(response.status).toBe(403); // Forbidden
         expect(response.body.message).toMatch(/Suspicious activity detected/); // User warning
 
