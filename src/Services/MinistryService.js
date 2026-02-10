@@ -14,11 +14,11 @@ class MinistryService {
     }
 
     async updateMinistry(id, data) {
-        return await MinistryRepository.update(id, data);
+        return await MinistryRepository.updateById(id, data);
     }
 
     async deleteMinistry(id) {
-        return await MinistryRepository.delete(id);
+        return await MinistryRepository.deleteById(id);
     }
 }
 

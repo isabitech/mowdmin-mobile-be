@@ -6,6 +6,10 @@ let MediaModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const MediaBookmarkRepository = {
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
   async getModels() {
     if (!MediaBookmarkModel || (!isMongo && (!UserModel || !MediaModel))) {
       if (isMongo) {
@@ -72,6 +76,7 @@ export const MediaBookmarkRepository = {
   async findById(id, options = {}) {
     const { MediaBookmarkModel, UserModel, MediaModel } = await this.getModels();
     if (isMongo) {
+      if (!this.isValidId(id)) return null;
       return MediaBookmarkModel.findById(id)
         .populate('userId', 'name email')
         .populate('mediaId');
@@ -96,15 +101,19 @@ export const MediaBookmarkRepository = {
   async updateById(id, payload, options = {}) {
     const { MediaBookmarkModel } = await this.getModels();
     if (isMongo) {
-      return MediaBookmarkModel.findByIdAndUpdate(id, payload, { new: true });
+      if (!this.isValidId(id)) return null;
+      return MediaBookmarkModel.findByIdAndUpdate(id, payload, { new: true }).populate('mediaId');
     } else {
-      return MediaBookmarkModel.update(payload, { where: { id }, returning: true, ...options });
+      const res = await MediaBookmarkModel.findByPk(id, options);
+      if (!res) return null;
+      return res.update(payload);
     }
   },
 
   async deleteById(id, options = {}) {
     const { MediaBookmarkModel } = await this.getModels();
     if (isMongo) {
+      if (!this.isValidId(id)) return false;
       const result = await MediaBookmarkModel.findByIdAndDelete(id);
       return !!result;
     } else {

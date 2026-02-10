@@ -38,17 +38,18 @@ export const MinistryRepository = {
         const { MinistryModel } = await this.getModels();
         return MinistryModel.create(data);
     },
-    async update(id, data) {
+    async updateById(id, data) {
         const { MinistryModel } = await this.getModels();
         if (isMongo) {
             if (!this.isValidId(id)) return null;
             return await MinistryModel.findByIdAndUpdate(id, data, { new: true });
         }
-        await MinistryModel.update(data, { where: { id } });
-        return await MinistryModel.findByPk(id);
+        const ministry = await MinistryModel.findByPk(id);
+        if (!ministry) return null;
+        return ministry.update(data);
     },
 
-    async delete(id) {
+    async deleteById(id) {
         const { MinistryModel } = await this.getModels();
         if (isMongo) {
             if (!this.isValidId(id)) return null;

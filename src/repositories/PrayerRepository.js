@@ -43,6 +43,16 @@ export const PrayerRepository = {
       return Model.findAll(options);
     }
   },
+  async updateById(id, payload, options = {}) {
+    const Model = await this.getModel();
+    if (isMongo) {
+      return Model.findByIdAndUpdate(id, payload, { new: true });
+    } else {
+      const res = await Model.findByPk(id, options);
+      if (!res) return null;
+      return res.update(payload);
+    }
+  },
   async deleteById(id, options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
