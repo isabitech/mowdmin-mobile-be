@@ -37,9 +37,7 @@ class EventService {
   }
 
   async deleteEvent(id) {
-    const event = await this.getEventById(id);
-    await event.destroy();
-    return true;
+    return await EventRepository.deleteById(id);
   }
 }
 
