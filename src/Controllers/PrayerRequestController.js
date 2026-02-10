@@ -5,17 +5,17 @@ import mongoose from "mongoose";
 
 class PrayerRequestController {
   // Helper to validate ObjectId
-  isValidId(id) {
+  isValidId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
   }
 
-  async create(req, res) {
+  create = async (req, res) => {
     const data = { ...req.body, userId: req.user.id };
     const result = await PrayerRequestService.create(data);
     return sendSuccess(res, { message: "Prayer Request Created Successfully", data: result, statusCode: 201 });
   }
 
-  async update(req, res) {
+  update = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer Request ID format", statusCode: 400 });
@@ -34,17 +34,17 @@ class PrayerRequestController {
     return sendSuccess(res, { message: "Prayer Request Updated Successfully", data: updated });
   }
 
-  async getAll(req, res) {
+  getAll = async (req, res) => {
     const requests = await PrayerRequestService.getAll();
     return sendSuccess(res, { message: "All Prayer Requests Fetched Successfully", data: requests });
   }
 
-  async getAllByUser(req, res) {
+  getAllByUser = async (req, res) => {
     const requests = await PrayerRequestService.getAllByUserId(req.user.id);
     return sendSuccess(res, { message: "My Prayer Requests Fetched Successfully", data: requests });
   }
 
-  async getSingle(req, res) {
+  getSingle = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer Request ID format", statusCode: 400 });
@@ -56,7 +56,7 @@ class PrayerRequestController {
     return sendSuccess(res, { message: "Prayer Request Fetched Successfully", data: request });
   }
 
-  async delete(req, res) {
+  delete = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer Request ID format", statusCode: 400 });

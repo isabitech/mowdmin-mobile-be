@@ -4,16 +4,16 @@ import mongoose from "mongoose";
 
 class MinistryController {
     // Helper to validate ObjectId
-    isValidId(id) {
+    isValidId = (id) => {
         return mongoose.Types.ObjectId.isValid(id);
     }
 
-    async getAllMinistries(req, res) {
+    getAllMinistries = async (req, res) => {
         const ministries = await MinistryService.getAllMinistries();
         return sendSuccess(res, { message: "Ministries fetched successfully", data: ministries });
     }
 
-    async getMinistryById(req, res) {
+    getMinistryById = async (req, res) => {
         if (!this.isValidId(req.params.id)) {
             return sendError(res, { message: "Invalid Ministry ID format", statusCode: 400 });
         }
@@ -22,12 +22,12 @@ class MinistryController {
         return sendSuccess(res, { message: "Ministry fetched successfully", data: ministry });
     }
 
-    async createMinistry(req, res) {
+    createMinistry = async (req, res) => {
         const ministry = await MinistryService.createMinistry(req.body);
         return sendSuccess(res, { message: "Ministry created successfully", data: ministry, statusCode: 201 });
     }
 
-    async updateMinistry(req, res) {
+    updateMinistry = async (req, res) => {
         if (!this.isValidId(req.params.id)) {
             return sendError(res, { message: "Invalid Ministry ID format", statusCode: 400 });
         }
@@ -36,7 +36,7 @@ class MinistryController {
         return sendSuccess(res, { message: "Ministry updated successfully", data: ministry });
     }
 
-    async deleteMinistry(req, res) {
+    deleteMinistry = async (req, res) => {
         if (!this.isValidId(req.params.id)) {
             return sendError(res, { message: "Invalid Ministry ID format", statusCode: 400 });
         }
