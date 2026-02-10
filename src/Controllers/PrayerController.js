@@ -4,12 +4,12 @@ import mongoose from "mongoose";
 
 class PrayerController {
   // Helper to validate ObjectId
-  isValidId(id) {
+  isValidId = (id) => {
     return mongoose.Types.ObjectId.isValid(id);
   }
 
   // Admin: Attach a user prayer request to the prayer wall
-  async attachRequest(req, res) {
+  attachRequest = async (req, res) => {
     const { requestId } = req.params;
     if (!this.isValidId(requestId)) {
       return sendError(res, { message: "Invalid Prayer Request ID format", statusCode: 400 });
@@ -19,13 +19,13 @@ class PrayerController {
     return sendSuccess(res, { message: "Prayer published from request", data: prayer });
   }
 
-  async create(req, res) {
+  create = async (req, res) => {
     const data = { ...req.body, userId: req.user.id };
     const prayer = await PrayerService.createPrayer(data);
     return sendSuccess(res, { message: "Prayer Created Successfully", data: prayer, statusCode: 201 });
   }
 
-  async getAll(req, res) {
+  getAll = async (req, res) => {
     if (req.user.isAdmin) {
       const prayers = await PrayerService.getAll();
       return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
@@ -34,12 +34,12 @@ class PrayerController {
     return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
   }
 
-  async getAllByUser(req, res) {
+  getAllByUser = async (req, res) => {
     const prayers = await PrayerService.getAllByUserId(req.user.id);
     return sendSuccess(res, { message: "My General Prayers Fetched Successfully", data: prayers });
   }
 
-  async getSingle(req, res) {
+  getSingle = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
@@ -51,7 +51,7 @@ class PrayerController {
     return sendSuccess(res, { message: "Prayer Fetched Successfully", data: prayer });
   }
 
-  async update(req, res) {
+  update = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
@@ -64,7 +64,7 @@ class PrayerController {
     return sendSuccess(res, { message: "Prayer Updated Successfully", data: updated });
   }
 
-  async delete(req, res) {
+  delete = async (req, res) => {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
