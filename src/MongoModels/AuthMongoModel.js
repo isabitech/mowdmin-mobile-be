@@ -27,6 +27,15 @@ const AuthMongoSchema = new mongoose.Schema({
     loggedOutAt: {
         type: Date,
     },
+    refreshTokenHash: {
+        type: String,
+    },
+    refreshTokenExpiresAt: {
+        type: Date,
+    },
+    replacedBy: {
+        type: String, // IDs of the new session that replaced this one (for reuse detection)
+    },
 }, {
     timestamps: true,
 });

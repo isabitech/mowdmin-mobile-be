@@ -56,6 +56,7 @@ auth.post(
     tryCatch(AuthController.login)
 );
 auth.post("/logout", tryCatch(AuthController.logout));
+auth.post("/refresh", authLimiter, tryCatch(AuthController.refreshToken));
 auth.post("/forgot-password", passwordResetLimiter, validateForgotPassword, handleValidationErrors, tryCatch(AuthController.forgotPassword));
 auth.post("/reset-password", otpLimiter, validateResetPassword, handleValidationErrors, tryCatch(AuthController.resetPassword));
 auth.post("/change-password", protectUser, validateChangePassword, handleValidationErrors, tryCatch(AuthController.changePassword));
