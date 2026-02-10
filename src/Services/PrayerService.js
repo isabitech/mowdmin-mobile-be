@@ -105,9 +105,7 @@ class PrayerService {
         return PrayerRepository.create(data);
     }
     async update(id, data) {
-        const prayer = await this.findById(id);
-        if (!prayer) return null;
-        return PrayerRepository.updateById ? PrayerRepository.updateById(id, data) : prayer.update(data);
+        return PrayerRepository.updateById(id, data);
     }
     async findById(id) {
         return PrayerRepository.findById(id);

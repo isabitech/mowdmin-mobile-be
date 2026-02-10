@@ -77,9 +77,11 @@ export const MediaRepository = {
   async updateById(id, payload, options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
-      return Model.findByIdAndUpdate(id, payload, { new: true });
+      return Model.findByIdAndUpdate(id, payload, { new: true }).populate('category_id');
     } else {
-      return Model.update(payload, { where: { id }, returning: true, ...options });
+      const res = await Model.findByPk(id, options);
+      if (!res) return null;
+      return res.update(payload);
     }
   },
   async deleteById(id, options = {}) {

@@ -83,6 +83,17 @@ export const EventRepository = {
       return EventModel.destroy({ where: { id }, ...options });
     }
   },
+  async updateById(id, payload, options = {}) {
+    const { EventModel } = await this.getModels();
+    if (isMongo) {
+      if (!this.isValidId(id)) return null;
+      return EventModel.findByIdAndUpdate(id, payload, { new: true }).populate('registrations');
+    } else {
+      const event = await EventModel.findByPk(id, options);
+      if (!event) return null;
+      return event.update(payload);
+    }
+  },
   async createRegistration(payload) {
     const { EventModel, EventRegistrationModel } = await this.getModels();
     const registration = await EventRegistrationModel.create(payload);

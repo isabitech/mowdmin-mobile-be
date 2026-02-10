@@ -17,10 +17,7 @@ class MediaService {
 
 
   async update(id, data) {
-    const res = await this.findById(id);
-    if (!res) return null;
-    await res.update(data);
-    return res;
+    return await MediaRepository.updateById(id, data);
   }
 
   async findById(id) {

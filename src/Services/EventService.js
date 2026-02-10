@@ -21,19 +21,7 @@ class EventService {
   }
 
   async updateEvent(id, updates) {
-    const event = await this.getEventById(id);
-    if (event.update) {
-      // Sequelize instance
-      await event.update(updates);
-      return event;
-    } else if (event.save) {
-      // Mongoose document
-      Object.assign(event, updates);
-      await event.save();
-      return event;
-    } else {
-      throw new Error('Event update not supported for this model instance');
-    }
+    return await EventRepository.updateById(id, updates);
   }
 
   async deleteEvent(id) {

@@ -40,7 +40,9 @@ export const MediaCategoryRepository = {
     if (isMongo) {
       return Model.findByIdAndUpdate(id, payload, { new: true });
     } else {
-      return Model.update(payload, { where: { id }, returning: true });
+      const category = await Model.findByPk(id);
+      if (!category) return null;
+      return category.update(payload);
     }
   },
   async deleteById(id) {

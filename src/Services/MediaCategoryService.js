@@ -7,10 +7,7 @@ class MediaCategoryService {
     }
 
     async updateMediaCategory(id, data) {
-        const res = await this.findById(id);
-        if (!res) return null;
-        await res.update(data);
-        return res;
+        return await MediaCategoryRepository.updateById(id, data);
     }
 
     async findById(id) {
