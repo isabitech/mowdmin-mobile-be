@@ -1,8 +1,13 @@
 
 let MediaCategoryModel;
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
+import mongoose from 'mongoose';
 
 export const MediaCategoryRepository = {
+  isValidId(id) {
+    if (!isMongo) return true;
+    return mongoose.Types.ObjectId.isValid(id);
+  },
   async getModel() {
     if (!MediaCategoryModel) {
       if (isMongo) {
@@ -38,6 +43,7 @@ export const MediaCategoryRepository = {
   async updateById(id, payload) {
     const Model = await this.getModel();
     if (isMongo) {
+      if (!this.isValidId(id)) return null;
       return Model.findByIdAndUpdate(id, payload, { new: true });
     } else {
       const category = await Model.findByPk(id);

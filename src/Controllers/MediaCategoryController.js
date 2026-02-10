@@ -28,6 +28,9 @@ class MediaCategoryController {
     }
 
     const updated = await MediaCategoryService.updateMediaCategory(req.params.id, value);
+    if (!updated) {
+      return sendError(res, { message: "Media Category not found", statusCode: 404 });
+    }
     return sendSuccess(res, { message: "Media Category Updated Successfully", data: updated });
   }
   async delete(req, res, next) {
