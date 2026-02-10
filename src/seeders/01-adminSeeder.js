@@ -10,17 +10,17 @@ const seedAdmin = async () => {
         const adminEmail = "admin@mowdmin.com";
         const existingAdmin = await UserRepository.findByEmail(adminEmail);
 
-        if (existingAdmin) {
-            console.log("⚠️ Admin user already exists. Syncing password and roles...");
-            await UserRepository.update(existingAdmin.id, {
-                password: "Password123!",
-                isAdmin: true,
-                role: "admin",
-                emailVerified: true
-            });
-            console.log("✅ Admin credentials synchronized.");
-            return;
-        }
+        // if (existingAdmin) {
+        //     console.log("⚠️ Admin user already exists. Syncing password and roles...");
+        //     await UserRepository.update(existingAdmin.id, {
+        //         password: "Password123!",
+        //         isAdmin: true,
+        //         role: "admin",
+        //         emailVerified: true
+        //     });
+        //     console.log("✅ Admin credentials synchronized.");
+        //     return;
+        // }
 
         const newAdmin = await UserRepository.create({
             name: "Super Admin",
