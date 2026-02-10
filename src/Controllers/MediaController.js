@@ -28,6 +28,9 @@ class MediaController {
     }
 
     const updated = await MediaService.update(req.params.id, value);
+    if (!updated) {
+      return sendError(res, { message: "Media not found", statusCode: 404 });
+    }
     return sendSuccess(res, { message: "Media Updated Successfully", data: updated });
   }
   async delete(req, res, next) {
