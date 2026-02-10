@@ -26,7 +26,11 @@ class PrayerController {
   }
 
   async getAll(req, res) {
-    const prayers = await PrayerService.getAll();
+    if (req.user.isAdmin) {
+      const prayers = await PrayerService.getAll();
+      return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
+    }
+    const prayers = await PrayerService.getAll(req.user.id);
     return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
   }
 

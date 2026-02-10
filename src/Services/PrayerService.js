@@ -115,10 +115,31 @@ class PrayerService {
     async findByIdForAUser(id, userId) {
         return PrayerRepository.findOne({ id, userId });
     }
-    async getAll() {
-        return PrayerRepository.findAll({
+    async getAll(userId) {
+        const prayers = await PrayerRepository.findAll({
             where: { isPublic: true },
             order: [["createdAt", "DESC"]],
+        });
+
+        if (userId) {
+            const likedPrayerIds = await PrayerLikeRepository.findLikedPrayerIdsByUserId(userId);
+            const likedSet = new Set(likedPrayerIds.map(id => id.toString()));
+
+            return prayers.map(prayer => {
+                const prayerObj = prayer.toObject ? prayer.toObject() : prayer.toJSON(); // Handle Mongoose vs Sequelize
+                return {
+                    ...prayerObj,
+                    isLiked: likedSet.has((prayerObj.id || prayerObj._id).toString())
+                };
+            });
+        }
+
+        return prayers.map(prayer => {
+            const prayerObj = prayer.toObject ? prayer.toObject() : prayer.toJSON();
+            return {
+                ...prayerObj,
+                isLiked: false
+            };
         });
     }
     async delete(id) {

@@ -72,4 +72,18 @@ export const PrayerLikeRepository = {
         }
         return Model.count({ where: { prayerId } });
     },
+
+    async findLikedPrayerIdsByUserId(userId) {
+        const Model = await this.getModel();
+        if (isMongo) {
+            const likes = await Model.find({ userId }).select('prayerId');
+            return likes.map(like => like.prayerId.toString());
+        } else {
+            const likes = await Model.findAll({
+                where: { userId },
+                attributes: ['prayerId'],
+            });
+            return likes.map(like => like.prayerId);
+        }
+    },
 };
