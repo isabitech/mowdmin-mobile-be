@@ -56,13 +56,17 @@ class SocialAuthService {
             }
 
             // Generate JWT token
-            const token = AuthService.generateToken(user.id);
+            const { token, expiresAt } = AuthService.generateToken(user.id);
+            const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
 
             // Store session
             const tokenHash = AuthService.hashToken(token);
+            const refreshTokenHash = AuthService.hashToken(refreshToken);
             await AuthRepository.create({
                 userId: user.id,
                 tokenHash,
+                refreshTokenHash,
+                refreshTokenExpiresAt: refreshExpiresAt,
                 ipAddress: null, // Can be passed as parameter if needed
                 deviceInfo: null
             });
@@ -75,6 +79,8 @@ class SocialAuthService {
                     emailVerified: user.emailVerified,
                 },
                 token,
+                refreshToken,
+                expiresAt
             };
         } catch (error) {
             if (error.message.includes('Token used too late')) {
@@ -162,13 +168,17 @@ class SocialAuthService {
             }
 
             // Generate JWT token
-            const token = AuthService.generateToken(user.id);
+            const { token, expiresAt } = AuthService.generateToken(user.id);
+            const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
 
             // Store session
             const tokenHash = AuthService.hashToken(token);
+            const refreshTokenHash = AuthService.hashToken(refreshToken);
             await AuthRepository.create({
                 userId: user.id,
                 tokenHash,
+                refreshTokenHash,
+                refreshTokenExpiresAt: refreshExpiresAt,
                 ipAddress: null, // Can be passed as parameter if needed
                 deviceInfo: null
             });
@@ -181,6 +191,8 @@ class SocialAuthService {
                     emailVerified: user.emailVerified,
                 },
                 token,
+                refreshToken,
+                expiresAt
             };
         } catch (error) {
             if (error.isOperational) throw error;

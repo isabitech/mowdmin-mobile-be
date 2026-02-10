@@ -37,6 +37,18 @@ const Auth = sequelize.define(
             type: DataTypes.DATE,
             allowNull: true,
         },
+        refreshTokenHash: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        refreshTokenExpiresAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+        replacedBy: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
     },
     {
         tableName: "auths",

@@ -18,8 +18,19 @@ class AuthController {
             ip: req.ip,
             userAgent: req.headers['user-agent']
         };
-        const { user, token } = await AuthService.login(email, password, meta);
-        return sendSuccess(res, { message: "Login successful", data: { user, token }, statusCode: 200 });
+        const { user, token, refreshToken, expiresAt } = await AuthService.login(email, password, meta);
+        return sendSuccess(res, { message: "Login successful", data: { user, token, refreshToken, expiresAt }, statusCode: 200 });
+    }
+
+    // Refresh Token
+    static async refreshToken(req, res) {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return sendError(res, { message: "Refresh token is required", statusCode: 400 });
+        }
+
+        const result = await AuthService.refreshToken(refreshToken);
+        return sendSuccess(res, { message: "Token refreshed successfully", data: result, statusCode: 200 });
     }
 
     // Logout
@@ -167,11 +178,9 @@ class AuthController {
     // Social Authentication - Google
     static async googleAuth(req, res) {
         const { idToken } = req.body;
-
         if (!idToken) {
             throw new AppError('Google ID token is required', 400);
         }
-
         const SocialAuthService = (await import('../Services/SocialAuthService.js')).default;
         const result = await SocialAuthService.authenticateWithGoogle(idToken);
 
@@ -181,18 +190,14 @@ class AuthController {
             statusCode: 200
         });
     }
-
     // Social Authentication - Apple
     static async appleAuth(req, res) {
         const { identityToken, user } = req.body;
-
         if (!identityToken) {
             throw new AppError('Apple identity token is required', 400);
         }
-
         const SocialAuthService = (await import('../Services/SocialAuthService.js')).default;
         const result = await SocialAuthService.authenticateWithApple(identityToken, user);
-
         return sendSuccess(res, {
             message: 'Apple authentication successful',
             data: result,
