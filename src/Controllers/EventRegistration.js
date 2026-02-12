@@ -9,7 +9,12 @@ class EventRegistrationController {
         const userId = req.user.id;
         const data = { userId, eventId };
         const registration = await EventRegistrationService.createEventReg(data);
-        return sendSuccess(res, { message: "Registration created successfully", data: registration });
+
+        const eventTitle = registration.eventId?.title || "event";
+        return sendSuccess(res, {
+            message: `Successfully registered for ${eventTitle}`,
+            data: registration
+        });
     }
 
     static async GetAll(req, res) {
@@ -56,11 +61,16 @@ class EventRegistrationController {
     static async Unregister(req, res) {
         const { eventId } = req.params;
         const userId = req.user.id;
-        const result = await EventRegistrationService.unregister(eventId, userId);
-        if (!result) {
+        const registration = await EventRegistrationService.unregister(eventId, userId);
+        if (!registration) {
             return sendError(res, { message: "Registration not found or already removed", statusCode: 404 });
         }
-        return sendSuccess(res, { message: "Unregistered successfully" });
+
+        const eventTitle = registration.eventId?.title || "event";
+        return sendSuccess(res, {
+            message: `Successfully unregistered from ${eventTitle}`,
+            data: { eventId: registration.eventId?._id || registration.eventId?.id || eventId }
+        });
     }
 
 }

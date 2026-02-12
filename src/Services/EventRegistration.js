@@ -17,7 +17,7 @@ class EventRegistrationService {
     }
 
     async getRegById(id) {
-        const reg = await EventRepository.findById(id);
+        const reg = await EventRepository.registrationFindById(id);
         if (!reg) throw new Error("Event registration not found");
         return reg;
     }

@@ -88,7 +88,7 @@ export const EventRepository = {
   },
   async updateById(id, payload, options = {}) {
     const { EventModel } = await this.getModels();
-    if (isMongo) {
+    if (isMongo()) {
       if (!this.isValidId(id)) return null;
       return EventModel.findByIdAndUpdate(id, payload, { new: true }).populate('registrations');
     } else {
@@ -101,17 +101,23 @@ export const EventRepository = {
     const { EventModel, EventRegistrationModel } = await this.getModels();
     const registration = await EventRegistrationModel.create(payload);
 
-    if (isMongo) {
+    if (isMongo()) {
       await EventModel.findByIdAndUpdate(payload.eventId, {
         $push: { registrations: registration._id }
       });
+      return await registration.populate(['eventId', 'userId']);
     }
 
-    return registration;
+    return registration.reload ? await registration.reload({
+      include: [
+        { model: EventModel, as: 'event' },
+        { model: (await import('../Models/UserModel.js')).default, as: 'user' }
+      ]
+    }) : registration;
   },
   async registrationfindAll(options = {}) {
     const { EventRegistrationModel } = await this.getModels();
-    if (isMongo) {
+    if (isMongo()) {
       const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
       let query = EventRegistrationModel.find(filter);
 
@@ -125,28 +131,65 @@ export const EventRepository = {
       if (options.limit) query = query.limit(options.limit);
       if (options.offset) query = query.skip(options.offset);
 
-      return query;
+      return await query.populate(['eventId', 'userId']);
     } else {
-      // If it's already a sequelize options object (has where/order/etc), use it as is.
-      // Otherwise, wrap the filter in a where clause.
+      const { default: Event } = await import('../Models/EventModel.js');
+      const { default: User } = await import('../Models/UserModel.js');
       const seqOptions = options.where || options.order || options.limit ? options : { where: options };
-      return EventRegistrationModel.findAll(seqOptions);
+      return EventRegistrationModel.findAll({
+        ...seqOptions,
+        include: [
+          { model: Event, as: 'event' },
+          { model: User, as: 'user' }
+        ]
+      });
+    }
+  },
+
+  async registrationFindById(id) {
+    const { EventRegistrationModel } = await this.getModels();
+    if (isMongo()) {
+      if (!this.isValidId(id)) return null;
+      return await EventRegistrationModel.findById(id).populate(['eventId', 'userId']);
+    } else {
+      const { default: Event } = await import('../Models/EventModel.js');
+      const { default: User } = await import('../Models/UserModel.js');
+      return await EventRegistrationModel.findByPk(id, {
+        include: [
+          { model: Event, as: 'event' },
+          { model: User, as: 'user' }
+        ]
+      });
     }
   },
 
   async unregister(eventId, userId) {
     const { EventModel, EventRegistrationModel } = await this.getModels();
-    if (isMongo) {
-      const registration = await EventRegistrationModel.findOneAndDelete({ eventId, userId });
+    if (isMongo()) {
+      const registration = await EventRegistrationModel.findOneAndDelete({ eventId, userId })
+        .populate(['eventId', 'userId']);
       if (registration) {
         await EventModel.findByIdAndUpdate(eventId, {
           $pull: { registrations: registration._id }
         });
       }
-      return !!registration;
+      return registration;
     } else {
-      const result = await EventRegistrationModel.destroy({ where: { eventId, userId } });
-      return result > 0;
+      const { default: Event } = await import('../Models/EventModel.js');
+      const { default: User } = await import('../Models/UserModel.js');
+
+      const registration = await EventRegistrationModel.findOne({
+        where: { eventId, userId },
+        include: [
+          { model: Event, as: 'event' },
+          { model: User, as: 'user' }
+        ]
+      });
+
+      if (registration) {
+        await registration.destroy();
+      }
+      return registration;
     }
   },
 };

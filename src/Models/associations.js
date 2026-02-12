@@ -14,6 +14,7 @@ import { Group, GroupMember, GroupMessage } from "./GroupModels.js";
 import Prayer from "./PrayerModel.js";
 import PrayerComment from "./PrayerCommentModel.js";
 import PrayerLike from "./PrayerLikeModel.js";
+import Event from "./EventModel.js";
 
 // Define associations between models
 const setupAssociations = () => {
@@ -42,6 +43,10 @@ const setupAssociations = () => {
     // User - EventRegistration Associations
     User.hasMany(EventRegistration, { foreignKey: "userId", as: "registrations" });
     EventRegistration.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+    // Event - EventRegistration Associations
+    Event.hasMany(EventRegistration, { foreignKey: "eventId", as: "registrations" });
+    EventRegistration.belongsTo(Event, { foreignKey: "eventId", as: "event" });
 
     // User - MediaBookmark Associations
     User.hasMany(MediaBookmark, { foreignKey: "userId", as: "bookmarks" });
