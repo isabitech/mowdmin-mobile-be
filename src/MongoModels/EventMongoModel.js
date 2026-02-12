@@ -17,9 +17,15 @@ const EventMongoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  description: {
+    type: String,
+  },
+  image: {
+    type: String,
+  },
   type: {
     type: String,
-    enum: ['Crusade', 'Baptism', 'Communion', 'Concert'],
+    enum: ['Crusade', 'Baptism', 'Communion', 'Concert', 'Seminar', 'Online', 'Tour', 'Convention', 'Conference', 'Symposium'],
     required: true,
   },
   registrations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'EventRegistrationMongo' }],

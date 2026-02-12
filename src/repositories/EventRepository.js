@@ -3,19 +3,22 @@ import mongoose from 'mongoose';
 let EventModel;
 let EventRegistrationModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = () => process.env.DB_CONNECTION === 'mongodb';
 
 export const EventRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!isMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModels() {
-    if (!EventModel || (!isMongo && !EventRegistrationModel)) {
-      if (isMongo) {
+    const mongoActive = isMongo();
+    if (mongoActive) {
+      if (!EventModel || !EventRegistrationModel) {
         EventModel = (await import('../MongoModels/EventMongoModel.js')).default;
         EventRegistrationModel = (await import('../MongoModels/EventRegistrationMongoModel.js')).default;
-      } else {
+      }
+    } else if (process.env.DB_CONNECTION === 'postgres' || process.env.DB_CONNECTION === 'mysql') {
+      if (!EventModel || !EventRegistrationModel) {
         EventModel = (await import('../Models/EventModel.js')).default;
         EventRegistrationModel = (await import('../Models/EventRegistration.js')).default;
       }
@@ -30,7 +33,7 @@ export const EventRepository = {
 
   async findAll(options = {}) {
     const { EventModel } = await this.getModels();
-    if (isMongo) {
+    if (isMongo()) {
       // Extract filter from 'where' or use the whole object if it doesn't look like Sequelize options
       const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
 

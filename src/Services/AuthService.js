@@ -12,37 +12,9 @@ import { AuthRepository } from "../repositories/AuthRepository.js";
 class AuthService {
     // Generate JWT token
     static generateToken(id) {
-        const expiresIn = process.env.JWT_EXPIRES_IN || "7d";
-        const token = jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
-
-        // Calculate expiration date
-        const expiresAt = new Date();
-        if (expiresIn.endsWith('d')) {
-            expiresAt.setDate(expiresAt.getDate() + parseInt(expiresIn));
-        } else if (expiresIn.endsWith('h')) {
-            expiresAt.setHours(expiresAt.getHours() + parseInt(expiresIn));
-        } else if (expiresIn.endsWith('m')) {
-            expiresAt.setMinutes(expiresAt.getMinutes() + parseInt(expiresIn));
-        } else {
-            expiresAt.setDate(expiresAt.getDate() + 1); // Default to 1 day
-        }
-
-        return { token, expiresAt };
-    }
-
-    // Generate Refresh Token
-    static generateRefreshToken(id) {
-        const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
-        const refreshToken = jwt.sign({ id, type: 'refresh' }, process.env.JWT_SECRET, { expiresIn });
-
-        const expiresAt = new Date();
-        if (expiresIn.endsWith('d')) {
-            expiresAt.setDate(expiresAt.getDate() + parseInt(expiresIn));
-        } else {
-            expiresAt.setDate(expiresAt.getDate() + 7); // Default to 7 days
-        }
-
-        return { refreshToken, expiresAt };
+        return jwt.sign({ id }, process.env.JWT_SECRET, {
+            expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+        });
     }
 
     // Helper to hash token
@@ -67,7 +39,7 @@ class AuthService {
         });
 
         // Initialize empty profile for the user
-        await ProfileRepository.create({ userId: newUser.id, displayName: name });
+        await ProfileRepository.create({ userId: newUser.id , displayName: name });
 
         // Generate and send email verification OTP
         try {
@@ -97,8 +69,6 @@ class AuthService {
         const userDataSafe = newUser.toJSON();
         delete userDataSafe.password;
         delete userDataSafe.emailVerifiedAt;
-        await ProfileRepository.create({ userId: newUser.id, displayName: name });
-
         return {
             user: userDataSafe,
             token: null,
@@ -123,96 +93,21 @@ class AuthService {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
-        const { token, expiresAt } = AuthService.generateToken(user.id);
-        const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
+
+        const token = AuthService.generateToken(user.id);
+
         // Store session
         const tokenHash = AuthService.hashToken(token);
-        const refreshTokenHash = AuthService.hashToken(refreshToken);
         await AuthRepository.create({
             userId: user.id,
             tokenHash,
-            refreshTokenHash,
-            refreshTokenExpiresAt: refreshExpiresAt,
             ipAddress: meta.ip,
             deviceInfo: meta.userAgent
         });
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
         delete userDataSafe.emailVerifiedAt;
-        return { user: userDataSafe, token, refreshToken, expiresAt };
-    }
-
-    // Refresh Access Token
-    static async refreshToken(incomingRefreshToken) {
-        let decoded;
-        try {
-            decoded = jwt.verify(incomingRefreshToken, process.env.JWT_SECRET);
-        } catch (error) {
-            throw new AppError("Invalid or expired refresh token", 401);
-        }
-
-        const tokenHash = AuthService.hashToken(incomingRefreshToken);
-        const session = await AuthRepository.findByTokenHash(tokenHash);
-
-        if (!session) {
-            throw new AppError("Invalid session", 401);
-        }
-
-        // Reuse Detection Logic
-        if (session.replacedBy) {
-            // SECURITY ALERT: Token reuse detected!
-            // This means an old token (which was already rotated) is being used again.
-            // Revoke ALL sessions for this user to force re-login.
-            await AuthRepository.revokeAllUserTokens(session.userId);
-            console.error(`🚨 SECURITY: Refresh token reuse detected for user ${session.userId}. All sessions revoked.`);
-            throw new AppError("Security alert: Suspicious activity detected. Please log in again.", 403);
-        }
-
-        if (session.isLoggedOut || (session.refreshTokenExpiresAt && new Date() > session.refreshTokenExpiresAt)) {
-            throw new AppError("Session expired or logged out", 401);
-        }
-
-        // Generate new tokens
-        const user = await UserRepository.findById(session.userId);
-        if (!user) throw new AppError("User not found", 404);
-
-        const { token, expiresAt } = AuthService.generateToken(user.id);
-        const { refreshToken: newRefreshToken, expiresAt: newExpiresAt } = AuthService.generateRefreshToken(user.id);
-
-        const newRefreshTokenHash = AuthService.hashToken(newRefreshToken);
-        const newTokenHash = AuthService.hashToken(token);
-
-        // Create NEW session
-        const newSession = await AuthRepository.create({
-            userId: user.id,
-            tokenHash: newTokenHash,
-            refreshTokenHash: newRefreshTokenHash,
-            refreshTokenExpiresAt: newExpiresAt,
-            ipAddress: session.ipAddress, // Inherit metadata
-            deviceInfo: session.deviceInfo
-        });
-
-        // Mark OLD session as replaced (Rotation)
-        // We use the new session's ID (or a unique identifier) as the "replacedBy" marker
-        if (session.updateOne) {
-            // Mongoose
-            await session.updateOne({
-                isLoggedOut: true,
-                replacedBy: newSession._id.toString()
-            });
-        } else {
-            // Sequelize
-            await session.update({
-                isLoggedOut: true,
-                replacedBy: newSession.id.toString()
-            });
-        }
-
-        return {
-            token,
-            refreshToken: newRefreshToken,
-            expiresAt
-        };
+        return { user: userDataSafe, token };
     }
 
     // Logout user

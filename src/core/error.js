@@ -27,6 +27,11 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
 
+const handleSyntaxError = (err) => {
+  const message = `Invalid JSON format: ${err.message}`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   logger.error("request_error", {
     statusCode: err.statusCode,
@@ -82,10 +87,16 @@ export const globalErrorHandler = (err, req, res, next) => {
     if (error.name === "ValidationError") error = handleValidationErrorDB(error);
     if (error.name === "JsonWebTokenError") error = handleJWTError();
     if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+      error = handleSyntaxError(err);
+    }
 
     sendErrorProd(error, res);
   } else {
     // Default fallback (treat as dev or prod depending on preference, sticking to dev for visibility if not strictly prod)
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+      return sendErrorDev(handleSyntaxError(err), res);
+    }
     sendErrorDev(err, res);
   }
 };

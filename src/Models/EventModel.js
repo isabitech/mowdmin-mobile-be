@@ -9,7 +9,9 @@ const Event = getSequelize().define(
     date: { type: DataTypes.DATE, allowNull: false },
     time: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
-    type: { type: DataTypes.ENUM("Crusade", "Baptism", "Communion", "Concert"), allowNull: false },
+    description: { type: DataTypes.TEXT, allowNull: true },
+    image: { type: DataTypes.STRING, allowNull: true },
+    type: { type: DataTypes.ENUM("Crusade", "Baptism", "Communion", "Concert", "Seminar", "Online", "Tour", "Convention", "Conference", "Symposium"), allowNull: false },
   },
   { tableName: "events", timestamps: true }
 );

@@ -25,6 +25,7 @@ const runSeeders = async () => {
         console.log("🚀 Starting Seeder...");
 
         await seedAdmin();
+        await seedMowdmin2026();
         // await seedUsers(20);
         // await seedMinistries();
         // await seedContent();
