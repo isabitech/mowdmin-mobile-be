@@ -14,7 +14,7 @@ export const validateEventCreate = [
         .withMessage("Time must be in HH:mm format"),
     body("location").notEmpty().withMessage("Location is required"),
     body("type")
-        .isIn(["Crusade", "Baptism", "Communion", "Concert"])
+        .isIn(["Crusade", "Baptism", "Communion", "Concert", "Seminar", "Online", "Tour", "Convention", "Conference", "Symposium"])
         .withMessage("Invalid event type"),
     (req, res, next) => {
         const errors = validationResult(req);
@@ -60,7 +60,7 @@ export const validateEventUpdate = [
     body("location").optional().isString().withMessage("Location must be a string"),
     body("type")
         .optional()
-        .isIn(["Crusade", "Baptism", "Communion", "Concert"])
+        .isIn(["Crusade", "Baptism", "Communion", "Concert", "Seminar", "Online", "Tour", "Convention", "Conference", "Symposium"])
         .withMessage("Invalid event type"),
 
     (req, res, next) => {
