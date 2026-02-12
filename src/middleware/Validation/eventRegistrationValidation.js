@@ -30,13 +30,6 @@ export const validateEventRegistration = [
     //         }
     //         return true;
     //     }),
-
-    // Optional ticketCode
-    body("ticketCode")
-        .optional()
-        .isString()
-        .withMessage("Ticket code must be a string"),
-
     // Validate status
     body("status")
         .optional()
