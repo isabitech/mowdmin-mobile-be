@@ -76,6 +76,15 @@ export const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
+  // Handle JSON Syntax Errors specifically and early
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    const syntaxErr = handleSyntaxError(err);
+    if (process.env.NODE_ENV === "development") {
+      return sendErrorDev(syntaxErr, res);
+    }
+    return sendErrorProd(syntaxErr, res);
+  }
+
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
@@ -87,16 +96,10 @@ export const globalErrorHandler = (err, req, res, next) => {
     if (error.name === "ValidationError") error = handleValidationErrorDB(error);
     if (error.name === "JsonWebTokenError") error = handleJWTError();
     if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
-    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-      error = handleSyntaxError(err);
-    }
 
     sendErrorProd(error, res);
   } else {
-    // Default fallback (treat as dev or prod depending on preference, sticking to dev for visibility if not strictly prod)
-    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-      return sendErrorDev(handleSyntaxError(err), res);
-    }
+    // Default fallback
     sendErrorDev(err, res);
   }
 };
