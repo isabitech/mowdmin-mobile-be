@@ -49,7 +49,11 @@ describe('Event Registration Routes', () => {
     });
 
     it('should register for an event successfully', async () => {
-        const mockReg = { id: validUUID, eventId: validUUID, userId: validUUID };
+        const mockReg = {
+            id: validUUID,
+            eventId: { id: validUUID, title: 'Test Event' },
+            userId: validUUID
+        };
         EventRegistrationService.createEventReg.mockResolvedValue(mockReg);
 
         const response = await request(app)
@@ -58,17 +62,23 @@ describe('Event Registration Routes', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('success');
+        expect(response.body.message).toBe('Successfully registered for Test Event');
     });
 
     it('should unregister from an event successfully', async () => {
-        EventRegistrationService.unregister.mockResolvedValue(true);
+        const mockReg = {
+            id: validUUID,
+            eventId: { id: validUUID, title: 'Test Event' },
+            userId: validUUID
+        };
+        EventRegistrationService.unregister.mockResolvedValue(mockReg);
 
         const response = await request(app)
             .delete(`/api/v1/event-registration/unregister/${validUUID}`);
 
         expect(response.status).toBe(200);
         expect(response.body.status).toBe('success');
-        expect(response.body.message).toBe('Unregistered successfully');
+        expect(response.body.message).toBe('Successfully unregistered from Test Event');
     });
 
     it('should return 404 if registration not found when unregistering', async () => {
