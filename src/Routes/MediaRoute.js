@@ -2,6 +2,7 @@ import { Router } from "express";
 import MediaController from "../Controllers/MediaController.js";
 import { protectAdmin, protectUser } from "../middleware/authMiddleware.js";
 import { tryCatch } from "../Utils/try-catch.js";
+import upload from "../Config/multer.js";
 import { middlewareValidateCreateMedia, middlewareValidateUpdateMedia } from "../middleware/Validation/MediaValidation.js";
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
@@ -11,6 +12,7 @@ media.post(
 	"/create",
 	protectUser,
 	protectAdmin,
+	upload.single("thumbnail"),
 	middlewareValidateCreateMedia,
 	handleValidationErrors,
 	tryCatch(MediaController.create)
@@ -21,6 +23,7 @@ media.put(
 	"/:id",
 	protectUser,
 	protectAdmin,
+	upload.single("thumbnail"),
 	middlewareValidateUpdateMedia,
 	handleValidationErrors,
 	tryCatch(MediaController.update)
@@ -28,3 +31,4 @@ media.put(
 media.delete("/:id", protectUser, protectAdmin, tryCatch(MediaController.delete));
 
 export default media;
+

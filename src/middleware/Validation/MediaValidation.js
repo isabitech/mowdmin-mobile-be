@@ -11,7 +11,7 @@ export const validateCreateMedia = (payload) =>
         duration: Joi.string().allow("", null),
         is_downloadable: Joi.boolean(),
         language: Joi.string().allow("", null),
-        thumbnail: Joi.string().uri().allow("", null),
+        thumbnail: Joi.string().allow("", null),
         youtubeLiveLink: Joi.string().uri().allow("", null),
         isLive: Joi.boolean(),
     })
@@ -29,7 +29,7 @@ export const validateUpdateMedia = (payload) =>
         duration: Joi.string().allow("", null),
         is_downloadable: Joi.boolean(),
         language: Joi.string().allow("", null),
-        thumbnail: Joi.string().uri().allow("", null),
+        thumbnail: Joi.string().allow("", null),
         youtubeLiveLink: Joi.string().uri().allow("", null),
         isLive: Joi.boolean(),
     })
