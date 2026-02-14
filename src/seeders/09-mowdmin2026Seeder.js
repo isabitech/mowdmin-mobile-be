@@ -132,13 +132,13 @@ const mowdminEvents = [
 
 const getDatesForRecurring = (year, recurringType) => {
     const dates = [];
-    const startDate = new Date(year, 0, 1);
-    const endDate = new Date(year, 11, 31);
+    const startDate = new Date(Date.UTC(year, 0, 1));
+    const endDate = new Date(Date.UTC(year, 11, 31));
 
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const day = d.getDay();
-        const date = d.getDate();
-        const month = d.getMonth();
+    for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
+        const day = d.getUTCDay();
+        const date = d.getUTCDate();
+        const month = d.getUTCMonth();
 
         if (recurringType === "Every Monday" && day === 1) {
             dates.push(new Date(d));
@@ -150,14 +150,14 @@ const getDatesForRecurring = (year, recurringType) => {
             dates.push(new Date(d));
         } else if (recurringType === "Last Wednesday" && day === 3) {
             const nextWeek = new Date(d);
-            nextWeek.setDate(d.getDate() + 7);
-            if (nextWeek.getMonth() !== month) {
+            nextWeek.setUTCDate(d.getUTCDate() + 7);
+            if (nextWeek.getUTCMonth() !== month) {
                 dates.push(new Date(d));
             }
         } else if (recurringType === "Last Saturday" && day === 6) {
             const nextWeek = new Date(d);
-            nextWeek.setDate(d.getDate() + 7);
-            if (nextWeek.getMonth() !== month) {
+            nextWeek.setUTCDate(d.getUTCDate() + 7);
+            if (nextWeek.getUTCMonth() !== month) {
                 dates.push(new Date(d));
             }
         } else if (recurringType === "Lord Supper") {
@@ -167,8 +167,8 @@ const getDatesForRecurring = (year, recurringType) => {
             }
             // Every last day of the month
             const nextDay = new Date(d);
-            nextDay.setDate(d.getDate() + 1);
-            if (nextDay.getMonth() !== month) {
+            nextDay.setUTCDate(d.getUTCDate() + 1);
+            if (nextDay.getUTCMonth() !== month) {
                 // Prevent doubling if 1st Sunday is also last day (unlikely but safe)
                 if (!dates.some(dt => dt.getTime() === d.getTime())) {
                     dates.push(new Date(d));
