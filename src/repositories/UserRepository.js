@@ -1,12 +1,12 @@
 let UserModel;
 let ProfileModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === 'mongodb';
 
 export const UserRepository = {
   async getModels() {
-    if (!UserModel || (!isMongo && !ProfileModel)) {
-      if (isMongo) {
+    if (!UserModel || (!getIsMongo() && !ProfileModel)) {
+      if (getIsMongo()) {
         const userImport = await import('../MongoModels/UserMongoModel.js');
         const profileImport = await import('../MongoModels/ProfileMongoModel.js');
 
@@ -27,7 +27,7 @@ export const UserRepository = {
   async findByEmail(email) {
     const { UserModel, ProfileModel } = await this.getModels();
 
-    if (isMongo) {
+    if (getIsMongo()) {
       return UserModel.findOne({ email });
     }
 
@@ -45,7 +45,7 @@ export const UserRepository = {
   async findById(id) {
     const { UserModel } = await this.getModels();
 
-    return isMongo
+    return getIsMongo()
       ? UserModel.findById(id)
       : UserModel.findByPk(id);
   },
@@ -57,7 +57,7 @@ export const UserRepository = {
 
   async findAll(options = {}) {
     const { UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
       let query = UserModel.find(filter);
 
@@ -79,7 +79,7 @@ export const UserRepository = {
 
   async update(id, data) {
     const { UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return UserModel.findByIdAndUpdate(id, data, { new: true });
     }
     const user = await UserModel.findByPk(id);
@@ -91,7 +91,7 @@ export const UserRepository = {
 
   async findOne(where) {
     const { UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       // Handle Sequelize-style { where: { ... } } or direct filter
       const filter = where.where || where;
       return UserModel.findOne(filter);
