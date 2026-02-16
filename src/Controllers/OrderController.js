@@ -23,7 +23,9 @@ class OrderController {
     return sendSuccess(res, { message: "Order Fetched Successfully", data: order });
   }
   async getUserOrders(req, res) {
+    console.log("OrderController: req.user.id =", req.user.id);
     const orders = await OrderService.getOrdersByUser(req.user.id);
+    console.log("OrderController: Fetched orders count =", orders.length);
     return sendSuccess(res, { message: "User Orders Fetched Successfully", data: orders });
   }
   async update(req, res) {

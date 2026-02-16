@@ -1,12 +1,12 @@
 import "../env.js";
 
 let AuthModel;
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === 'mongodb';
 
 export const AuthRepository = {
     async getModel() {
         if (!AuthModel) {
-            if (isMongo) {
+            if (getIsMongo()) {
                 AuthModel = (await import('../MongoModels/AuthMongoModel.js')).default;
             } else {
                 AuthModel = (await import('../Models/AuthModel.js')).default;
@@ -22,21 +22,21 @@ export const AuthRepository = {
 
     async findByUserId(userId) {
         const Model = await this.getModel();
-        return isMongo ? Model.find({ userId }) : Model.findAll({ where: { userId } });
+        return getIsMongo() ? Model.find({ userId }) : Model.findAll({ where: { userId } });
     },
 
     async findByTokenHash(tokenHash) {
         const Model = await this.getModel();
         // Since we are doing soft logout, we prefer to return the record even if logged out
         // so the middleware can explicitly say "You have logged out" vs "Invalid token".
-        return isMongo ? Model.findOne({ tokenHash }) : Model.findOne({ where: { tokenHash } });
+        return getIsMongo() ? Model.findOne({ tokenHash }) : Model.findOne({ where: { tokenHash } });
     },
 
     async revokeToken(userId, tokenHash) {
         const Model = await this.getModel();
         const updateData = { isLoggedOut: true, loggedOutAt: new Date() };
 
-        if (isMongo) {
+        if (getIsMongo()) {
             // MongoDB
             // Handle specific revoke by hash (safe) or by userId + hash
             let query = { tokenHash };
@@ -54,7 +54,7 @@ export const AuthRepository = {
         const Model = await this.getModel();
         const updateData = { isLoggedOut: true, loggedOutAt: new Date() };
 
-        if (isMongo) {
+        if (getIsMongo()) {
             return Model.updateMany({ userId }, updateData);
         } else {
             return Model.update(updateData, { where: { userId } });
@@ -66,7 +66,7 @@ export const AuthRepository = {
         const Model = await this.getModel();
         const updateData = { lastLogin: touchedAt };
 
-        if (isMongo) {
+        if (getIsMongo()) {
             // Only touch active sessions
             return Model.updateOne({ tokenHash, isLoggedOut: false }, updateData);
         }

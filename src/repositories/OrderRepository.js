@@ -1,17 +1,20 @@
+import mongoose from 'mongoose';
 // OrderRepository.js
 let OrderModel;
 let UserModel;
 let OrderItemModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === 'mongodb';
 
 export const OrderRepository = {
     async getModels() {
-        if (!OrderModel || (!isMongo && (!UserModel || !OrderItemModel))) {
-            if (isMongo) {
+        if (!OrderModel || (!getIsMongo() && (!UserModel || !OrderItemModel))) {
+            if (getIsMongo()) {
                 OrderModel = (await import('../MongoModels/OrderMongoModel.js')).default;
                 UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
                 OrderItemModel = (await import('../MongoModels/OrderItemMongoModel.js')).default;
+                // Ensure Product model is registered for population
+                await import('../MongoModels/ProductMongoModel.js');
             } else {
                 OrderModel = (await import('../Models/OrderModel.js')).default;
                 UserModel = (await import('../Models/UserModel.js')).default;
@@ -22,17 +25,46 @@ export const OrderRepository = {
     },
 
     async create(data) {
-        const { OrderModel } = await this.getModels();
+        const { OrderModel, OrderItemModel } = await this.getModels();
+        if (getIsMongo()) {
+            const { items, ...orderData } = data;
+
+            // Create the order first
+            const order = await OrderModel.create(orderData);
+
+            if (items && Array.isArray(items)) {
+                const createdItemIds = [];
+                for (const item of items) {
+                    const orderItem = await OrderItemModel.create({
+                        ...item,
+                        orderId: order._id,
+                        price: item.price || 0 // Default to 0 if price not provided
+                    });
+                    createdItemIds.push(orderItem._id);
+                }
+
+                // Update the order with item IDs
+                order.items = createdItemIds;
+                await order.save();
+            }
+            return order;
+        }
         return OrderModel.create(data);
     },
 
     async findAll(options = {}) {
         const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
 
-        if (isMongo) {
+        if (getIsMongo()) {
             return OrderModel.find({})
                 .populate('userId', 'name email')
-                .populate('items'); // Assuming items is the field name for order items in Mongo schema
+                .populate({
+                    path: 'items',
+                    populate: {
+                        path: 'productId',
+                        model: 'ProductMongo'
+                    }
+                }); // Deep populate product child information
         } else {
             return OrderModel.findAll({
                 ...options,
@@ -53,10 +85,16 @@ export const OrderRepository = {
     async findById(id, options = {}) {
         const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
 
-        if (isMongo) {
+        if (getIsMongo()) {
             return OrderModel.findById(id)
                 .populate('userId', 'name email')
-                .populate('items');
+                .populate({
+                    path: 'items',
+                    populate: {
+                        path: 'productId',
+                        model: 'ProductMongo'
+                    }
+                });
         } else {
             return OrderModel.findByPk(id, {
                 ...options,
@@ -74,8 +112,22 @@ export const OrderRepository = {
     async findAllByUserId(userId, options = {}) {
         const { OrderModel, UserModel } = await this.getModels();
 
-        if (isMongo) {
-            return OrderModel.find({ userId, ...options });
+        if (getIsMongo()) {
+            console.log("OrderRepository: Finding orders for userId:", userId);
+            const queryUserId = mongoose.isValidObjectId(userId) ? new mongoose.Types.ObjectId(userId) : userId;
+            // Strip out Sequelize-specific options like 'include', 'order', 'where'
+            const { include, order, where, ...mongoOptions } = options;
+            const orders = await OrderModel.find({ userId: queryUserId, ...mongoOptions })
+                .populate('userId', 'name email')
+                .populate({
+                    path: 'items',
+                    populate: {
+                        path: 'productId',
+                        model: 'ProductMongo'
+                    }
+                })
+                .sort({ createdAt: -1 }); // Default to latest first for orders
+            return orders;
         } else {
             return OrderModel.findAll({
                 where: { userId },
@@ -93,8 +145,16 @@ export const OrderRepository = {
 
     async updateById(id, data, options = {}) {
         const { OrderModel } = await this.getModels();
-        if (isMongo) {
-            return OrderModel.findByIdAndUpdate(id, data, { new: true });
+        if (getIsMongo()) {
+            return OrderModel.findByIdAndUpdate(id, data, { new: true })
+                .populate('userId', 'name email')
+                .populate({
+                    path: 'items',
+                    populate: {
+                        path: 'productId',
+                        model: 'ProductMongo'
+                    }
+                });
         } else {
             const order = await OrderModel.findByPk(id, options);
             if (!order) return null;
@@ -104,7 +164,7 @@ export const OrderRepository = {
 
     async deleteById(id, options = {}) {
         const { OrderModel } = await this.getModels();
-        if (isMongo) {
+        if (getIsMongo()) {
             const result = await OrderModel.findByIdAndDelete(id);
             return !!result;
         } else {

@@ -35,11 +35,14 @@ export const checkOwnership = (resourceType, paramName = 'id') => {
             }
 
             // Check if user owns the resource
-            // Note: Different models might have different fields (userId, user_id, etc.)
-            // Based on repositories, we assume 'userId'
-            const ownerId = resource.userId || resource.user_id;
+            // Note: handle both unpopulated IDs and populated objects
+            const rawOwnerId = resource.userId || resource.user_id;
+            const ownerId = (rawOwnerId && typeof rawOwnerId === 'object')
+                ? (rawOwnerId._id || rawOwnerId.id || rawOwnerId)
+                : rawOwnerId;
 
             if (ownerId && ownerId.toString() !== userId.toString()) {
+                console.log(`Ownership Denied: Resource Owner ${ownerId} vs Requester ${userId}`);
                 return next(new AppError("You do not have permission to perform this action", 403));
             }
 
