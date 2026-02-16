@@ -22,7 +22,30 @@ export const OrderRepository = {
     },
 
     async create(data) {
-        const { OrderModel } = await this.getModels();
+        const { OrderModel, OrderItemModel } = await this.getModels();
+        if (isMongo) {
+            const { items, ...orderData } = data;
+
+            // Create the order first
+            const order = await OrderModel.create(orderData);
+
+            if (items && Array.isArray(items)) {
+                const createdItemIds = [];
+                for (const item of items) {
+                    const orderItem = await OrderItemModel.create({
+                        ...item,
+                        orderId: order._id,
+                        price: item.price || 0 // Default to 0 if price not provided
+                    });
+                    createdItemIds.push(orderItem._id);
+                }
+
+                // Update the order with item IDs
+                order.items = createdItemIds;
+                await order.save();
+            }
+            return order;
+        }
         return OrderModel.create(data);
     },
 

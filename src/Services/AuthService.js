@@ -39,7 +39,7 @@ class AuthService {
         });
 
         // Initialize empty profile for the user
-        await ProfileRepository.create({ userId: newUser.id , displayName: name });
+        await ProfileRepository.create({ userId: newUser.id , displayName: name , language: language || 'EN' , photoUrl: null, location: null, bio: null });
 
         // Generate and send email verification OTP
         try {
