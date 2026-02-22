@@ -9,6 +9,14 @@ class PaymentController {
       return sendError(res, { message: error.details[0].message, statusCode: 400 });
     }
 
+    // Auto-inject userId from authenticated user
+    value.userId = req.user.id;
+
+    // Generate unique payment reference if not provided
+    if (!value.reference) {
+      value.reference = `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    }
+
     const payment = await PaymentService.createPayment(value);
     return sendSuccess(res, { message: "Payment Created Successfully", data: payment, statusCode: 201 });
   }
