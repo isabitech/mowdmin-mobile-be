@@ -16,9 +16,13 @@ const OrderItemMongoSchema = new mongoose.Schema({
     required: true,
     default: 1,
   },
-  price: {
+  unit_price: {
     type: mongoose.Schema.Types.Decimal128,
-    required: true,
+    required: false,
+  },
+  subtotal: {
+    type: mongoose.Schema.Types.Decimal128,
+    required: false,
   },
 }, {
   timestamps: true,

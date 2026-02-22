@@ -6,6 +6,7 @@ export const validateCreatePayment = (payload) =>
     amount: Joi.number().min(0).required(),
     method: Joi.string().required(),
     status: Joi.string().required(),
+    reference: Joi.string().optional(), // Optional - auto-generated if not provided
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
