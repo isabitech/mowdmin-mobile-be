@@ -1,6 +1,6 @@
 import { Router } from "express";
 import NotificationController from "../Controllers/NotificationController.js";
-import { protectUser } from "../middleware/authMiddleware.js";
+import { protectAdmin, protectUser } from "../middleware/authMiddleware.js";
 
 import { handleValidationErrors } from "../middleware/Validation/handleValidationErrors.js";
 
@@ -13,6 +13,7 @@ const notification = Router();
 notification.post(
 	"/create",
 	protectUser,
+	protectAdmin,
 	createNotificationValidation,
 	handleValidationErrors,
 	tryCatch(NotificationController.create)
