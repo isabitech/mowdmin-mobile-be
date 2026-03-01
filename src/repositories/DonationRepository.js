@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 let DonationModel;
 let UserModel;
+let CampaignModel;
 
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
@@ -10,17 +11,18 @@ export const DonationRepository = {
     if (!DonationModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         DonationModel = (await import('../MongoModels/DonationMongoModel.js')).default;
-        // Mongo usually handles relations differently (e.g. populate), but we load it anyway if needed for consistency or future manual populations
         UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        CampaignModel = (await import('../MongoModels/CampaignMongoModel.js')).default;
       } else {
         DonationModel = (await import('../Models/DonationModel.js')).default;
         UserModel = (await import('../Models/UserModel.js')).default;
+        CampaignModel = (await import('../Models/CampaignModel.js')).default;
       }
     }
-    return { DonationModel, UserModel };
+    return { DonationModel, UserModel, CampaignModel };
   },
 
-  async create(dto) {
+  async createDonation(dto) {
     const { DonationModel } = await this.getModels();
     return DonationModel.create(dto);
   },
@@ -30,23 +32,25 @@ export const DonationRepository = {
     return mongoose.Types.ObjectId.isValid(id);
   },
 
-  async findById(id) {
+  async getDonationById(id) {
     const { DonationModel } = await this.getModels();
     if (isMongo) {
       if (!this.isValidId(id)) return null;
-      return DonationModel.findById(id).populate('userId', 'name email');
+      return DonationModel.findById(id).populate('userId', 'name email').populate('campaign', 'title description');
     } else {
       return DonationModel.findByPk(id, {
-        include: [{ model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] }]
+        include: [
+          { model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] },
+          { model: CampaignModel, as: 'campaign', attributes: ['id', 'title', 'description'] }
+        ]
       });
     }
   },
 
-  async findAll(filters = {}, pagination = { page: 1, limit: 10 }) {
-    const { DonationModel, UserModel } = await this.getModels();
-    const { page, limit } = pagination;
+  async getAllDonationsWithPagination({ search, page = 1, limit = 10, ...filters }) {
+    const { DonationModel, UserModel, CampaignModel } = await this.getModels();
 
-    // Handle MongoDB filters (convert userId string to ObjectId if present)
+    // Handle MongoDB filters
     const processedFilters = { ...filters };
     if (isMongo && processedFilters.userId && typeof processedFilters.userId === 'string') {
       if (mongoose.Types.ObjectId.isValid(processedFilters.userId)) {
@@ -54,24 +58,34 @@ export const DonationRepository = {
       }
     }
 
+    if (search) {
+      if (isMongo) {
+        processedFilters.$or = [
+          { transactionRef: { $regex: search, $options: "i" } }
+        ]
+      } else {
+        // Placeholder for SQL Search
+        processedFilters.transactionRef = search;
+      }
+    }
+
     if (isMongo) {
       const skip = (page - 1) * limit;
-      const [data, total] = await Promise.all([
+      const [donations, total] = await Promise.all([
         DonationModel.find(processedFilters)
           .sort({ createdAt: -1 })
           .skip(skip)
-          .limit(limit)
-          .populate('userId', 'name email'),
+          .limit(Number(limit))
+          .populate('userId', 'name email')
+          .populate('campaign', 'title'),
         DonationModel.countDocuments(processedFilters)
       ]);
       return {
-        data,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
-        }
+        donations,
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / limit)
       };
     } else {
       const offset = (page - 1) * limit;
@@ -81,27 +95,51 @@ export const DonationRepository = {
         limit,
         order: [['createdAt', 'DESC']],
         include: [
-          {
-            model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
+          { model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] },
+          { model: CampaignModel, as: 'campaign', attributes: ['id', 'title'] }
         ]
       });
       return {
-        data: rows,
-        meta: {
-          total: count,
-          page,
-          limit,
-          totalPages: Math.ceil(count / limit)
-        }
+        donations: rows,
+        total: count,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(count / limit)
       };
     }
   },
 
-  async findAllByUserId(userId, pagination = { page: 1, limit: 10 }) {
-    return this.findAll({ userId }, pagination);
+  async updateDonationStatus(id, status) {
+    const { DonationModel } = await this.getModels();
+    if (isMongo) {
+      return await DonationModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true, runValidators: true }
+      );
+    } else {
+      const donation = await DonationModel.findByPk(id);
+      if (!donation) return null;
+      await donation.update({ status });
+      return donation;
+    }
+  },
+
+  async getDonationsByCampaign(campaignId) {
+    const { DonationModel } = await this.getModels();
+    if (isMongo) {
+      return await DonationModel.find({ campaign: campaignId })
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 });
+    } else {
+      return await DonationModel.findAll({
+        where: { campaignId },
+        include: [
+          { model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] }
+        ],
+        order: [['createdAt', 'DESC']],
+      });
+    }
   }
 };
 

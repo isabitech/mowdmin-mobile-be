@@ -21,61 +21,46 @@ export const PaymentRepository = {
     return { PaymentModel, OrderModel, UserModel };
   },
 
-  async create(data) {
+  async createPayment(data) {
     const { PaymentModel } = await this.getModels();
     return PaymentModel.create(data);
   },
 
-  async findAll(options = {}) {
-    const { PaymentModel, OrderModel, UserModel } = await this.getModels();
+  async getAllPaymentsWithPagination(filters = {}) {
+    const { PaymentModel, UserModel } = await this.getModels();
+    const { page = 1, limit = 10, type, status } = filters;
+    const skip = (page - 1) * limit;
+
     if (isMongo) {
-      return PaymentModel.find({})
-        .populate('userId', 'name email')
-        .populate('orderId');
+      const query = {};
+      if (type) query.type = type;
+      if (status) query.status = status;
+
+      const items = await PaymentModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'name email');
+
+      const total = await PaymentModel.countDocuments(query);
+
+      return {
+        items,
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit)
+      };
     } else {
-      return PaymentModel.findAll({
-        ...options,
-        include: [
-          {
-            model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          },
-          // Assuming default alias for order
-          /* 
-          {
-              model: OrderModel,
-              as: 'order'
-          } 
-          */
-        ]
-      });
-    }
-  },
+      const where = {};
+      if (type) where.type = type;
+      if (status) where.status = status;
 
-  async findById(id, options = {}) {
-    const { PaymentModel, UserModel } = await this.getModels();
-    return isMongo
-      ? PaymentModel.findById(id).populate('userId', 'name email').populate('orderId')
-      : PaymentModel.findByPk(id, {
-        ...options,
-        include: [
-          {
-            model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
-      });
-  },
-
-  async findOne(where, options = {}) {
-    const { PaymentModel, UserModel } = await this.getModels();
-    return isMongo
-      ? PaymentModel.findOne(where)
-      : PaymentModel.findOne({
+      const { rows, count } = await PaymentModel.findAndCountAll({
         where,
-        ...options,
+        order: [['createdAt', 'DESC']],
+        offset: skip,
+        limit: parseInt(limit),
         include: [
           {
             model: UserModel,
@@ -84,26 +69,67 @@ export const PaymentRepository = {
           }
         ]
       });
-  },
 
-  async updateById(id, data, options = {}) {
-    const { PaymentModel } = await this.getModels();
-    if (isMongo) {
-      return PaymentModel.findByIdAndUpdate(id, data, { new: true });
-    } else {
-      const payment = await PaymentModel.findByPk(id, options);
-      if (!payment) return null;
-      return payment.update(data);
+      return {
+        items: rows,
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      };
     }
   },
 
-  async deleteById(id, options = {}) {
+  async getPaymentById(id) {
+    const { PaymentModel, UserModel } = await this.getModels();
+    if (isMongo) {
+      return PaymentModel.findById(id).populate('userId', 'name email');
+    } else {
+      return PaymentModel.findByPk(id, {
+        include: [
+          {
+            model: UserModel,
+            as: 'user',
+            attributes: ['id', 'name', 'email']
+          }
+        ]
+      });
+    }
+  },
+
+  async findByPaymentIntentId(paymentIntentId) {
+    const { PaymentModel } = await this.getModels();
+    return isMongo
+      ? PaymentModel.findOne({ paymentIntentId })
+      : PaymentModel.findOne({ where: { paymentIntentId } });
+  },
+
+  async findByWebhookEventId(webhookEventId) {
+    const { PaymentModel } = await this.getModels();
+    return isMongo
+      ? PaymentModel.findOne({ webhookEventId })
+      : PaymentModel.findOne({ where: { webhookEventId } });
+  },
+
+  async updatePaymentStatus(id, status, extraData = {}) {
+    const { PaymentModel } = await this.getModels();
+    const updateData = { status, ...extraData };
+
+    if (isMongo) {
+      return PaymentModel.findByIdAndUpdate(id, updateData, { new: true });
+    } else {
+      const payment = await PaymentModel.findByPk(id);
+      if (!payment) return null;
+      return payment.update(updateData);
+    }
+  },
+
+  async deleteById(id) {
     const { PaymentModel } = await this.getModels();
     if (isMongo) {
-      const result = await PaymentModel.findByIdAndDelete(id);
-      return !!result;
+      return PaymentModel.findByIdAndDelete(id);
     } else {
-      const payment = await PaymentModel.findByPk(id, options);
+      const payment = await PaymentModel.findByPk(id);
       if (!payment) return null;
       await payment.destroy();
       return true;

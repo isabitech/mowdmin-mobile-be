@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
+import cron from 'node-cron';
 
 import './env.js';
 import { connectMongoDB } from './Config/mongodb.js';
@@ -34,6 +35,7 @@ import ministry from './Routes/MinistryRoute.js';
 import { bibleStoryRouter, bibleVerseRouter } from './Routes/BibleRoute.js';
 import prayerLike from './Routes/PrayerLikeRoute.js';
 import prayerComment from './Routes/PrayerCommentRoute.js';
+import campaign from './Routes/CampaignRoute.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -88,7 +90,6 @@ app.use(cors({
 }));
 app.use(morgan('combined'));
 app.use(compression());
-app.use(express.json()); // Moved this line up as per instruction's implied order
 
 // Health check endpoint (before routes)
 app.get('/health', async (req, res) => {
@@ -122,6 +123,20 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// ==========================================
+// Stripe Webhook (MUST be before express.json())
+// ==========================================
+// We mount this part of the payment route early so it can parse raw bodies.
+import PaymentController from "./Controllers/PaymentController.js";
+import { tryCatch } from "./Utils/try-catch.js";
+app.post(
+  "/api/v1/payment/webhooks/stripe",
+  express.raw({ type: 'application/json' }),
+  tryCatch(PaymentController.handleWebhook)
+);
+
+// Global Parsers
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 app.use(attachRequestMeta);
@@ -152,8 +167,9 @@ apiRouter.use('/membership', membership);
 apiRouter.use('/profile', profile);
 apiRouter.use('/donation', donation);
 apiRouter.use('/info', info);
-apiRouter.use('/payment', payment);
+apiRouter.use('/payment', payment); // Standard JSON payment endpoints
 apiRouter.use('/groups', group);
+apiRouter.use('/campaigns', campaign);
 
 app.use('/api/v1', apiRouter);
 
@@ -196,6 +212,18 @@ async function bootstrap() {
 
     console.log('🔄 Connecting to Redis...');
     await initializeRedis();
+
+    // Start background jobs
+    console.log('📅 Starting background cron jobs...');
+    // Run at minute 0 past every hour
+    cron.schedule('0 * * * *', async () => {
+      try {
+        const PaymentService = (await import('./Services/PaymentService.js')).default;
+        await PaymentService.expirePendingPayments();
+      } catch (err) {
+        console.error('❌ [Cron] Error running expirePendingPayments:', err);
+      }
+    });
 
     // Start server
     const server = app.listen(PORT, () => {
