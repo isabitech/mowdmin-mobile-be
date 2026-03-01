@@ -1,52 +1,52 @@
 // DonationController.js
-import donationService from "../Services/DonationService.js";
+import DonationService from "../Services/DonationService.js";
 import { sendSuccess } from "../core/response.js";
 
 class DonationController {
   async create(req, res, next) {
-    const dto = { ...req.body, userId: req.user.id };
-    const result = await donationService.createDonation(dto);
+    // Assuming req.user is set by authMiddleware
+    const userId = req.user?._id || req.user?.id;
+    const payload = { ...req.body, userId };
+
+    const donation = await DonationService.createDonation(payload);
     return sendSuccess(res, {
       message: "Donation created successfully",
-      data: result,
-      statusCode: 201
+      data: donation,
+      statusCode: 201,
     });
   }
 
-  async getDonationById(req, res, next) {
-    const { id } = req.params;
-    const donation = await donationService.getDonationById(id);
-    if (!donation) {
-      return res.status(404).json({ status: 'error', message: 'Donation not found' });
-    }
+  async getAll(req, res, next) {
+    const filters = req.query;
+    const result = await DonationService.getAllDonationsWithPagination(filters);
+    return sendSuccess(res, {
+      message: "Donations fetched successfully",
+      data: result,
+    });
+  }
+
+  async getOne(req, res, next) {
+    const donation = await DonationService.getDonationById(req.params.id);
     return sendSuccess(res, {
       message: "Donation fetched successfully",
       data: donation,
     });
   }
 
-  async getDonationsByUser(req, res, next) {
-    const { page = 1, limit = 10 } = req.query;
-    const pagination = {
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
-    };
-    const donations = await donationService.getDonationsByUserId(req.user.id, pagination);
+  async updateStatus(req, res, next) {
+    const { status, paymentVerificationData } = req.body;
+    const donation = await DonationService.updateDonationStatus(req.params.id, status, paymentVerificationData);
+
     return sendSuccess(res, {
-      message: "Your donations fetched successfully",
-      data: donations,
+      message: `Donation status updated to ${status}`,
+      data: donation,
     });
   }
 
-  async getDonations(req, res, next) {
-    const { page = 1, limit = 10, ...filters } = req.query;
-    const pagination = {
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
-    };
-    const donations = await donationService.getDonations(filters, pagination);
+  async getByCampaign(req, res, next) {
+    const donations = await DonationService.getDonationsByCampaign(req.params.campaignId);
     return sendSuccess(res, {
-      message: "Donations fetched successfully",
+      message: "Campaign donations fetched successfully",
       data: donations,
     });
   }

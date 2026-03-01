@@ -1,121 +1,308 @@
+import Stripe from "stripe";
+import mongoose from "mongoose";
 import { PaymentRepository } from "../repositories/PaymentRepository.js";
 import { OrderRepository } from "../repositories/OrderRepository.js";
+import CampaignService from "./CampaignService.js";
+import { AppError } from "../core/error.js";
+
+// Initialize Stripe instance - ensure we don't crash if env missing during boot, but catch during usage
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_to_prevent_boot_crash', {
+    apiVersion: '2023-10-16', // Ensure you pin an API version
+});
+
 class PaymentService {
-    async getModels() {
-        let Order, User;
-        if (process.env.DB_CONNECTION !== 'mongodb') {
-            Order = (await import("../Models/OrderModel.js")).default;
-            User = (await import("../Models/UserModel.js")).default;
-        } else {
-            Order = (await import("../MongoModels/OrderMongoModel.js")).default;
-            User = (await import("../MongoModels/UserMongoModel.js")).default;
+    /**
+     * Creates a PaymentIntent with Stripe and saves a pending Payment in DB
+     */
+    async createPaymentIntent(userId, amount, currency, type, metadata = {}) {
+        // 1. Strict Server-side validation
+        if (!amount || amount <= 0) {
+            throw new AppError("Invalid payment amount", 400);
         }
-        return { Order, User };
-    }
 
+        if (!['order', 'donation', 'subscription'].includes(type)) {
+            throw new AppError("Invalid payment type", 400);
+        }
 
-    // Initialize a new payment record
-    async createPayment(data) {
-        return PaymentRepository.create(data);
-    }
+        if (!process.env.STRIPE_SECRET_KEY) {
+            throw new AppError("Stripe configuration is missing", 500);
+        }
 
-    // Fetch all payments (admin/global)
-    async getAllPayments() {
-        const { Order, User } = await this.getModels();
-        return PaymentRepository.findAll({
-            include: [
-                { model: Order, as: "order", attributes: ["id", "status", "total_amount"] },
-                { model: User, as: "user", attributes: ["id", "name", "email"] },
-            ],
-            order: [["createdAt", "DESC"]],
+        // Convert amount to cents for Stripe (assuming amount is passed in standard currency units)
+        const amountInCents = Math.round(amount * 100);
+
+        // 2. Create PaymentIntent
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amountInCents,
+            currency: currency.toLowerCase(),
+            metadata: {
+                userId: userId.toString(),
+                type,
+                ...metadata,
+            },
         });
-    }
 
-    // Fetch all payments by user
-    async getPaymentsByUser(userId) {
-        const { Order } = await this.getModels();
-        return PaymentRepository.findAll({
-            where: { userId },
-            include: [{ model: Order, as: "order" }],
-            order: [["createdAt", "DESC"]],
+        // 3. Save pending payment record
+        const transactionRef = `PAY-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+        // Set expiration to 24 hours from now for pending payments
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24);
+
+        const paymentRecord = await PaymentRepository.createPayment({
+            userId,
+            amount,
+            currency: currency.toUpperCase(),
+            type,
+            status: 'pending',
+            transactionRef,
+            paymentIntentId: paymentIntent.id,
+            metadata,
+            expiresAt,
         });
+
+        return {
+            clientSecret: paymentIntent.client_secret,
+            paymentId: paymentRecord._id || paymentRecord.id, // Support mongoose/sequelize
+            transactionRef,
+            expiresAt
+        };
     }
 
-    // Fetch single payment
-    async getPaymentById(id) {
-        const { Order, User } = await this.getModels();
-        return PaymentRepository.findById(id, {
-            include: [
-                { model: Order, as: "order" },
-                { model: User, as: "user" },
-            ],
-        });
+    /**
+     * Main Webhook Handler
+     */
+    async handleStripeWebhook(signature, rawBody) {
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+            throw new AppError("Stripe webhook secret is missing", 500);
+        }
+
+        let event;
+
+        try {
+            event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+        } catch (err) {
+            console.error(`⚠️ Webhook signature verification failed.`, err.message);
+            throw new AppError(`Webhook Error: ${err.message}`, 400);
+        }
+
+        // Process the event
+        console.log(`[Stripe Webhook] Received event: ${event.type} [ID: ${event.id}]`);
+
+        // Idempotency Check: Did we process this precise webhook event already?
+        const existingProcessedEvent = await PaymentRepository.findByWebhookEventId(event.id);
+        if (existingProcessedEvent) {
+            console.log(`[Stripe Webhook] Event ${event.id} already processed. Skipping.`);
+            return { received: true, alreadyProcessed: true };
+        }
+
+        switch (event.type) {
+            case 'payment_intent.succeeded':
+                const paymentIntentSucceeded = event.data.object;
+                await this.handlePaymentSuccess(paymentIntentSucceeded, event.id);
+                break;
+
+            case 'payment_intent.payment_failed':
+                const paymentIntentFailed = event.data.object;
+                await this.handlePaymentFailure(paymentIntentFailed, event.id);
+                break;
+
+            default:
+                console.log(`[Stripe Webhook] Unhandled event type ${event.type}`);
+        }
+
+        return { received: true };
     }
 
-    // Update payment details
-    async updatePayment(id, data) {
-        const payment = await PaymentRepository.findById(id);
-        if (!payment) return null;
+    async handlePaymentSuccess(paymentIntent, webhookEventId) {
+        const payment = await PaymentRepository.findByPaymentIntentId(paymentIntent.id);
+        if (!payment) {
+            console.error(`[Webhook] No payment record found for Intent ID: ${paymentIntent.id}`);
+            return;
+        }
 
-        return await payment.update(data);
-    }
+        // Double Idempotency Check: Is it already marked successful?
+        if (payment.status === 'success') {
+            console.log(`[Webhook] Payment ${payment.transactionRef} already marked successful.`);
+            return;
+        }
 
-    // Delete payment record
-    async deletePayment(id) {
-        const deleted = await PaymentRepository.deleteById(id);
-        if (!deleted) return null;
+        // If using MongoDB, utilize a transaction for atomic multi-document updates
+        if (process.env.DB_CONNECTION === 'mongodb') {
+            const session = await mongoose.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    const PaymentModel = (await import("../MongoModels/PaymentMongoModel.js")).default;
 
-        return { message: "Payment record deleted successfully" };
-    }
+                    // 1. Update Payment Status
+                    await PaymentModel.findByIdAndUpdate(
+                        payment._id || payment.id,
+                        { status: 'success', webhookEventId },
+                        { session, new: true, runValidators: true }
+                    );
 
-    // Mark payment as successful
-    async markAsSuccessful(reference, webhookEventId = null) {
-        // Check for duplicate webhook processing (idempotency)
-        if (webhookEventId) {
-            const existingPayment = await PaymentRepository.findOne({
-                where: { webhookEventId }
-            });
-            if (existingPayment) {
-                console.log(`⚠️ Duplicate webhook ${webhookEventId} ignored - payment already processed`);
-                return existingPayment;
+                    // 2. Route Logic
+                    if (payment.type === 'order') {
+                        await this._processOrderSuccess(payment, session);
+                    } else if (payment.type === 'donation') {
+                        await this._processDonationSuccess(payment, session);
+                    }
+                });
+                console.log(`✅ [Webhook] Payment ${payment.transactionRef} marked successful inside transaction.`);
+            } catch (err) {
+                console.error(`❌ [Webhook] Error processing side-effects for payment ${payment.transactionRef}:`, err);
+                // Throw to let Stripe know things failed hard
+                throw new AppError(`Transaction failed: ${err.message}`, 500);
+            } finally {
+                await session.endSession();
+            }
+        } else {
+            // Fallback for Non-MongoDB SQL structures
+            await PaymentRepository.updatePaymentStatus(
+                payment.id,
+                'success',
+                { webhookEventId }
+            );
+            console.log(`✅ [Webhook] Payment ${payment.transactionRef} marked successful (No DB Transaction).`);
+
+            try {
+                if (payment.type === 'order') {
+                    await this._processOrderSuccess(payment);
+                } else if (payment.type === 'donation') {
+                    await this._processDonationSuccess(payment);
+                }
+            } catch (err) {
+                console.error(`❌ [Webhook] Error processing side-effects for payment ${payment.transactionRef}:`, err);
             }
         }
+    }
 
-        const payment = await PaymentRepository.findOne({ where: { reference } });
-        if (!payment) return null;
+    /**
+     * Handle failed Payment Intent
+     */
+    async handlePaymentFailure(paymentIntent, webhookEventId) {
+        const payment = await PaymentRepository.findByPaymentIntentId(paymentIntent.id);
+        if (!payment) return;
 
-        // Idempotency: if already successful, return without changes
-        if (payment.status === "successful") {
-            console.log(`⚠️ Payment ${reference} already marked successful`);
-            return payment;
+        if (payment.status === 'failed') return; // Idempotent check
+
+        await PaymentRepository.updatePaymentStatus(
+            payment._id || payment.id,
+            'failed',
+            { webhookEventId }
+        );
+        console.log(`❌ [Webhook] Payment ${payment.transactionRef} marked failed.`);
+
+        // Route fail logic
+        await this._processFailureSideEffects(payment);
+    }
+
+    // --- Private Side-Effect Business Logic Handlers ---
+
+    async _processOrderSuccess(payment, session = null) {
+        const orderId = payment.metadata?.orderId;
+        if (!orderId) return;
+
+        if (process.env.DB_CONNECTION === 'mongodb') {
+            const OrderModel = (await import("../MongoModels/OrderMongoModel.js")).default;
+            await OrderModel.findByIdAndUpdate(
+                orderId,
+                { status: "paid" },
+                { session, new: true }
+            );
+            console.log(`✅ [Webhook] Order ${orderId} marked as paid in transaction.`);
+        } else {
+            const order = await OrderRepository.findById(orderId);
+            if (order) {
+                order.status = "paid";
+                await order.save();
+                console.log(`✅ [Webhook] Order ${orderId} marked as paid.`);
+            }
         }
+    }
 
-        payment.status = "successful";
-        if (webhookEventId) {
-            payment.webhookEventId = webhookEventId;
+    async _processDonationSuccess(payment, session = null) {
+        const campaignId = payment.metadata?.campaignId;
+        const donationId = payment.metadata?.donationId;
+        if (!campaignId) return;
+
+        const amountDecimal = parseFloat(payment.amount.toString());
+
+        if (process.env.DB_CONNECTION === 'mongodb') {
+            const CampaignModel = (await import("../MongoModels/CampaignMongoModel.js")).default;
+
+            // Atomic update for Campaign
+            await CampaignModel.findByIdAndUpdate(
+                campaignId,
+                { $inc: { totalRaised: amountDecimal } },
+                { session, new: true }
+            );
+            console.log(`✅ [Webhook] Campaign ${campaignId} incremented by ${amountDecimal}.`);
+
+            if (donationId) {
+                const DonationModel = (await import("../MongoModels/DonationMongoModel.js")).default;
+                await DonationModel.findByIdAndUpdate(
+                    donationId,
+                    { status: 'success' },
+                    { session, new: true }
+                );
+            }
+        } else {
+            const CampaignModel = (await import("../MongoModels/CampaignMongoModel.js")).default;
+            await CampaignModel.findByIdAndUpdate(
+                campaignId,
+                { $inc: { totalRaised: amountDecimal } },
+                { new: true }
+            );
+
+            if (donationId) {
+                const DonationRepository = (await import("../repositories/DonationRepository.js")).default;
+                await DonationRepository.updateDonationStatus(donationId, 'success');
+            }
         }
-        await payment.save();
+    }
 
-        // Optionally update related order
-        const order = await OrderRepository.findById(payment.orderId);
-        if (order) {
-            order.status = "paid";
-            await order.save();
+    async _processFailureSideEffects(payment) {
+        if (payment.type === 'donation' && payment.metadata?.donationId) {
+            const DonationRepository = (await import("../repositories/DonationRepository.js")).default;
+            await DonationRepository.updateDonationStatus(payment.metadata.donationId, 'failed');
         }
+    }
 
-        console.log(`✅ Payment ${reference} marked successful`);
+    // --- Admin / Standard Fetch Methods ---
+
+    async getAllPayments(filters) {
+        return PaymentRepository.getAllPaymentsWithPagination(filters);
+    }
+
+    async getPaymentById(id) {
+        const payment = await PaymentRepository.getPaymentById(id);
+        if (!payment) {
+            throw new AppError("Payment not found", 404);
+        }
         return payment;
     }
 
-    // Mark payment as failed
-    async markAsFailed(reference) {
-        const payment = await PaymentRepository.findOne({ where: { reference } });
-        if (!payment) return null;
+    /**
+     * Optional Cleanup Job: Marks all pending payments past expiresAt as 'failed'.
+     * Intended to be run via a Cron job (e.g. node-cron) periodically.
+     */
+    async expirePendingPayments() {
+        if (process.env.DB_CONNECTION === 'mongodb') {
+            const PaymentModel = (await import("../MongoModels/PaymentMongoModel.js")).default;
+            const now = new Date();
 
-        payment.status = "failed";
-        await payment.save();
+            const result = await PaymentModel.updateMany(
+                { status: 'pending', expiresAt: { $lte: now } },
+                { $set: { status: 'failed' } }
+            );
 
-        return payment;
+            if (result.modifiedCount > 0) {
+                console.log(`[Job: Expire Payments] Marked ${result.modifiedCount} pending payments as failed.`);
+            }
+        }
+        // If SQL, add equivalent batched raw query here.
     }
 }
 

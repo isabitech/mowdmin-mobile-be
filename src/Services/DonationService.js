@@ -1,29 +1,66 @@
 // DonationService.js
-import { DonationRepository } from "../repositories/DonationRepository.js";
+import DonationRepository from "../repositories/DonationRepository.js";
+import CampaignService from "./CampaignService.js";
+import { AppError } from "../core/error.js";
 
+class DonationService {
+  async createDonation(data) {
+    const { campaign: campaignId } = data;
 
-export const createDonation = async (dto) => {
-  return DonationRepository.create(dto);
-};
+    // Validate campaign is active before donating
+    const campaign = await CampaignService.getCampaignById(campaignId);
+    if (!campaign.isActive) {
+      throw new AppError("Cannot donate to an inactive campaign", 400);
+    }
 
-export const getDonations = async (filters, pagination) => {
-  return DonationRepository.findAll(filters, pagination);
-};
+    return await DonationRepository.createDonation(data);
+  }
 
-export const getDonationById = async (id) => {
-  return DonationRepository.findById(id);
-};
+  async getDonationById(id) {
+    const donation = await DonationRepository.getDonationById(id);
+    if (!donation) {
+      throw new AppError("Donation not found", 404);
+    }
+    return donation;
+  }
 
-export const getDonationsByUserId = async (userId, pagination) => {
-  return DonationRepository.findAllByUserId(userId, pagination);
-};
+  async getAllDonationsWithPagination(query) {
+    return await DonationRepository.getAllDonationsWithPagination(query);
+  }
 
-export const getAllDonations = getDonations; // Alias for tests
+  async updateDonationStatus(id, status, paymentVerificationData = null) {
+    const donation = await this.getDonationById(id);
 
-export default {
-  createDonation,
-  getDonations,
-  getDonationById,
-  getDonationsByUserId,
-  getAllDonations,
-};
+    // Cannot mark failed donation as success without payment verification
+    if (donation.status === 'failed' && status === 'success') {
+      if (!paymentVerificationData || !paymentVerificationData.verified) {
+        throw new AppError("Cannot mark a failed donation as success without payment verification", 400);
+      }
+    }
+
+    // Only increment totalRaised if transitioning from a non-success state to success
+    const isBecomingSuccess = donation.status !== 'success' && status === 'success';
+
+    const updatedDonation = await DonationRepository.updateDonationStatus(id, status);
+
+    if (isBecomingSuccess) {
+      const campaign = await CampaignService.getCampaignById(donation.campaign._id || donation.campaign.id);
+
+      // We parse amounts carefully since amount might be a Decimal128 object depending on DB/Mongoose implementation
+      const donationAmount = updatedDonation.amount ? parseFloat(updatedDonation.amount.toString()) : 0;
+      const currentTotal = campaign.totalRaised || 0;
+
+      await CampaignService.updateCampaign(campaign._id || campaign.id, {
+        totalRaised: currentTotal + donationAmount
+      });
+    }
+
+    return updatedDonation;
+  }
+
+  async getDonationsByCampaign(campaignId) {
+    return await DonationRepository.getDonationsByCampaign(campaignId);
+  }
+}
+
+export default new DonationService();

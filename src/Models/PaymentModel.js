@@ -9,20 +9,29 @@ const Payment = getSequelize().define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    orderId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
+    },
+    orderId: {
+      type: DataTypes.UUID,
+      allowNull: true, // Optional for other payment types
+    },
+    type: {
+      type: DataTypes.ENUM("order", "donation", "subscription"),
+      allowNull: false,
+      defaultValue: "order",
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    currency: {
+      type: DataTypes.STRING,
+      defaultValue: "USD",
+    },
     status: {
-      type: DataTypes.ENUM("pending", "completed", "failed"),
+      type: DataTypes.ENUM("pending", "success", "failed", "refunded"),
       defaultValue: "pending",
     },
     reference: {
@@ -30,14 +39,27 @@ const Payment = getSequelize().define(
       allowNull: false,
       unique: true,
     },
-    method: {
+    paymentIntentId: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     webhookEventId: {
       type: DataTypes.STRING,
       unique: true,
       allowNull: true,
       index: true,
+    },
+    method: {
+      type: DataTypes.STRING,
+      defaultValue: "stripe",
+    },
+    metadata: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    expiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {
