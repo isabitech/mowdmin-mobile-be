@@ -1,6 +1,7 @@
 // DonationController.js
 import DonationService from "../Services/DonationService.js";
-import { sendSuccess } from "../core/response.js";
+import PaymentService from "../Services/PaymentService.js";
+import { sendSuccess, sendError } from "../core/response.js";
 
 class DonationController {
   async create(req, res, next) {
@@ -48,6 +49,47 @@ class DonationController {
     return sendSuccess(res, {
       message: "Campaign donations fetched successfully",
       data: donations,
+    });
+  }
+
+  async payForDonation(req, res) {
+    const donationId = req.params.id;
+    const userId = req.user?._id || req.user?.id;
+
+    // Fetch the donation and validate
+    const donation = await DonationService.getDonationById(donationId);
+    if (!donation) {
+      return sendError(res, { message: "Donation not found", statusCode: 404 });
+    }
+    if (donation.status !== 'pending') {
+      return sendError(res, { message: `Cannot pay for a donation with status '${donation.status}'`, statusCode: 400 });
+    }
+
+    // Parse the amount (may be Decimal128)
+    const amount = parseFloat(donation.amount.toString());
+    if (!amount || amount <= 0) {
+      return sendError(res, { message: "Donation has an invalid amount", statusCode: 400 });
+    }
+
+    // Get campaignId from the donation
+    const campaignId = donation.campaign?._id || donation.campaign;
+
+    // Create a Stripe PaymentIntent linked to this donation
+    const paymentResult = await PaymentService.createPaymentIntent(
+      userId,
+      amount,
+      donation.currency || 'USD',
+      'donation',
+      {
+        donationId: donationId.toString(),
+        campaignId: campaignId.toString(),
+      }
+    );
+
+    return sendSuccess(res, {
+      message: "Payment intent created for donation",
+      data: paymentResult,
+      statusCode: 201,
     });
   }
 }

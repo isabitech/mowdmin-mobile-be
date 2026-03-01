@@ -6,8 +6,8 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/mowdmin';
 
 export const connectMongoDB = async () => {
-    const mongoUri = process.env.MONGO_URI;
-    // console.log(`mongo url->`, mongoUri)
+    // const mongoUri = process.env.MONGO_URI;
+    console.log(`mongo url->`, mongoUri)
     try {
         await mongoose.connect(mongoUri, {
             dbName: process.env.MONGO_DB_NAME,

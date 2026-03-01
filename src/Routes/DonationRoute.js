@@ -11,6 +11,9 @@ router.post('/', protectUser, tryCatch(DonationController.create.bind(DonationCo
 router.get('/', protectUser, protectAdmin, tryCatch(DonationController.getAll.bind(DonationController)));
 router.get('/:id', protectUser, tryCatch(DonationController.getOne.bind(DonationController)));
 
+// Pay for a donation (creates a Stripe PaymentIntent)
+router.post('/:id/pay', protectUser, tryCatch(DonationController.payForDonation.bind(DonationController)));
+
 // Specific action routes
 router.patch('/:id/status', protectUser, protectAdmin, tryCatch(DonationController.updateStatus.bind(DonationController)));
 router.get('/campaign/:campaignId', tryCatch(DonationController.getByCampaign.bind(DonationController)));
