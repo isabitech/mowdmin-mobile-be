@@ -11,6 +11,8 @@ export const GroupRepository = {
                 GroupModel = mongoModels.Group;
                 MemberModel = mongoModels.GroupMember;
                 MessageModel = mongoModels.GroupMessage;
+                // Ensure UserMongo model is registered for population
+                await import('../MongoModels/UserMongoModel.js');
             } else {
                 const sqlModels = await import('../Models/GroupModels.js');
                 GroupModel = sqlModels.Group;
@@ -28,14 +30,44 @@ export const GroupRepository = {
     },
 
     async findAllGroups(filters = {}) {
-        const { GroupModel } = await this.getModels();
-        if (isMongo) return await GroupModel.find(filters);
+        const { GroupModel, MemberModel } = await this.getModels();
+        if (isMongo) {
+            const groups = await GroupModel.find(filters)
+                .populate('creatorId', 'name email photo');
+
+            // Attach member count to each group
+            const groupsWithCounts = await Promise.all(
+                groups.map(async (group) => {
+                    const memberCount = await MemberModel.countDocuments({ groupId: group._id });
+                    const groupObj = group.toObject();
+                    groupObj.memberCount = memberCount;
+                    return groupObj;
+                })
+            );
+            return groupsWithCounts;
+        }
         return await GroupModel.findAll({ where: filters });
     },
 
     async findGroupById(id) {
-        const { GroupModel } = await this.getModels();
-        if (isMongo) return await GroupModel.findById(id);
+        const { GroupModel, MemberModel } = await this.getModels();
+        if (isMongo) {
+            const group = await GroupModel.findById(id)
+                .populate('creatorId', 'name email photo');
+
+            if (!group) return null;
+
+            // Get members with user details
+            const members = await MemberModel.find({ groupId: id })
+                .populate('userId', 'name email photo');
+
+            const memberCount = members.length;
+
+            const groupObj = group.toObject();
+            groupObj.memberCount = memberCount;
+            groupObj.members = members;
+            return groupObj;
+        }
         return await GroupModel.findByPk(id);
     },
 
@@ -47,7 +79,7 @@ export const GroupRepository = {
 
     async findMembersByGroup(groupId) {
         const { MemberModel } = await this.getModels();
-        if (isMongo) return await MemberModel.find({ groupId });
+        if (isMongo) return await MemberModel.find({ groupId }).populate('userId', 'name email photo');
         return await MemberModel.findAll({ where: { groupId } });
     },
 
@@ -66,8 +98,25 @@ export const GroupRepository = {
     async findGroupsByUserId(userId) {
         const { MemberModel, GroupModel } = await this.getModels();
         if (isMongo) {
-            const memberships = await MemberModel.find({ userId }).populate('groupId');
-            return memberships.map(m => m.groupId).filter(g => g !== null);
+            const memberships = await MemberModel.find({ userId })
+                .populate({
+                    path: 'groupId',
+                    populate: { path: 'creatorId', select: 'name email photo' }
+                });
+
+            // For each group, also attach member count
+            const groups = await Promise.all(
+                memberships
+                    .map(m => m.groupId)
+                    .filter(g => g !== null)
+                    .map(async (group) => {
+                        const memberCount = await MemberModel.countDocuments({ groupId: group._id });
+                        const groupObj = group.toObject();
+                        groupObj.memberCount = memberCount;
+                        return groupObj;
+                    })
+            );
+            return groups;
         }
         // For SQL, we assume a belongsTo/hasMany relationship is set up or use a join
         return await GroupModel.findAll({
@@ -87,13 +136,22 @@ export const GroupRepository = {
 
     async findMessagesByGroup(groupId) {
         const { MessageModel } = await this.getModels();
-        if (isMongo) return await MessageModel.find({ groupId }).sort({ createdAt: 1 });
+        if (isMongo) {
+            return await MessageModel.find({ groupId })
+                .populate('senderId', 'name email photo')
+                .sort({ createdAt: 1 });
+        }
         return await MessageModel.findAll({ where: { groupId }, order: [['createdAt', 'ASC']] });
     },
 
     async deleteGroup(id) {
-        const { GroupModel } = await this.getModels();
-        if (isMongo) return await GroupModel.findByIdAndDelete(id);
+        const { GroupModel, MemberModel, MessageModel } = await this.getModels();
+        if (isMongo) {
+            // Also clean up members and messages when deleting a group
+            await MemberModel.deleteMany({ groupId: id });
+            await MessageModel.deleteMany({ groupId: id });
+            return await GroupModel.findByIdAndDelete(id);
+        }
         return await GroupModel.destroy({ where: { id } });
     }
 };

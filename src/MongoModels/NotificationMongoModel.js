@@ -14,7 +14,16 @@ const NotificationMongoSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  read: {
+  type: {
+    type: String,
+    enum: ['info', 'alert', 'reminder', 'system'],
+    default: 'info',
+  },
+  metadata: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
+  isRead: {
     type: Boolean,
     default: false,
   },

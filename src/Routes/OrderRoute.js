@@ -26,6 +26,9 @@ order.put(
 );
 order.delete("/:id", protectUser, protectAdmin, tryCatch(OrderController.delete));
 
+// Pay for an order (creates a Stripe PaymentIntent)
+order.post("/:id/pay", protectUser, tryCatch(OrderController.payForOrder));
+
 // Admin Cancellation
 order.post("/:id/cancel", protectUser, protectAdmin, tryCatch(OrderController.cancel));
 
