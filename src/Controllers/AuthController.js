@@ -92,14 +92,20 @@ class AuthController {
             return sendError(res, { message: "Profile not found", statusCode: 404 });
         }
         // Format image URL if exists
-        const formatPhotoUrl = (url) => {
+        const formatPhotoUrl = (req, url) => {
             if (!url) return null;
-            if (url.startsWith('http')) return url;
-            return `${process.env.BASE_URL}${url}`;
+
+            if (url.startsWith("http")) {
+                return url;
+            }
+
+            const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+            return `${baseUrl}${url}`;
         };
         const profileData = {
             ...profile.toJSON(),
-            photoUrl: formatPhotoUrl(profile.photoUrl),
+            photoUrl: formatPhotoUrl(req, profile.photoUrl),
         };
         return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
     }
@@ -115,9 +121,7 @@ class AuthController {
         // Format image URL if exists
         const profileData = {
             ...profile.toJSON(),
-            photoUrl: profile.photoUrl
-                ? `${process.env.BASE_URL}${profile.photoUrl}`
-                : null,
+            photoUrl: formatPhotoUrl(req, profile.photoUrl),
         };
         return sendSuccess(res, { message: "Profile saved successfully", data: profileData, statusCode: 200 });
     }

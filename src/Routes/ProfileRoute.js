@@ -8,7 +8,7 @@ import { handleValidationErrors } from "../middleware/Validation/handleValidatio
 import { tryCatch } from "../Utils/try-catch.js";
 
 const router = express.Router();
-router.get('/', protectUser, ProfileController.getProfile);
+router.get('/', protectUser, tryCatch(ProfileController.getProfile));
 router.put(
 	'/',
 	protectUser,

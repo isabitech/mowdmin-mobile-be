@@ -3,10 +3,16 @@ import profileService from '../Services/ProfileService.js';
 import { sendSuccess, sendError } from '../core/response.js';
 
 // Normalize photo URL relative to BASE_URL when stored as a path
-const formatPhotoUrl = (url) => {
+const formatPhotoUrl = (req, url) => {
   if (!url) return null;
-  if (url.startsWith('http')) return url;
-  return `${process.env.BASE_URL}${url}`;
+
+  if (url.startsWith("http")) {
+    return url;
+  }
+
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+  return `${baseUrl}${url}`;
 };
 
 export class ProfileController {
@@ -22,7 +28,7 @@ export class ProfileController {
     }
     const profileData = {
       ...profile.toJSON(),
-      photoUrl: formatPhotoUrl(profile.photoUrl),
+      photoUrl: formatPhotoUrl(req, profile.photoUrl),
     };
     return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
   }
@@ -42,7 +48,7 @@ export class ProfileController {
     const updated = await profileService.updateProfile(userId, dto);
     const profileData = {
       ...updated.toJSON(),
-      photoUrl: formatPhotoUrl(updated.photoUrl),
+      photoUrl: formatPhotoUrl(req, updated.photoUrl),
     };
     return sendSuccess(res, { message: "Profile updated successfully", data: profileData, statusCode: 200 });
   }
