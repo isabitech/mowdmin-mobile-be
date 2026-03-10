@@ -1,25 +1,49 @@
 // ProfileController.js
 import profileService from '../Services/ProfileService.js';
-import { sendSuccess } from '../core/response.js';
+import { sendSuccess, sendError } from '../core/response.js';
+
+// Normalize photo URL relative to BASE_URL when stored as a path
+const formatPhotoUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${process.env.BASE_URL}${url}`;
+};
 
 export class ProfileController {
-  static async getProfile(req, res, next) {
-    const userId = req.user.id;
-    const profile = await profileService.getProfile(userId);
-    return sendSuccess(res, { message: "Profile fetched successfully", data: profile });
-  }
 
+  static async getProfile(req, res) {
+    const userId = req.user.id;
+    if (!userId) {
+      return sendError(res, { message: "User ID is required", statusCode: 400 });
+    }
+    const profile = await profileService.getProfile(userId);
+    if (!profile) {
+      return sendError(res, { message: "Profile not found", statusCode: 404 });
+    }
+    const profileData = {
+      ...profile.toJSON(),
+      photoUrl: formatPhotoUrl(profile.photoUrl),
+    };
+    return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
+  }
   static async updateProfile(req, res, next) {
     const userId = req.user.id;
-    const { displayName, bio, location, phoneNumber, phone_number, birthdate } = req.body;
+    // Gracefully handle cases where body parsing fails (e.g., missing JSON/form parser)
+    const { displayName, bio, location, phoneNumber, phone_number, birthdate } = req.body || {};
     const dto = {
       displayName,
       bio,
       location,
       phone_number: phoneNumber || phone_number,
-      birthdate
+      birthdate,
+      photoUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
+
     };
     const updated = await profileService.updateProfile(userId, dto);
-    return sendSuccess(res, { message: "Profile updated successfully", data: updated });
+    const profileData = {
+      ...updated.toJSON(),
+      photoUrl: formatPhotoUrl(updated.photoUrl),
+    };
+    return sendSuccess(res, { message: "Profile updated successfully", data: profileData, statusCode: 200 });
   }
 }

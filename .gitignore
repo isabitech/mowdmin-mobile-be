@@ -2,3 +2,4 @@
 .env
 .local-rules/
 .jest-cache
+/uploads
