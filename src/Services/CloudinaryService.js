@@ -37,6 +37,31 @@ class CloudinaryService {
   static async delete(publicId) {
     return cloudinary.uploader.destroy(publicId);
   }
+
+  /**
+   * Extract the public ID from a Cloudinary URL.
+   * e.g. "https://res.cloudinary.com/xxx/image/upload/v123/mowdmin/profiles/abc.jpg"
+   *   → "mowdmin/profiles/abc"
+   * Returns null for non-Cloudinary URLs.
+   */
+  static extractPublicId(url) {
+    if (!url || !url.includes("res.cloudinary.com")) return null;
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+    // Remove version prefix (v1234567890/) and file extension
+    const afterUpload = parts[1].replace(/^v\d+\//, "");
+    return afterUpload.replace(/\.[^.]+$/, "");
+  }
+
+  /**
+   * Delete old Cloudinary image if it exists. Safe to call with any URL.
+   */
+  static async deleteIfCloudinary(url) {
+    const publicId = CloudinaryService.extractPublicId(url);
+    if (publicId) {
+      await CloudinaryService.delete(publicId);
+    }
+  }
 }
 
 export default CloudinaryService;

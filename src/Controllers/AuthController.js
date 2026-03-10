@@ -99,8 +99,19 @@ class AuthController {
     static async createOrUpdateProfile(req, res) {
         const userId = req.user.id;
         const data = { ...req.body };
+
         // Upload photo to Cloudinary if provided
         if (req.file) {
+            const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
+            data.photoUrl = url;
+        }
+        // Upload photo to Cloudinary if provided
+        if (req.file) {
+            // Delete old photo from Cloudinary
+            const existing = await AuthService.getProfile(userId);
+            if (existing?.photoUrl) {
+                await CloudinaryService.deleteIfCloudinary(existing.photoUrl);
+            }
             const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
             data.photoUrl = url;
         }
@@ -113,6 +124,11 @@ class AuthController {
         const userId = req.user.id;
         if (!userId) {
             return sendError(res, { message: "User ID is required", statusCode: 400 });
+        }
+        // Delete profile photo from Cloudinary
+        const profile = await AuthService.getProfile(userId);
+        if (profile?.photoUrl) {
+            await CloudinaryService.deleteIfCloudinary(profile.photoUrl);
         }
         await AuthService.deleteProfile(userId);
         return sendSuccess(res, { message: "Profile deleted successfully", data: null, statusCode: 200 });

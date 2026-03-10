@@ -28,6 +28,11 @@ export class ProfileController {
     };
 
     if (req.file) {
+      // Delete old photo from Cloudinary before uploading new one
+      const existing = await profileService.getProfile(userId);
+      if (existing?.photoUrl) {
+        await CloudinaryService.deleteIfCloudinary(existing.photoUrl);
+      }
       const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
       dto.photoUrl = url;
     }
