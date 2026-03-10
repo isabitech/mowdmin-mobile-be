@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import cron from 'node-cron';
+import path from 'path';
 
 import './env.js';
 import { connectMongoDB } from './Config/mongodb.js';
@@ -138,7 +139,7 @@ app.post(
 // Global Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use(attachRequestMeta);
 
 // API router

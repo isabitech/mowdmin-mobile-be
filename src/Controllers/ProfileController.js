@@ -11,8 +11,9 @@ const formatPhotoUrl = (req, url) => {
   }
 
   const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const cleanPath = url.startsWith("/") ? url : `/${url}`;
 
-  return `${baseUrl}${url}`;
+  return `${baseUrl}${cleanPath}`;
 };
 
 export class ProfileController {
