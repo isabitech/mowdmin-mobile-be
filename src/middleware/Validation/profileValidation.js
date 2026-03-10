@@ -1,11 +1,8 @@
 import { body, param } from "express-validator";
 
 // Validate profile update data
+// Note: userId comes from the authenticated user context, not a route param.
 export const validateProfileUpdate = [
-    param("userId")
-        .isUUID()
-        .withMessage("User ID must be a valid UUID"),
-
     body("displayName")
         .optional()
         .trim()
