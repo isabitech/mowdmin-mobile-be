@@ -1,36 +1,7 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import crypto from "crypto";
 
-// Determine upload directory
-const __dirname = path.resolve();
-const uploadDir = path.join(__dirname, "uploads");
-
-// Create directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configure storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Sanitize extension - only allow whitelisted extensions
-    const ext = path.extname(file.originalname).toLowerCase();
-    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
-
-    if (!allowedExts.includes(ext)) {
-      return cb(new Error('Invalid file extension'), false);
-    }
-
-    // Use crypto for secure random filename
-    const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
-    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-  },
-});
+// Use memory storage so file buffers can be uploaded to Cloudinary
+const storage = multer.memoryStorage();
 
 // File filter for image validation
 const fileFilter = (req, file, cb) => {

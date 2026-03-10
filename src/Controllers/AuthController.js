@@ -1,4 +1,5 @@
 import AuthService from "../Services/AuthService.js";
+import CloudinaryService from "../Services/CloudinaryService.js";
 import { sendSuccess, sendError } from "../core/response.js";
 
 class AuthController {
@@ -91,39 +92,20 @@ class AuthController {
         if (!profile) {
             return sendError(res, { message: "Profile not found", statusCode: 404 });
         }
-        // Format image URL if exists
-        const formatPhotoUrl = (req, url) => {
-            if (!url) return null;
-
-            if (url.startsWith("http")) {
-                return url;
-            }
-
-            const baseUrl = `${req.protocol}://${req.get("host")}`;
-
-            return `${baseUrl}${url}`;
-        };
-        const profileData = {
-            ...profile.toJSON(),
-            photoUrl: formatPhotoUrl(req, profile.photoUrl),
-        };
-        return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
+        return sendSuccess(res, { message: "Profile retrieved successfully", data: profile, statusCode: 200 });
     }
 
     // Create or update user profile
     static async createOrUpdateProfile(req, res) {
         const userId = req.user.id;
         const data = { ...req.body };
-        // Attach uploaded file path if it exists
-        if (req.file) data.photoUrl = `/uploads/${req.file.filename}`;
-        // Call service to create or update the profile
+        // Upload photo to Cloudinary if provided
+        if (req.file) {
+            const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
+            data.photoUrl = url;
+        }
         const profile = await AuthService.createOrUpdateProfile(userId, data);
-        // Format image URL if exists
-        const profileData = {
-            ...profile.toJSON(),
-            photoUrl: formatPhotoUrl(req, profile.photoUrl),
-        };
-        return sendSuccess(res, { message: "Profile saved successfully", data: profileData, statusCode: 200 });
+        return sendSuccess(res, { message: "Profile saved successfully", data: profile, statusCode: 200 });
     }
 
     // Delete user profile

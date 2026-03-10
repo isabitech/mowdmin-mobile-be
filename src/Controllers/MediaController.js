@@ -1,4 +1,5 @@
 import MediaService from "../Services/MediaService.js";
+import CloudinaryService from "../Services/CloudinaryService.js";
 import { sendSuccess, sendError } from "../core/response.js";
 import { validateCreateMedia, validateUpdateMedia } from "../middleware/Validation/MediaValidation.js";
 
@@ -6,7 +7,8 @@ class MediaController {
   async create(req, res, next) {
     const payload = { ...req.body };
     if (req.file) {
-      payload.thumbnail = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/media" });
+      payload.thumbnail = url;
     }
 
     const { error, value } = validateCreateMedia(payload);
@@ -29,7 +31,8 @@ class MediaController {
   async update(req, res, next) {
     const payload = { ...req.body };
     if (req.file) {
-      payload.thumbnail = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/media" });
+      payload.thumbnail = url;
     }
 
     const { error, value } = validateUpdateMedia(payload);
