@@ -1,9 +1,14 @@
 import PrayerService from "../Services/PrayerService.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import { PrayerLikeRepository } from "../repositories/PrayerLikeRepository.js";
 
 class PrayerLikeController {
   async like(req, res) {
     const { id } = req.params;
+    // Prevent invalid IDs (e.g., bad ObjectId strings) from causing server errors
+    if (!PrayerLikeRepository.isValidId(id)) {
+      return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
+    }
     const result = await PrayerService.likePrayer(id, req.user.id);
     if (!result) return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
     return sendSuccess(res, { message: result.liked ? "Prayer Liked" : "Prayer Unliked", data: result });
@@ -16,6 +21,9 @@ class PrayerLikeController {
   }
   async unlike(req, res) {
     const { id } = req.params;
+    if (!PrayerLikeRepository.isValidId(id)) {
+      return sendError(res, { message: "Invalid Prayer ID format", statusCode: 400 });
+    }
     const result = await PrayerService.unlikePrayer(id, req.user.id);
     if (!result) return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
     return sendSuccess(res, { message: result.liked ? "Prayer Liked" : "Prayer Unliked", data: result });

@@ -16,7 +16,8 @@ const NotificationMongoSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['info', 'alert', 'reminder', 'system'],
+    // Allow all known notification types used across services and validators
+    enum: ['info', 'alert', 'reminder', 'system', 'transaction', 'like'],
     default: 'info',
   },
   metadata: {
