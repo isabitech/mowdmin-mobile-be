@@ -31,6 +31,11 @@ class MediaController {
   async update(req, res, next) {
     const payload = { ...req.body };
     if (req.file) {
+      // Delete old thumbnail from Cloudinary
+      const existing = await MediaService.findById(req.params.id);
+      if (existing?.thumbnail) {
+        await CloudinaryService.deleteIfCloudinary(existing.thumbnail);
+      }
       const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/media" });
       payload.thumbnail = url;
     }
@@ -47,6 +52,11 @@ class MediaController {
     return sendSuccess(res, { message: "Media Updated Successfully", data: updated });
   }
   async delete(req, res, next) {
+    // Delete thumbnail from Cloudinary before removing the media
+    const media = await MediaService.findById(req.params.id);
+    if (media?.thumbnail) {
+      await CloudinaryService.deleteIfCloudinary(media.thumbnail);
+    }
     await MediaService.delete(req.params.id);
     return sendSuccess(res, { message: "Media Deleted Successfully", data: {} });
   }

@@ -19,6 +19,11 @@ class EventController {
   async update(req, res, next) {
     let updateData = { ...req.body };
     if (req.file) {
+      // Delete old event image from Cloudinary
+      const existing = await EventService.getEventById(req.params.id);
+      if (existing?.image) {
+        await CloudinaryService.deleteIfCloudinary(existing.image);
+      }
       const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/events" });
       updateData.image = url;
     }
@@ -29,6 +34,11 @@ class EventController {
     return sendSuccess(res, { message: "Event Updated Successfully", data: event });
   }
   async delete(req, res, next) {
+    // Delete event image from Cloudinary before removing the event
+    const event = await EventService.getEventById(req.params.id);
+    if (event?.image) {
+      await CloudinaryService.deleteIfCloudinary(event.image);
+    }
     await EventService.deleteEvent(req.params.id);
     return sendSuccess(res, { message: "Event Deleted Successfully", data: {} });
   }
