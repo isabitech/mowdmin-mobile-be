@@ -1,20 +1,7 @@
 // ProfileController.js
 import profileService from '../Services/ProfileService.js';
+import CloudinaryService from '../Services/CloudinaryService.js';
 import { sendSuccess, sendError } from '../core/response.js';
-
-// Normalize photo URL relative to BASE_URL when stored as a path
-const formatPhotoUrl = (req, url) => {
-  if (!url) return null;
-
-  if (url.startsWith("http")) {
-    return url;
-  }
-
-  const baseUrl = `${req.protocol}://${req.get("host")}`;
-  const cleanPath = url.startsWith("/") ? url : `/${url}`;
-
-  return `${baseUrl}${cleanPath}`;
-};
 
 export class ProfileController {
 
@@ -27,15 +14,10 @@ export class ProfileController {
     if (!profile) {
       return sendError(res, { message: "Profile not found", statusCode: 404 });
     }
-    const profileData = {
-      ...profile.toJSON(),
-      photoUrl: formatPhotoUrl(req, profile.photoUrl),
-    };
-    return sendSuccess(res, { message: "Profile retrieved successfully", data: profileData, statusCode: 200 });
+    return sendSuccess(res, { message: "Profile retrieved successfully", data: profile, statusCode: 200 });
   }
   static async updateProfile(req, res, next) {
     const userId = req.user.id;
-    // Gracefully handle cases where body parsing fails (e.g., missing JSON/form parser)
     const { displayName, bio, location, phoneNumber, phone_number, birthdate } = req.body || {};
     const dto = {
       displayName,
@@ -43,14 +25,14 @@ export class ProfileController {
       location,
       phone_number: phoneNumber || phone_number,
       birthdate,
-      photoUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
+    };
 
-    };
+    if (req.file) {
+      const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
+      dto.photoUrl = url;
+    }
+
     const updated = await profileService.updateProfile(userId, dto);
-    const profileData = {
-      ...updated.toJSON(),
-      photoUrl: formatPhotoUrl(req, updated.photoUrl),
-    };
-    return sendSuccess(res, { message: "Profile updated successfully", data: profileData, statusCode: 200 });
+    return sendSuccess(res, { message: "Profile updated successfully", data: updated, statusCode: 200 });
   }
 }
