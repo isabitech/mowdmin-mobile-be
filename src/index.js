@@ -136,8 +136,8 @@ app.post(
 );
 
 // Global Parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(attachRequestMeta);
 
 // API router
@@ -230,6 +230,8 @@ async function bootstrap() {
       console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
     });
 
+    server.setTimeout(30000);
+
     // Graceful shutdown handlers
     const gracefulShutdown = async (signal) => {
       console.log(`\n${signal} received, shutting down gracefully...`);
@@ -245,9 +247,10 @@ async function bootstrap() {
 
           // Close Redis connection if available
           try {
-            const { redisClient } = await import('./Config/redis.js');
-            if (redisClient && redisClient.isOpen) {
-              await redisClient.quit();
+            const { getRedisClient } = await import('./Config/redis.js');
+            const redis = await getRedisClient();
+            if (redis && redis.isOpen) {
+              await redis.quit();
               console.log('Redis connection closed');
             }
           } catch (err) {

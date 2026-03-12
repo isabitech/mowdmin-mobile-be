@@ -30,6 +30,15 @@ class PaymentController {
 
   async getOne(req, res) {
     const payment = await PaymentService.getPaymentById(req.params.id);
+    if (!payment) {
+      return sendError(res, { message: "Payment not found", statusCode: 404 });
+    }
+    // Verify ownership unless admin
+    const paymentUserId = payment.userId?._id || payment.userId;
+    const requestUserId = req.user._id || req.user.id;
+    if (!req.user.isAdmin && paymentUserId && paymentUserId.toString() !== requestUserId.toString()) {
+      return sendError(res, { message: "You do not have permission to view this payment", statusCode: 403 });
+    }
     return sendSuccess(res, { message: "Payment Fetched Successfully", data: payment });
   }
 

@@ -1,6 +1,7 @@
 import PrayerService from "../Services/PrayerService.js";
 import { sendSuccess, sendError } from "../core/response.js";
 import mongoose from "mongoose";
+import { paginate } from "../Utils/helper.js";
 
 class PrayerController {
   // Helper to validate ObjectId
@@ -26,16 +27,20 @@ class PrayerController {
   }
 
   getAll = async (req, res) => {
+    const { page, limit: pageSize } = req.query;
+    const pagination = page ? paginate(page, pageSize) : {};
     if (req.user.isAdmin) {
-      const prayers = await PrayerService.getAll();
+      const prayers = await PrayerService.getAll(undefined, pagination);
       return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
     }
-    const prayers = await PrayerService.getAll(req.user.id);
+    const prayers = await PrayerService.getAll(req.user.id, pagination);
     return sendSuccess(res, { message: "All Prayers Fetched Successfully", data: prayers });
   }
 
   getAllByUser = async (req, res) => {
-    const prayers = await PrayerService.getAllByUserId(req.user.id);
+    const { page, limit: pageSize } = req.query;
+    const pagination = page ? paginate(page, pageSize) : {};
+    const prayers = await PrayerService.getAllByUserId(req.user.id, pagination);
     return sendSuccess(res, { message: "My General Prayers Fetched Successfully", data: prayers });
   }
 

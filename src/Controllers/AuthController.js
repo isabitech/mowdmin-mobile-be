@@ -1,6 +1,7 @@
 import AuthService from "../Services/AuthService.js";
 import CloudinaryService from "../Services/CloudinaryService.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import { AppError } from "../Utils/AppError.js";
 
 class AuthController {
 
@@ -78,7 +79,7 @@ class AuthController {
 
     // Change Password — for logged-in users
     static async changePassword(req, res) {
-        await AuthService.changePassword(req.body.email, req.body.currentPassword, req.body.newPassword);
+        await AuthService.changePassword(req.user.email, req.body.currentPassword, req.body.newPassword);
         return sendSuccess(res, { message: "Password changed successfully", data: {}, statusCode: 200 });
     }
 
@@ -100,11 +101,6 @@ class AuthController {
         const userId = req.user.id;
         const data = { ...req.body };
 
-        // Upload photo to Cloudinary if provided
-        if (req.file) {
-            const { url } = await CloudinaryService.upload(req.file.buffer, { folder: "mowdmin/profiles" });
-            data.photoUrl = url;
-        }
         // Upload photo to Cloudinary if provided
         if (req.file) {
             // Delete old photo from Cloudinary

@@ -11,6 +11,8 @@ export const PrayerLikeRepository = {
     async getModel() {
         if (!PrayerLikeModel) {
             if (isMongo) {
+                // Ensure PrayerMongo model is registered for population
+                await import('../MongoModels/PrayerMongoModel.js');
                 PrayerLikeModel = (await import('../MongoModels/PrayerLikeMongoModel.js')).default;
             } else {
                 PrayerLikeModel = (await import('../Models/PrayerLikeModel.js')).default;

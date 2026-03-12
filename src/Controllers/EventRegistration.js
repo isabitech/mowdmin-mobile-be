@@ -5,7 +5,6 @@ class EventRegistrationController {
 
     static async create(req, res) {
         const { eventId } = req.body;
-        console.log("Creating registration for eventId:", eventId);
         const userId = req.user.id;
         const data = { userId, eventId };
         const registration = await EventRegistrationService.createEventReg(data);
@@ -35,9 +34,10 @@ class EventRegistrationController {
         return sendSuccess(res, { message: "Registration fetched successfully", data: registration });
     }
     static async Update(req, res) {
-        const { eventId, ticketCode, userId, status } = req.body;
+        const { eventId, ticketCode, status } = req.body;
         const { id } = req.params;
-        const data = { userId, eventId, ticketCode, status };
+        // Strip userId from body to prevent hijacking
+        const data = { eventId, ticketCode, status };
         const registration = await EventRegistrationService.updateEventReg(id, data);
         if (!registration) {
             return sendError(res, { message: "Registration not found", statusCode: 404 });

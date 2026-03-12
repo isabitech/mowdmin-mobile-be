@@ -18,7 +18,7 @@ class OrderService {
     }
 
     // Fetch all orders (admin/global view)
-    async getAllOrders() {
+    async getAllOrders(pagination = {}) {
         const { User } = await this.getModels();
         return OrderRepository.findAll({
             include: [
@@ -29,11 +29,12 @@ class OrderService {
                 },
             ],
             order: [["createdAt", "DESC"]],
+            ...pagination,
         });
     }
 
     // Fetch all orders for a single user
-    async getOrdersByUser(userId) {
+    async getOrdersByUser(userId, pagination = {}) {
         const { User } = await this.getModels();
         return OrderRepository.findAllByUserId(userId, {
             include: [
@@ -44,6 +45,7 @@ class OrderService {
                 },
             ],
             order: [["createdAt", "DESC"]],
+            ...pagination,
         });
     }
 

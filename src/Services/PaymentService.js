@@ -5,9 +5,13 @@ import { OrderRepository } from "../repositories/OrderRepository.js";
 import CampaignService from "./CampaignService.js";
 import { AppError } from "../core/error.js";
 
-// Initialize Stripe instance - ensure we don't crash if env missing during boot, but catch during usage
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_to_prevent_boot_crash', {
-    apiVersion: '2023-10-16', // Ensure you pin an API version
+// Initialize Stripe instance - fail fast if not configured
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeKey && process.env.NODE_ENV === 'production') {
+    console.error('FATAL: STRIPE_SECRET_KEY is not set in production');
+}
+const stripe = new Stripe(stripeKey || 'sk_test_placeholder', {
+    apiVersion: '2023-10-16',
 });
 
 class PaymentService {

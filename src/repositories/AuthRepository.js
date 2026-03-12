@@ -32,6 +32,11 @@ export const AuthRepository = {
         return getIsMongo() ? Model.findOne({ tokenHash }) : Model.findOne({ where: { tokenHash } });
     },
 
+    async findByRefreshTokenHash(refreshTokenHash) {
+        const Model = await this.getModel();
+        return getIsMongo() ? Model.findOne({ refreshTokenHash }) : Model.findOne({ where: { refreshTokenHash } });
+    },
+
     async revokeToken(userId, tokenHash) {
         const Model = await this.getModel();
         const updateData = { isLoggedOut: true, loggedOutAt: new Date() };

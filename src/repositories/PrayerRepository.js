@@ -38,7 +38,18 @@ export const PrayerRepository = {
   async findAll(options = {}) {
     const Model = await this.getModel();
     if (isMongo) {
-      return Model.find({});
+      const filter = options.where || {};
+      let query = Model.find(filter);
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, dir]) => { sort[field] = dir === 'DESC' ? -1 : 1; });
+        query = query.sort(sort);
+      }
+      if (options.limit) {
+        query = query.limit(options.limit);
+        if (options.offset) query = query.skip(options.offset);
+      }
+      return query.lean();
     } else {
       return Model.findAll(options);
     }

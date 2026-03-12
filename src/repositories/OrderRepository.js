@@ -33,15 +33,13 @@ export const OrderRepository = {
             const order = await OrderModel.create(orderData);
 
             if (items && Array.isArray(items)) {
-                const createdItemIds = [];
-                for (const item of items) {
-                    const orderItem = await OrderItemModel.create({
-                        ...item,
-                        orderId: order._id,
-                        price: item.price || 0 // Default to 0 if price not provided
-                    });
-                    createdItemIds.push(orderItem._id);
-                }
+                const itemDocs = items.map(item => ({
+                    ...item,
+                    orderId: order._id,
+                    price: item.price || 0
+                }));
+                const createdItems = await OrderItemModel.insertMany(itemDocs);
+                const createdItemIds = createdItems.map(item => item._id);
 
                 // Update the order with item IDs
                 order.items = createdItemIds;
@@ -56,7 +54,7 @@ export const OrderRepository = {
         const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
 
         if (getIsMongo()) {
-            return OrderModel.find({})
+            let query = OrderModel.find({})
                 .populate('userId', 'name email')
                 .populate({
                     path: 'items',
@@ -64,7 +62,13 @@ export const OrderRepository = {
                         path: 'productId',
                         model: 'ProductMongo'
                     }
-                }); // Deep populate product child information
+                })
+                .sort({ createdAt: -1 });
+            if (options.limit) {
+                query = query.limit(options.limit);
+                if (options.offset) query = query.skip(options.offset);
+            }
+            return query;
         } else {
             return OrderModel.findAll({
                 ...options,
@@ -113,11 +117,9 @@ export const OrderRepository = {
         const { OrderModel, UserModel } = await this.getModels();
 
         if (getIsMongo()) {
-            console.log("OrderRepository: Finding orders for userId:", userId);
             const queryUserId = mongoose.isValidObjectId(userId) ? new mongoose.Types.ObjectId(userId) : userId;
-            // Strip out Sequelize-specific options like 'include', 'order', 'where'
-            const { include, order, where, ...mongoOptions } = options;
-            const orders = await OrderModel.find({ userId: queryUserId, ...mongoOptions })
+            const { include, order, where, limit, offset, ...mongoOptions } = options;
+            let query = OrderModel.find({ userId: queryUserId, ...mongoOptions })
                 .populate('userId', 'name email')
                 .populate({
                     path: 'items',
@@ -126,8 +128,12 @@ export const OrderRepository = {
                         model: 'ProductMongo'
                     }
                 })
-                .sort({ createdAt: -1 }); // Default to latest first for orders
-            return orders;
+                .sort({ createdAt: -1 });
+            if (limit) {
+                query = query.limit(limit);
+                if (offset) query = query.skip(offset);
+            }
+            return query;
         } else {
             return OrderModel.findAll({
                 where: { userId },

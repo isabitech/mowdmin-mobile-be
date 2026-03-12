@@ -22,4 +22,7 @@ const PrayerMongoSchema = new mongoose.Schema({
   collection: 'prayers',
 });
 
+PrayerMongoSchema.index({ userId: 1, createdAt: -1 });
+PrayerMongoSchema.index({ isPublic: 1, createdAt: -1 });
+
 export default mongoose.model('PrayerMongo', PrayerMongoSchema);

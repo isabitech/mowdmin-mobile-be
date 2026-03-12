@@ -30,4 +30,7 @@ const OrderMongoSchema = new mongoose.Schema({
   collection: 'orders',
 });
 
+OrderMongoSchema.index({ userId: 1, createdAt: -1 });
+OrderMongoSchema.index({ status: 1 });
+
 export default mongoose.model('OrderMongo', OrderMongoSchema);

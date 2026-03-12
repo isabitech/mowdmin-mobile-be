@@ -52,7 +52,7 @@ export const EventRepository = {
       if (options.limit) query = query.limit(options.limit);
       if (options.offset) query = query.skip(options.offset);
 
-      return query.populate('registrations');
+      return query.populate('registrations').lean();
     } else {
       return EventModel.findAll(options);
     }

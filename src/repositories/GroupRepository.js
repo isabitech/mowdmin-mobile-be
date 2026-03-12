@@ -1,26 +1,30 @@
 import { Group, GroupMember, GroupMessage } from "../Models/GroupModels.js";
-let GroupModel, MemberModel, MessageModel;
+import User from "../Models/UserModel.js";
+let GroupModel, MemberModel, MessageModel, UserModel;
 
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
 
 export const GroupRepository = {
     async getModels() {
-        if (!GroupModel || !MemberModel || !MessageModel) {
+        if (!GroupModel || !MemberModel || !MessageModel || !UserModel) {
             if (isMongo) {
                 const mongoModels = await import('../MongoModels/GroupMongoModels.js');
                 GroupModel = mongoModels.Group;
                 MemberModel = mongoModels.GroupMember;
                 MessageModel = mongoModels.GroupMessage;
                 // Ensure UserMongo model is registered for population
-                await import('../MongoModels/UserMongoModel.js');
+                const userMongo = await import('../MongoModels/UserMongoModel.js');
+                UserModel = userMongo.default;
             } else {
                 const sqlModels = await import('../Models/GroupModels.js');
                 GroupModel = sqlModels.Group;
                 MemberModel = sqlModels.GroupMember;
                 MessageModel = sqlModels.GroupMessage;
+                const userSql = await import('../Models/UserModel.js');
+                UserModel = userSql.default;
             }
         }
-        return { GroupModel, MemberModel, MessageModel };
+        return { GroupModel, MemberModel, MessageModel, UserModel };
     },
 
     // Group Operations
@@ -33,18 +37,20 @@ export const GroupRepository = {
         const { GroupModel, MemberModel } = await this.getModels();
         if (isMongo) {
             const groups = await GroupModel.find(filters)
-                .populate('creatorId', 'name email photo');
+                .populate('creatorId', 'name email photo')
+                .lean();
 
-            // Attach member count to each group
-            const groupsWithCounts = await Promise.all(
-                groups.map(async (group) => {
-                    const memberCount = await MemberModel.countDocuments({ groupId: group._id });
-                    const groupObj = group.toObject();
-                    groupObj.memberCount = memberCount;
-                    return groupObj;
-                })
-            );
-            return groupsWithCounts;
+            const groupIds = groups.map(g => g._id);
+            const counts = await MemberModel.aggregate([
+                { $match: { groupId: { $in: groupIds } } },
+                { $group: { _id: '$groupId', count: { $sum: 1 } } }
+            ]);
+            const countMap = Object.fromEntries(counts.map(c => [c._id.toString(), c.count]));
+
+            return groups.map(group => {
+                group.memberCount = countMap[group._id.toString()] || 0;
+                return group;
+            });
         }
         return await GroupModel.findAll({ where: filters });
     },
@@ -68,7 +74,17 @@ export const GroupRepository = {
             groupObj.members = members;
             return groupObj;
         }
-        return await GroupModel.findByPk(id);
+        const { UserModel } = await this.getModels();
+        return await GroupModel.findByPk(id, {
+            include: [
+                { model: UserModel, as: 'creator', attributes: ['name', 'email', 'profilePicture'] },
+                {
+                    model: MemberModel,
+                    as: 'members',
+                    include: [{ model: UserModel, as: 'user', attributes: ['name', 'email', 'profilePicture'] }]
+                }
+            ]
+        });
     },
 
     // Membership Operations
@@ -78,9 +94,12 @@ export const GroupRepository = {
     },
 
     async findMembersByGroup(groupId) {
-        const { MemberModel } = await this.getModels();
+        const { MemberModel, UserModel } = await this.getModels();
         if (isMongo) return await MemberModel.find({ groupId }).populate('userId', 'name email photo');
-        return await MemberModel.findAll({ where: { groupId } });
+        return await MemberModel.findAll({
+            where: { groupId },
+            include: [{ model: UserModel, as: 'user', attributes: ['name', 'email', 'profilePicture'] }]
+        });
     },
 
     async findMember(groupId, userId) {
@@ -104,19 +123,19 @@ export const GroupRepository = {
                     populate: { path: 'creatorId', select: 'name email photo' }
                 });
 
-            // For each group, also attach member count
-            const groups = await Promise.all(
-                memberships
-                    .map(m => m.groupId)
-                    .filter(g => g !== null)
-                    .map(async (group) => {
-                        const memberCount = await MemberModel.countDocuments({ groupId: group._id });
-                        const groupObj = group.toObject();
-                        groupObj.memberCount = memberCount;
-                        return groupObj;
-                    })
-            );
-            return groups;
+            const validGroups = memberships.map(m => m.groupId).filter(g => g !== null);
+            const groupIds = validGroups.map(g => g._id);
+            const counts = await MemberModel.aggregate([
+                { $match: { groupId: { $in: groupIds } } },
+                { $group: { _id: '$groupId', count: { $sum: 1 } } }
+            ]);
+            const countMap = Object.fromEntries(counts.map(c => [c._id.toString(), c.count]));
+
+            return validGroups.map(group => {
+                const groupObj = group.toObject();
+                groupObj.memberCount = countMap[group._id.toString()] || 0;
+                return groupObj;
+            });
         }
         // For SQL, we assume a belongsTo/hasMany relationship is set up or use a join
         return await GroupModel.findAll({
@@ -135,13 +154,18 @@ export const GroupRepository = {
     },
 
     async findMessagesByGroup(groupId) {
-        const { MessageModel } = await this.getModels();
+        const { MessageModel, UserModel } = await this.getModels();
         if (isMongo) {
             return await MessageModel.find({ groupId })
                 .populate('senderId', 'name email photo')
-                .sort({ createdAt: 1 });
+                .sort({ createdAt: 1 })
+                .lean();
         }
-        return await MessageModel.findAll({ where: { groupId }, order: [['createdAt', 'ASC']] });
+        return await MessageModel.findAll({
+            where: { groupId },
+            include: [{ model: UserModel, as: 'sender', attributes: ['name', 'email', 'profilePicture'] }],
+            order: [['createdAt', 'ASC']]
+        });
     },
 
     async deleteGroup(id) {
