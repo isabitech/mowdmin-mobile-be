@@ -1,6 +1,7 @@
 import EventService from "../Services/EventService.js";
 import CloudinaryService from "../Services/CloudinaryService.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import { paginate } from "../Utils/helper.js";
 
 class EventController {
   async create(req, res, next) {
@@ -43,7 +44,9 @@ class EventController {
     return sendSuccess(res, { message: "Event Deleted Successfully", data: {} });
   }
   async getAll(req, res, next) {
-    const events = await EventService.getAllEvents();
+    const { page, limit: pageSize } = req.query;
+    const pagination = page ? paginate(page, pageSize) : {};
+    const events = await EventService.getAllEvents(pagination);
     return sendSuccess(res, { message: "Events fetched successfully", data: events });
   }
   async getOne(req, res, next) {

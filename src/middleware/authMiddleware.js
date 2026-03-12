@@ -20,8 +20,10 @@ export const protectUser = async (req, res, next) => {
       return next(new AppError("Auth Token is Required", 401));
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify JWT token with pinned algorithm
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      algorithms: ['HS256'],
+    });
 
     // Check if token exists in Auth DB (Session Check)
     const tokenHash = AuthService.hashToken(token);

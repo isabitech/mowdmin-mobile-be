@@ -19,4 +19,7 @@ const MediaBookmarksMongoSchema = new mongoose.Schema({
   collection: 'media_bookmarks',
 });
 
+MediaBookmarksMongoSchema.index({ userId: 1 });
+MediaBookmarksMongoSchema.index({ userId: 1, mediaId: 1 });
+
 export default mongoose.model('MediaBookmarksMongo', MediaBookmarksMongoSchema);

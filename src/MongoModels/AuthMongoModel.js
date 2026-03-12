@@ -40,4 +40,8 @@ const AuthMongoSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+AuthMongoSchema.index({ tokenHash: 1 });
+AuthMongoSchema.index({ refreshTokenHash: 1 });
+AuthMongoSchema.index({ userId: 1, isLoggedOut: 1 });
+
 export default mongoose.model('AuthMongo', AuthMongoSchema);

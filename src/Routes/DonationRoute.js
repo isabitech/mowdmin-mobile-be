@@ -16,6 +16,6 @@ router.post('/:id/pay', protectUser, tryCatch(DonationController.payForDonation.
 
 // Specific action routes
 router.patch('/:id/status', protectUser, protectAdmin, tryCatch(DonationController.updateStatus.bind(DonationController)));
-router.get('/campaign/:campaignId', tryCatch(DonationController.getByCampaign.bind(DonationController)));
+router.get('/campaign/:campaignId', protectUser, tryCatch(DonationController.getByCampaign.bind(DonationController)));
 
 export default router;

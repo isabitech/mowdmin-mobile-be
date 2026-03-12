@@ -36,7 +36,7 @@ export const MediaRepository = {
       if (options.limit) query = query.limit(options.limit);
       if (options.offset) query = query.skip(options.offset);
 
-      return query;
+      return query.lean();
     } else {
       const MediaCategory = (await import('../Models/MediaCategory.js')).default;
       const query = {

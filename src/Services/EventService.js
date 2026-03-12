@@ -6,10 +6,10 @@ class EventService {
     return await EventRepository.create(data);
   }
 
-  async getAllEvents() {
+  async getAllEvents(pagination = {}) {
     return await EventRepository.findAll({
       order: [["date", "ASC"]],
-      // If you need registration/user info, fetch it separately using repositories
+      ...pagination,
     });
   }
 

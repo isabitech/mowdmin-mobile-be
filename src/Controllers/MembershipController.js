@@ -5,7 +5,7 @@ import { sendSuccess } from '../core/response.js';
 
 class MembershipController {
   async registerMembership(req, res, next) {
-    const dto = req.body; // Add validation as needed
+    const dto = { ...req.body, userId: req.user.id };
     const result = await membershipService.registerMembership(dto);
     return sendSuccess(res, { message: "Membership registered successfully", data: result, statusCode: 201 });
   }

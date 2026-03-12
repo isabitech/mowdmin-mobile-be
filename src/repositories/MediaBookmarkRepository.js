@@ -35,7 +35,8 @@ export const MediaBookmarkRepository = {
     if (isMongo) {
       return MediaBookmarkModel.find({})
         .populate('userId', 'name email')
-        .populate('mediaId');
+        .populate('mediaId')
+        .lean();
     } else {
       return MediaBookmarkModel.findAll({
         ...options,
@@ -58,7 +59,8 @@ export const MediaBookmarkRepository = {
     const { MediaBookmarkModel, MediaModel } = await this.getModels();
     if (isMongo) {
       return MediaBookmarkModel.find({ userId, ...options })
-        .populate('mediaId');
+        .populate('mediaId')
+        .lean();
     } else {
       return MediaBookmarkModel.findAll({
         where: { userId },

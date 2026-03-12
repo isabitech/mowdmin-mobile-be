@@ -18,9 +18,17 @@ export const NotificationRepository = {
     const Model = await this.getModel();
     return Model.create(payload);
   },
-  async findAllByUserId(userId) {
+  async findAllByUserId(userId, options = {}) {
     const Model = await this.getModel();
-    return isMongo ? Model.find({ userId }) : Model.findAll({ where: { userId } });
+    if (isMongo) {
+      let query = Model.find({ userId }).sort({ createdAt: -1 });
+      if (options.limit) {
+        query = query.limit(options.limit);
+        if (options.offset) query = query.skip(options.offset);
+      }
+      return query.lean();
+    }
+    return Model.findAll({ where: { userId }, order: [['createdAt', 'DESC']], ...options });
   },
   async findById(id) {
     const Model = await this.getModel();

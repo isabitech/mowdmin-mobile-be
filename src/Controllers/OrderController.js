@@ -3,6 +3,7 @@ import OrderService from "../Services/OrderService.js";
 import PaymentService from "../Services/PaymentService.js";
 import { sendSuccess, sendError } from "../core/response.js";
 import { validateCreateOrder, validateUpdateOrder } from "../middleware/Validation/orderValidation.js";
+import { paginate } from "../Utils/helper.js";
 
 class OrderController {
   async create(req, res) {
@@ -16,7 +17,9 @@ class OrderController {
     return sendSuccess(res, { message: "Order Created Successfully", data: order, statusCode: 201 });
   }
   async getAll(req, res) {
-    const orders = await OrderService.getAllOrders();
+    const { page, limit: pageSize } = req.query;
+    const pagination = page ? paginate(page, pageSize) : {};
+    const orders = await OrderService.getAllOrders(pagination);
     return sendSuccess(res, { message: "All Orders Fetched Successfully", data: orders });
   }
   async getOne(req, res) {
@@ -24,9 +27,9 @@ class OrderController {
     return sendSuccess(res, { message: "Order Fetched Successfully", data: order });
   }
   async getUserOrders(req, res) {
-    console.log("OrderController: req.user.id =", req.user.id);
-    const orders = await OrderService.getOrdersByUser(req.user.id);
-    console.log("OrderController: Fetched orders count =", orders.length);
+    const { page, limit: pageSize } = req.query;
+    const pagination = page ? paginate(page, pageSize) : {};
+    const orders = await OrderService.getOrdersByUser(req.user.id, pagination);
     return sendSuccess(res, { message: "User Orders Fetched Successfully", data: orders });
   }
   async update(req, res) {

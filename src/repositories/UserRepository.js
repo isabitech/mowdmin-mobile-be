@@ -28,7 +28,7 @@ export const UserRepository = {
     const { UserModel, ProfileModel } = await this.getModels();
 
     if (getIsMongo()) {
-      return UserModel.findOne({ email });
+      return UserModel.findOne({ email }).select('+password');
     }
 
     return UserModel.findOne({
@@ -45,9 +45,12 @@ export const UserRepository = {
   async findById(id) {
     const { UserModel } = await this.getModels();
 
-    return getIsMongo()
-      ? UserModel.findById(id)
-      : UserModel.findByPk(id);
+    if (getIsMongo()) {
+      return UserModel.findById(id);
+    }
+    return UserModel.findByPk(id, {
+      attributes: { exclude: ['password'] }
+    });
   },
 
   async create(payload) {
@@ -74,6 +77,7 @@ export const UserRepository = {
       return query;
     }
     const seqOptions = options.where || options.order || options.limit ? options : { where: options };
+    seqOptions.attributes = { exclude: ['password'] };
     return UserModel.findAll(seqOptions);
   },
 

@@ -10,11 +10,45 @@ import ProfileRepository from "../repositories/ProfileRepository.js";
 import { AuthRepository } from "../repositories/AuthRepository.js";
 
 class AuthService {
+    // Validate password strength
+    static validatePassword(password) {
+        if (!password || password.length < 8) {
+            throw new AppError('Password must be at least 8 characters long', 400);
+        }
+        if (!/[A-Z]/.test(password)) {
+            throw new AppError('Password must contain at least one uppercase letter', 400);
+        }
+        if (!/[a-z]/.test(password)) {
+            throw new AppError('Password must contain at least one lowercase letter', 400);
+        }
+        if (!/[0-9]/.test(password)) {
+            throw new AppError('Password must contain at least one number', 400);
+        }
+    }
+
     // Generate JWT token
     static generateToken(id) {
-        return jwt.sign({ id }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+        const expiresIn = process.env.JWT_EXPIRES_IN || "1d";
+        const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+            expiresIn,
+            algorithm: 'HS256',
         });
+        // Calculate absolute expiry
+        const decoded = jwt.decode(token);
+        const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
+        return { token, expiresAt };
+    }
+
+    // Generate refresh token with longer expiry
+    static generateRefreshToken(id) {
+        const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+        const refreshToken = jwt.sign({ id, type: 'refresh' }, process.env.JWT_SECRET, {
+            expiresIn,
+            algorithm: 'HS256',
+        });
+        const decoded = jwt.decode(refreshToken);
+        const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
+        return { refreshToken, expiresAt };
     }
 
     // Helper to hash token
@@ -25,6 +59,8 @@ class AuthService {
     // Register a new user
     static async register(userData, meta = {}) {
         const { email, password, name, language } = userData;
+
+        AuthService.validatePassword(password);
 
         const existingUser = await UserRepository.findByEmail(email);
         if (existingUser) throw new AppError("Email already in use", 400);
@@ -94,20 +130,75 @@ class AuthService {
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
 
-        const token = AuthService.generateToken(user.id);
+        const { token, expiresAt } = AuthService.generateToken(user.id);
+        const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
 
         // Store session
         const tokenHash = AuthService.hashToken(token);
+        const refreshTokenHash = AuthService.hashToken(refreshToken);
         await AuthRepository.create({
             userId: user.id,
             tokenHash,
+            refreshTokenHash,
+            refreshTokenExpiresAt: refreshExpiresAt,
             ipAddress: meta.ip,
             deviceInfo: meta.userAgent
         });
         const userDataSafe = user.toJSON();
         delete userDataSafe.password;
         delete userDataSafe.emailVerifiedAt;
-        return { user: userDataSafe, token };
+        return { user: userDataSafe, token, refreshToken, expiresAt };
+    }
+
+    // Refresh token - rotate tokens
+    static async refreshToken(refreshTokenValue) {
+        // Verify the refresh token
+        let decoded;
+        try {
+            decoded = jwt.verify(refreshTokenValue, process.env.JWT_SECRET, {
+                algorithms: ['HS256'],
+            });
+        } catch (err) {
+            throw new AppError("Invalid or expired refresh token", 401);
+        }
+
+        if (decoded.type !== 'refresh') {
+            throw new AppError("Invalid token type", 401);
+        }
+
+        // Find the session by refresh token hash
+        const refreshTokenHash = AuthService.hashToken(refreshTokenValue);
+        const session = await AuthRepository.findByRefreshTokenHash(refreshTokenHash);
+
+        if (!session || session.isLoggedOut) {
+            throw new AppError("Session has ended. Please login again.", 401);
+        }
+
+        // Check if refresh token has expired at DB level
+        if (session.refreshTokenExpiresAt && new Date() > session.refreshTokenExpiresAt) {
+            await AuthRepository.revokeToken(session.userId, session.tokenHash);
+            throw new AppError("Refresh token expired. Please login again.", 401);
+        }
+
+        // Revoke old session
+        await AuthRepository.revokeToken(session.userId, session.tokenHash);
+
+        // Generate new tokens
+        const { token: newToken, expiresAt } = AuthService.generateToken(decoded.id);
+        const { refreshToken: newRefreshToken, expiresAt: newRefreshExpiresAt } = AuthService.generateRefreshToken(decoded.id);
+
+        // Create new session
+        const newTokenHash = AuthService.hashToken(newToken);
+        const newRefreshTokenHash = AuthService.hashToken(newRefreshToken);
+        await AuthRepository.create({
+            userId: decoded.id,
+            tokenHash: newTokenHash,
+            refreshTokenHash: newRefreshTokenHash,
+            refreshTokenExpiresAt: newRefreshExpiresAt,
+            replacedBy: newTokenHash,
+        });
+
+        return { token: newToken, refreshToken: newRefreshToken, expiresAt };
     }
 
     // Logout user
@@ -145,6 +236,8 @@ class AuthService {
 
     // Reset password using OTP
     static async resetPassword(email, otp, newPassword) {
+        AuthService.validatePassword(newPassword);
+
         const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
@@ -155,7 +248,7 @@ class AuthService {
         }
 
         // Hash and save new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
         user.password = hashedPassword;
         await user.save();
 
@@ -165,13 +258,15 @@ class AuthService {
 
     // Change password (authenticated user)
     static async changePassword(email, currentPassword, newPassword) {
+        AuthService.validatePassword(newPassword);
+
         const user = await UserRepository.findByEmail(email);
         if (!user) throw new AppError("User not found", 404);
 
         const isValidPassword = await bcrypt.compare(currentPassword, user.password);
         if (!isValidPassword) throw new AppError("Current password is incorrect", 400);
 
-        user.password = await bcrypt.hash(newPassword, 10);
+        user.password = await bcrypt.hash(newPassword, 12);
         await user.save();
 
         return { message: "Password changed successfully" };

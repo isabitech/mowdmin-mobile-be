@@ -113,10 +113,11 @@ class PrayerService {
     async findByIdForAUser(id, userId) {
         return PrayerRepository.findOne({ id, userId });
     }
-    async getAll(userId) {
+    async getAll(userId, pagination = {}) {
         const prayers = await PrayerRepository.findAll({
             where: { isPublic: true },
             order: [["createdAt", "DESC"]],
+            ...pagination,
         });
 
         if (userId) {
@@ -124,7 +125,7 @@ class PrayerService {
             const likedSet = new Set(likedPrayerIds.map(id => id.toString()));
 
             return prayers.map(prayer => {
-                const prayerObj = prayer.toObject ? prayer.toObject() : prayer.toJSON(); // Handle Mongoose vs Sequelize
+                const prayerObj = prayer.toObject ? prayer.toObject() : (prayer.toJSON ? prayer.toJSON() : prayer);
                 return {
                     ...prayerObj,
                     isLiked: likedSet.has((prayerObj.id || prayerObj._id).toString())
@@ -133,7 +134,7 @@ class PrayerService {
         }
 
         return prayers.map(prayer => {
-            const prayerObj = prayer.toObject ? prayer.toObject() : prayer.toJSON();
+            const prayerObj = prayer.toObject ? prayer.toObject() : (prayer.toJSON ? prayer.toJSON() : prayer);
             return {
                 ...prayerObj,
                 isLiked: false
@@ -143,10 +144,11 @@ class PrayerService {
     async delete(id) {
         return PrayerRepository.deleteById(id);
     }
-    async getAllByUserId(userId) {
+    async getAllByUserId(userId, pagination = {}) {
         return PrayerRepository.findAll({
             where: { userId: userId },
             order: [["createdAt", "DESC"]],
+            ...pagination,
         });
     }
 }

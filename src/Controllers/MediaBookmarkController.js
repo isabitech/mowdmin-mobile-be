@@ -14,11 +14,12 @@ class MediaBookmarkController {
         return sendSuccess(res, { message: "Bookmark Created Successfully", data: bookmark, statusCode: 201 });
     }
     async getAll(req, res, next) {
-        const bookmarks = await MediaBookmarkService.getAllMediaBookmarks();
+        const userId = req.user?.id;
+        const bookmarks = await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
         return sendSuccess(res, { message: "All Bookmarks Fetched Successfully", data: bookmarks });
     }
     async getAllByUser(req, res, next) {
-        const { userId } = req.params;
+        const userId = req.user?.id;
         const bookmarks = await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
         return sendSuccess(res, { message: "User Bookmarks Fetched Successfully", data: bookmarks });
     }

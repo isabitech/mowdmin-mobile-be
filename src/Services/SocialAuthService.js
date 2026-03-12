@@ -123,7 +123,7 @@ class SocialAuthService {
                 jwt.verify(identityToken, getKey, {
                     algorithms: ['RS256'],
                     issuer: 'https://appleid.apple.com',
-                    audience: process.env.APPLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID, // Fallback for testing
+                    audience: process.env.APPLE_CLIENT_ID,
                 }, (err, decoded) => {
                     if (err) reject(err);
                     else resolve(decoded);

@@ -18,6 +18,9 @@ const groupMemberSchema = new mongoose.Schema({
     role: { type: String, enum: ['Admin', 'Member'], default: 'Member' }
 }, { timestamps: true });
 
+groupMemberSchema.index({ groupId: 1, userId: 1 });
+groupMemberSchema.index({ userId: 1 });
+
 export const GroupMember = mongoose.model('GroupMember', groupMemberSchema);
 
 // Group Message Schema
@@ -27,5 +30,7 @@ const groupMessageSchema = new mongoose.Schema({
     content: { type: String, required: true },
     type: { type: String, default: 'text' }
 }, { timestamps: true });
+
+groupMessageSchema.index({ groupId: 1, createdAt: 1 });
 
 export const GroupMessage = mongoose.model('GroupMessage', groupMessageSchema);
