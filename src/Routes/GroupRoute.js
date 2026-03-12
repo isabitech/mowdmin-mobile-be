@@ -7,7 +7,8 @@ const group = Router();
 
 group.post("/create", protectUser, tryCatch(GroupController.createGroup));
 group.get("/me", protectUser, tryCatch(GroupController.getMyGroups));
-group.get("/discover", protectUser, tryCatch(GroupController.getDiscoverGroups));
+group.get("/discover", protectUser, tryCatch(GroupController.getDisc
+    overGroups));
 group.get("/:id", protectUser, tryCatch(GroupController.getGroupDetails));
 group.post("/:id/join", protectUser, tryCatch(GroupController.joinGroup));
 group.delete("/:id/leave", protectUser, tryCatch(GroupController.leaveGroup));
