@@ -1,5 +1,3 @@
-import { Group, GroupMember, GroupMessage } from "../Models/GroupModels.js";
-import User from "../Models/UserModel.js";
 let GroupModel, MemberModel, MessageModel, UserModel;
 
 const isMongo = process.env.DB_CONNECTION === 'mongodb';
@@ -52,7 +50,11 @@ export const GroupRepository = {
                 return group;
             });
         }
-        return await GroupModel.findAll({ where: filters });
+        const { UserModel } = await this.getModels();
+        return await GroupModel.findAll({
+            where: filters,
+            include: [{ model: UserModel, as: 'creator', attributes: ['name', 'email', 'profilePicture'] }]
+        });
     },
 
     async findGroupById(id) {
@@ -138,12 +140,17 @@ export const GroupRepository = {
             });
         }
         // For SQL, we assume a belongsTo/hasMany relationship is set up or use a join
+        const { UserModel } = await this.getModels();
         return await GroupModel.findAll({
-            include: [{
-                model: MemberModel,
-                where: { userId },
-                required: true
-            }]
+            include: [
+                {
+                    model: MemberModel,
+                    where: { userId },
+                    required: true,
+                    attributes: [] // Don't return membership data, just use for filtering
+                },
+                { model: UserModel, as: 'creator', attributes: ['name', 'email', 'profilePicture'] }
+            ]
         });
     },
 
