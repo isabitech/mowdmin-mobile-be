@@ -2,6 +2,7 @@
 import DonationService from "../Services/DonationService.js";
 import PaymentService from "../Services/PaymentService.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import { paginate } from "../Utils/helper.js";
 
 class DonationController {
   async create(req, res, next) {
@@ -34,8 +35,15 @@ class DonationController {
     // Verify ownership unless admin
     const donationUserId = donation.userId?._id || donation.userId;
     const requestUserId = req.user?._id || req.user?.id;
-    if (!req.user?.isAdmin && donationUserId && donationUserId.toString() !== requestUserId.toString()) {
-      return sendError(res, { message: "You do not have permission to view this donation", statusCode: 403 });
+    if (
+      !req.user?.isAdmin &&
+      donationUserId &&
+      donationUserId.toString() !== requestUserId.toString()
+    ) {
+      return sendError(res, {
+        message: "You do not have permission to view this donation",
+        statusCode: 403,
+      });
     }
     return sendSuccess(res, {
       message: "Donation fetched successfully",
@@ -45,7 +53,11 @@ class DonationController {
 
   async updateStatus(req, res, next) {
     const { status, paymentVerificationData } = req.body;
-    const donation = await DonationService.updateDonationStatus(req.params.id, status, paymentVerificationData);
+    const donation = await DonationService.updateDonationStatus(
+      req.params.id,
+      status,
+      paymentVerificationData,
+    );
 
     return sendSuccess(res, {
       message: `Donation status updated to ${status}`,
@@ -54,7 +66,11 @@ class DonationController {
   }
 
   async getByCampaign(req, res, next) {
-    const donations = await DonationService.getDonationsByCampaign(req.params.campaignId);
+    const { page, limit: pageSize } = req.query;
+    const donations = await DonationService.getDonationsByCampaign(
+      req.params.campaignId,
+      paginate(page || 1, pageSize),
+    );
     return sendSuccess(res, {
       message: "Campaign donations fetched successfully",
       data: donations,
@@ -74,17 +90,26 @@ class DonationController {
     // Verify ownership
     const donationUserId = donation.userId?._id || donation.userId;
     if (donationUserId && donationUserId.toString() !== userId.toString()) {
-      return sendError(res, { message: "You do not have permission to perform this action", statusCode: 403 });
+      return sendError(res, {
+        message: "You do not have permission to perform this action",
+        statusCode: 403,
+      });
     }
 
-    if (donation.status !== 'pending') {
-      return sendError(res, { message: `Cannot pay for a donation with status '${donation.status}'`, statusCode: 400 });
+    if (donation.status !== "pending") {
+      return sendError(res, {
+        message: `Cannot pay for a donation with status '${donation.status}'`,
+        statusCode: 400,
+      });
     }
 
     // Parse the amount (may be Decimal128)
     const amount = parseFloat(donation.amount.toString());
     if (!amount || amount <= 0) {
-      return sendError(res, { message: "Donation has an invalid amount", statusCode: 400 });
+      return sendError(res, {
+        message: "Donation has an invalid amount",
+        statusCode: 400,
+      });
     }
 
     // Get campaignId from the donation
@@ -94,12 +119,12 @@ class DonationController {
     const paymentResult = await PaymentService.createPaymentIntent(
       userId,
       amount,
-      donation.currency || 'USD',
-      'donation',
+      donation.currency || "USD",
+      "donation",
       {
         donationId: donationId.toString(),
         campaignId: campaignId.toString(),
-      }
+      },
     );
 
     return sendSuccess(res, {

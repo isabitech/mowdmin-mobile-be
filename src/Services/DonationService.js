@@ -32,34 +32,48 @@ class DonationService {
     const donation = await this.getDonationById(id);
 
     // Cannot mark failed donation as success without payment verification
-    if (donation.status === 'failed' && status === 'success') {
+    if (donation.status === "failed" && status === "success") {
       if (!paymentVerificationData || !paymentVerificationData.verified) {
-        throw new AppError("Cannot mark a failed donation as success without payment verification", 400);
+        throw new AppError(
+          "Cannot mark a failed donation as success without payment verification",
+          400,
+        );
       }
     }
 
     // Only increment totalRaised if transitioning from a non-success state to success
-    const isBecomingSuccess = donation.status !== 'success' && status === 'success';
+    const isBecomingSuccess =
+      donation.status !== "success" && status === "success";
 
-    const updatedDonation = await DonationRepository.updateDonationStatus(id, status);
+    const updatedDonation = await DonationRepository.updateDonationStatus(
+      id,
+      status,
+    );
 
     if (isBecomingSuccess) {
-      const campaign = await CampaignService.getCampaignById(donation.campaign._id || donation.campaign.id);
+      const campaign = await CampaignService.getCampaignById(
+        donation.campaign._id || donation.campaign.id,
+      );
 
       // We parse amounts carefully since amount might be a Decimal128 object depending on DB/Mongoose implementation
-      const donationAmount = updatedDonation.amount ? parseFloat(updatedDonation.amount.toString()) : 0;
+      const donationAmount = updatedDonation.amount
+        ? parseFloat(updatedDonation.amount.toString())
+        : 0;
       const currentTotal = campaign.totalRaised || 0;
 
       await CampaignService.updateCampaign(campaign._id || campaign.id, {
-        totalRaised: currentTotal + donationAmount
+        totalRaised: currentTotal + donationAmount,
       });
     }
 
     return updatedDonation;
   }
 
-  async getDonationsByCampaign(campaignId) {
-    return await DonationRepository.getDonationsByCampaign(campaignId);
+  async getDonationsByCampaign(campaignId, pagination = {}) {
+    return await DonationRepository.getDonationsByCampaign(
+      campaignId,
+      pagination,
+    );
   }
 }
 

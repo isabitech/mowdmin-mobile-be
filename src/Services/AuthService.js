@@ -8,477 +8,554 @@ import { AppError } from "../Utils/AppError.js";
 import { UserRepository } from "../repositories/UserRepository.js";
 import ProfileRepository from "../repositories/ProfileRepository.js";
 import { AuthRepository } from "../repositories/AuthRepository.js";
+import { logger } from "../core/logger.js";
+import { invalidateCachedSessionUser } from "../Utils/authSessionCache.js";
 
 class AuthService {
-    // Validate password strength
-    static validatePassword(password) {
-        if (!password || password.length < 8) {
-            throw new AppError('Password must be at least 8 characters long', 400);
-        }
-        if (!/[A-Z]/.test(password)) {
-            throw new AppError('Password must contain at least one uppercase letter', 400);
-        }
-        if (!/[a-z]/.test(password)) {
-            throw new AppError('Password must contain at least one lowercase letter', 400);
-        }
-        if (!/[0-9]/.test(password)) {
-            throw new AppError('Password must contain at least one number', 400);
-        }
+  // Validate password strength
+  static validatePassword(password) {
+    if (!password || password.length < 8) {
+      throw new AppError("Password must be at least 8 characters long", 400);
+    }
+    if (!/[A-Z]/.test(password)) {
+      throw new AppError(
+        "Password must contain at least one uppercase letter",
+        400,
+      );
+    }
+    if (!/[a-z]/.test(password)) {
+      throw new AppError(
+        "Password must contain at least one lowercase letter",
+        400,
+      );
+    }
+    if (!/[0-9]/.test(password)) {
+      throw new AppError("Password must contain at least one number", 400);
+    }
+  }
+
+  // Generate JWT token
+  static generateToken(id) {
+    const expiresIn = process.env.JWT_EXPIRES_IN || "1d";
+    const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn,
+      algorithm: "HS256",
+    });
+    // Calculate absolute expiry
+    const decoded = jwt.decode(token);
+    const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
+    return { token, expiresAt };
+  }
+
+  // Generate refresh token with longer expiry
+  static generateRefreshToken(id) {
+    const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+    const refreshToken = jwt.sign(
+      { id, type: "refresh" },
+      process.env.JWT_SECRET,
+      {
+        expiresIn,
+        algorithm: "HS256",
+      },
+    );
+    const decoded = jwt.decode(refreshToken);
+    const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
+    return { refreshToken, expiresAt };
+  }
+
+  // Helper to hash token
+  static hashToken(token) {
+    return crypto.createHash("sha256").update(token).digest("hex");
+  }
+
+  // Register a new user
+  static async register(userData, meta = {}) {
+    const { email, password, name, language } = userData;
+
+    AuthService.validatePassword(password);
+
+    const existingUser = await UserRepository.findByEmail(email);
+    if (existingUser) throw new AppError("Email already in use", 400);
+    const newUser = await UserRepository.create({
+      // Create user with email unverified
+      email,
+      password: password,
+      language,
+      name,
+      emailVerified: false,
+    });
+
+    // Initialize empty profile for the user
+    await ProfileRepository.create({
+      userId: newUser.id,
+      displayName: name,
+      language: language || "EN",
+      photoUrl: null,
+      location: null,
+      bio: null,
+    });
+
+    // Generate and send email verification OTP
+    try {
+      const otp = await OTPService.storeOTP(email, "email_verification", 10);
+      await EmailService.sendEmailVerificationOTP(email, otp, name);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info(`Email verification OTP sent to ${email}`);
+      }
+    } catch (error) {
+      logger.error("Failed to send verification email", {
+        message: error.message,
+      });
+      // Don't fail registration if email sending fails
     }
 
-    // Generate JWT token
-    static generateToken(id) {
-        const expiresIn = process.env.JWT_EXPIRES_IN || "1d";
-        const token = jwt.sign({ id }, process.env.JWT_SECRET, {
-            expiresIn,
-            algorithm: 'HS256',
-        });
-        // Calculate absolute expiry
-        const decoded = jwt.decode(token);
-        const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
-        return { token, expiresAt };
+    // const token = new AuthService().generateToken(newUser.id);
+
+    // // Store session
+    // const tokenHash = AuthService.hashToken(token);
+    // await AuthRepository.create({
+    //     userId: newUser.id,
+    //     tokenHash,
+    //     ipAddress: meta.ip,
+    //     deviceInfo: meta.userAgent
+    // });
+
+    // Send welcome email asynchronously without blocking response
+    setImmediate(async () => {
+      try {
+        await EmailService.sendWelcomeEmail(newUser.email, newUser.name);
+      } catch (err) {
+        logger.error("Email send error", { message: err.message });
+      }
+    });
+    const userDataSafe = newUser.toJSON();
+    delete userDataSafe.password;
+    delete userDataSafe.emailVerifiedAt;
+    return {
+      user: userDataSafe,
+      token: null,
+      message:
+        "Registration successful! Please check your email for verification code.",
+    };
+  }
+
+  // Login user
+  static async login(email, password, meta = {}) {
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("Invalid email or password", 401);
+
+    // Check if user has a password (not a social-only account)
+    if (!user.password || user.password === null) {
+      // User signed up with social auth (Google/Apple)
+      const authMethod = user.googleId
+        ? "Google"
+        : user.appleId
+          ? "Apple"
+          : "social";
+      throw new AppError(
+        `This account uses ${authMethod} sign-in. Please use the "${authMethod} Sign-In" button instead.`,
+        400,
+      );
     }
 
-    // Generate refresh token with longer expiry
-    static generateRefreshToken(id) {
-        const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
-        const refreshToken = jwt.sign({ id, type: 'refresh' }, process.env.JWT_SECRET, {
-            expiresIn,
-            algorithm: 'HS256',
-        });
-        const decoded = jwt.decode(refreshToken);
-        const expiresAt = decoded.exp ? new Date(decoded.exp * 1000) : null;
-        return { refreshToken, expiresAt };
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
+
+    const { token, expiresAt } = AuthService.generateToken(user.id);
+    const { refreshToken, expiresAt: refreshExpiresAt } =
+      AuthService.generateRefreshToken(user.id);
+
+    // Store session
+    const tokenHash = AuthService.hashToken(token);
+    const refreshTokenHash = AuthService.hashToken(refreshToken);
+    await AuthRepository.create({
+      userId: user.id,
+      tokenHash,
+      refreshTokenHash,
+      refreshTokenExpiresAt: refreshExpiresAt,
+      ipAddress: meta.ip,
+      deviceInfo: meta.userAgent,
+    });
+    const userDataSafe = user.toJSON();
+    delete userDataSafe.password;
+    delete userDataSafe.emailVerifiedAt;
+    return { user: userDataSafe, token, refreshToken, expiresAt };
+  }
+
+  // Refresh token - rotate tokens
+  static async refreshToken(refreshTokenValue) {
+    // Verify the refresh token
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshTokenValue, process.env.JWT_SECRET, {
+        algorithms: ["HS256"],
+      });
+    } catch (err) {
+      throw new AppError("Invalid or expired refresh token", 401);
     }
 
-    // Helper to hash token
-    static hashToken(token) {
-        return crypto.createHash("sha256").update(token).digest("hex");
+    if (decoded.type !== "refresh") {
+      throw new AppError("Invalid token type", 401);
     }
 
-    // Register a new user
-    static async register(userData, meta = {}) {
-        const { email, password, name, language } = userData;
+    // Find the session by refresh token hash
+    const refreshTokenHash = AuthService.hashToken(refreshTokenValue);
+    const session =
+      await AuthRepository.findByRefreshTokenHash(refreshTokenHash);
 
-        AuthService.validatePassword(password);
-
-        const existingUser = await UserRepository.findByEmail(email);
-        if (existingUser) throw new AppError("Email already in use", 400);
-        const newUser = await UserRepository.create({
-
-            // Create user with email unverified
-            email,
-            password: password,
-            language,
-            name,
-            emailVerified: false,
-        });
-
-        // Initialize empty profile for the user
-        await ProfileRepository.create({ userId: newUser.id , displayName: name , language: language || 'EN' , photoUrl: null, location: null, bio: null });
-
-        // Generate and send email verification OTP
-        try {
-            const otp = await OTPService.storeOTP(email, 'email_verification', 10);
-            await EmailService.sendEmailVerificationOTP(email, otp, name);
-            console.log(`✅ Email verification OTP sent to ${email}`);
-        } catch (error) {
-            console.error('Failed to send verification email:', error.message);
-            // Don't fail registration if email sending fails
-        }
-
-        // const token = new AuthService().generateToken(newUser.id);
-
-        // // Store session
-        // const tokenHash = AuthService.hashToken(token);
-        // await AuthRepository.create({
-        //     userId: newUser.id,
-        //     tokenHash,
-        //     ipAddress: meta.ip,
-        //     deviceInfo: meta.userAgent
-        // });
-
-        // Send welcome email asynchronously
-        EmailService.sendWelcomeEmail(newUser.email, newUser.name).catch((err) =>
-            console.error("Email send error:", err.message)
-        );
-        const userDataSafe = newUser.toJSON();
-        delete userDataSafe.password;
-        delete userDataSafe.emailVerifiedAt;
-        return {
-            user: userDataSafe,
-            token: null,
-            message: "Registration successful! Please check your email for verification code."
-        };
+    if (!session || session.isLoggedOut) {
+      throw new AppError("Session has ended. Please login again.", 401);
     }
 
-    // Login user
-    static async login(email, password, meta = {}) {
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("Invalid email or password", 401);
-
-        // Check if user has a password (not a social-only account)
-        if (!user.password || user.password === null) {
-            // User signed up with social auth (Google/Apple)
-            const authMethod = user.googleId ? 'Google' : user.appleId ? 'Apple' : 'social';
-            throw new AppError(
-                `This account uses ${authMethod} sign-in. Please use the "${authMethod} Sign-In" button instead.`,
-                400
-            );
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
-
-        const { token, expiresAt } = AuthService.generateToken(user.id);
-        const { refreshToken, expiresAt: refreshExpiresAt } = AuthService.generateRefreshToken(user.id);
-
-        // Store session
-        const tokenHash = AuthService.hashToken(token);
-        const refreshTokenHash = AuthService.hashToken(refreshToken);
-        await AuthRepository.create({
-            userId: user.id,
-            tokenHash,
-            refreshTokenHash,
-            refreshTokenExpiresAt: refreshExpiresAt,
-            ipAddress: meta.ip,
-            deviceInfo: meta.userAgent
-        });
-        const userDataSafe = user.toJSON();
-        delete userDataSafe.password;
-        delete userDataSafe.emailVerifiedAt;
-        return { user: userDataSafe, token, refreshToken, expiresAt };
+    // Check if refresh token has expired at DB level
+    if (
+      session.refreshTokenExpiresAt &&
+      new Date() > session.refreshTokenExpiresAt
+    ) {
+      await AuthRepository.revokeToken(session.userId, session.tokenHash);
+      throw new AppError("Refresh token expired. Please login again.", 401);
     }
 
-    // Refresh token - rotate tokens
-    static async refreshToken(refreshTokenValue) {
-        // Verify the refresh token
-        let decoded;
-        try {
-            decoded = jwt.verify(refreshTokenValue, process.env.JWT_SECRET, {
-                algorithms: ['HS256'],
-            });
-        } catch (err) {
-            throw new AppError("Invalid or expired refresh token", 401);
-        }
+    // Revoke old session
+    await AuthRepository.revokeToken(session.userId, session.tokenHash);
 
-        if (decoded.type !== 'refresh') {
-            throw new AppError("Invalid token type", 401);
-        }
+    // Generate new tokens
+    const { token: newToken, expiresAt } = AuthService.generateToken(
+      decoded.id,
+    );
+    const { refreshToken: newRefreshToken, expiresAt: newRefreshExpiresAt } =
+      AuthService.generateRefreshToken(decoded.id);
 
-        // Find the session by refresh token hash
-        const refreshTokenHash = AuthService.hashToken(refreshTokenValue);
-        const session = await AuthRepository.findByRefreshTokenHash(refreshTokenHash);
+    // Create new session
+    const newTokenHash = AuthService.hashToken(newToken);
+    const newRefreshTokenHash = AuthService.hashToken(newRefreshToken);
+    await AuthRepository.create({
+      userId: decoded.id,
+      tokenHash: newTokenHash,
+      refreshTokenHash: newRefreshTokenHash,
+      refreshTokenExpiresAt: newRefreshExpiresAt,
+      replacedBy: newTokenHash,
+    });
 
-        if (!session || session.isLoggedOut) {
-            throw new AppError("Session has ended. Please login again.", 401);
-        }
+    return { token: newToken, refreshToken: newRefreshToken, expiresAt };
+  }
 
-        // Check if refresh token has expired at DB level
-        if (session.refreshTokenExpiresAt && new Date() > session.refreshTokenExpiresAt) {
-            await AuthRepository.revokeToken(session.userId, session.tokenHash);
-            throw new AppError("Refresh token expired. Please login again.", 401);
-        }
+  // Logout user
+  static async logout(token) {
+    const tokenHash = AuthService.hashToken(token);
+    await AuthRepository.revokeToken(null, tokenHash); // Passing null for userId as we might strictly revoke by hash, or we can update revokeToken to handle just hash if unique
+    invalidateCachedSessionUser(tokenHash);
+    // Actually AuthRepository.revokeToken expects (userId, tokenHash).
+    // Let's check repository. findByTokenHash is safer.
+    const session = await AuthRepository.findByTokenHash(tokenHash);
+    if (session) {
+      await AuthRepository.revokeToken(session.userId, tokenHash);
+    }
+    return { message: "Logged out successfully" };
+  }
 
-        // Revoke old session
-        await AuthRepository.revokeToken(session.userId, session.tokenHash);
+  // Forgot password: send reset token via email
+  static async forgotPassword(email) {
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("Email not found", 404);
 
-        // Generate new tokens
-        const { token: newToken, expiresAt } = AuthService.generateToken(decoded.id);
-        const { refreshToken: newRefreshToken, expiresAt: newRefreshExpiresAt } = AuthService.generateRefreshToken(decoded.id);
-
-        // Create new session
-        const newTokenHash = AuthService.hashToken(newToken);
-        const newRefreshTokenHash = AuthService.hashToken(newRefreshToken);
-        await AuthRepository.create({
-            userId: decoded.id,
-            tokenHash: newTokenHash,
-            refreshTokenHash: newRefreshTokenHash,
-            refreshTokenExpiresAt: newRefreshExpiresAt,
-            replacedBy: newTokenHash,
-        });
-
-        return { token: newToken, refreshToken: newRefreshToken, expiresAt };
+    // Check rate limiting for password reset requests
+    const rateCheck = await OTPService.checkRateLimit(
+      email,
+      "password_reset",
+      3,
+    );
+    if (!rateCheck.allowed) {
+      throw new AppError(
+        `Too many password reset attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`,
+        429,
+      );
     }
 
-    // Logout user
-    static async logout(token) {
-        const tokenHash = AuthService.hashToken(token);
-        await AuthRepository.revokeToken(null, tokenHash); // Passing null for userId as we might strictly revoke by hash, or we can update revokeToken to handle just hash if unique
-        // Actually AuthRepository.revokeToken expects (userId, tokenHash).
-        // Let's check repository. findByTokenHash is safer.
-        const session = await AuthRepository.findByTokenHash(tokenHash);
-        if (session) {
-            await AuthRepository.revokeToken(session.userId, tokenHash);
-        }
-        return { message: "Logged out successfully" };
+    // Generate and store reset OTP in Redis
+    const resetOTP = await OTPService.storeOTP(email, "password_reset", 15);
+
+    // Send reset OTP email
+    await EmailService.sendTokenEmail(user.email, resetOTP, "Password Reset");
+
+    return { message: "Password reset code sent to your email" };
+  }
+
+  // Reset password using OTP
+  static async resetPassword(email, otp, newPassword) {
+    AuthService.validatePassword(newPassword);
+
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("User not found", 404);
+
+    // Verify OTP from Redis
+    const verification = await OTPService.verifyOTP(
+      email,
+      otp,
+      "password_reset",
+    );
+    if (!verification.valid) {
+      throw new AppError(verification.message, 400);
     }
 
-    // Forgot password: send reset token via email
-    static async forgotPassword(email) {
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("Email not found", 404);
+    // Hash and save new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.password = hashedPassword;
+    await user.save();
 
-        // Check rate limiting for password reset requests
-        const rateCheck = await OTPService.checkRateLimit(email, 'password_reset', 3);
-        if (!rateCheck.allowed) {
-            throw new AppError(`Too many password reset attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`, 429);
-        }
+    if (process.env.NODE_ENV !== "production") {
+      logger.info(`Password reset successfully for ${email}`);
+    }
+    return { message: "Password has been reset successfully" };
+  }
 
-        // Generate and store reset OTP in Redis
-        const resetOTP = await OTPService.storeOTP(email, 'password_reset', 15);
+  // Change password (authenticated user)
+  static async changePassword(email, currentPassword, newPassword) {
+    AuthService.validatePassword(newPassword);
 
-        // Send reset OTP email
-        await EmailService.sendTokenEmail(user.email, resetOTP, "Password Reset");
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("User not found", 404);
 
-        return { message: "Password reset code sent to your email" };
+    const isValidPassword = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+    if (!isValidPassword)
+      throw new AppError("Current password is incorrect", 400);
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save();
+
+    return { message: "Password changed successfully" };
+  }
+
+  // Verify email with OTP
+  static async verifyEmail(email, otp) {
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("User not found", 404);
+
+    if (user.emailVerified) {
+      throw new AppError("Email is already verified", 400);
     }
 
-    // Reset password using OTP
-    static async resetPassword(email, otp, newPassword) {
-        AuthService.validatePassword(newPassword);
-
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("User not found", 404);
-
-        // Verify OTP from Redis
-        const verification = await OTPService.verifyOTP(email, otp, 'password_reset');
-        if (!verification.valid) {
-            throw new AppError(verification.message, 400);
-        }
-
-        // Hash and save new password
-        const hashedPassword = await bcrypt.hash(newPassword, 12);
-        user.password = hashedPassword;
-        await user.save();
-
-        console.log(`✅ Password reset successfully for ${email}`);
-        return { message: "Password has been reset successfully" };
+    // Verify OTP from Redis
+    const verification = await OTPService.verifyOTP(
+      email,
+      otp,
+      "email_verification",
+    );
+    if (!verification.valid) {
+      throw new AppError(verification.message, 400);
     }
 
-    // Change password (authenticated user)
-    static async changePassword(email, currentPassword, newPassword) {
-        AuthService.validatePassword(newPassword);
+    // Mark email as verified
+    user.emailVerified = true;
+    user.emailVerifiedAt = new Date();
+    await user.save();
 
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("User not found", 404);
-
-        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
-        if (!isValidPassword) throw new AppError("Current password is incorrect", 400);
-
-        user.password = await bcrypt.hash(newPassword, 12);
-        await user.save();
-
-        return { message: "Password changed successfully" };
+    // Send welcome email after successful verification
+    try {
+      await EmailService.sendWelcomeEmail(user.email, user.name);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info(`Welcome email sent to ${user.email}`);
+      }
+    } catch (error) {
+      logger.error("Failed to send welcome email", { message: error.message });
+      // Don't fail verification if welcome email fails
     }
 
-    // Verify email with OTP
-    static async verifyEmail(email, otp) {
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("User not found", 404);
+    if (process.env.NODE_ENV !== "production") {
+      logger.info(`Email verified successfully for ${email}`);
+    }
+    return {
+      message: "Email verified successfully! Welcome to Mowdministries!",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        emailVerified: true,
+        emailVerifiedAt: user.emailVerifiedAt,
+      },
+    };
+  }
 
-        if (user.emailVerified) {
-            throw new AppError("Email is already verified", 400);
-        }
+  // Resend email verification OTP
+  static async resendEmailVerification(email) {
+    const user = await UserRepository.findByEmail(email);
+    if (!user) throw new AppError("User not found", 404);
 
-        // Verify OTP from Redis
-        const verification = await OTPService.verifyOTP(email, otp, 'email_verification');
-        if (!verification.valid) {
-            throw new AppError(verification.message, 400);
-        }
-
-        // Mark email as verified
-        user.emailVerified = true;
-        user.emailVerifiedAt = new Date();
-        await user.save();
-
-        // Send welcome email after successful verification
-        try {
-            await EmailService.sendWelcomeEmail(user.email, user.name);
-            console.log(`✅ Welcome email sent to ${user.email}`);
-        } catch (error) {
-            console.error('Failed to send welcome email:', error.message);
-            // Don't fail verification if welcome email fails
-        }
-
-        console.log(`✅ Email verified successfully for ${email}`);
-        return {
-            message: "Email verified successfully! Welcome to Mowdministries!",
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                emailVerified: true,
-                emailVerifiedAt: user.emailVerifiedAt
-            }
-        };
+    if (user.emailVerified) {
+      throw new AppError("Email is already verified", 400);
     }
 
-    // Resend email verification OTP
-    static async resendEmailVerification(email) {
-        const user = await UserRepository.findByEmail(email);
-        if (!user) throw new AppError("User not found", 404);
-
-        if (user.emailVerified) {
-            throw new AppError("Email is already verified", 400);
-        }
-
-        // Check if OTP already exists and hasn't expired
-        const otpExists = await OTPService.otpExists(email, 'email_verification');
-        if (otpExists) {
-            const ttl = await OTPService.getOTPTTL(email, 'email_verification');
-            throw new AppError(`Verification code already sent. Please wait ${Math.ceil(ttl / 60)} minutes before requesting a new one.`, 429);
-        }
-
-        // Check rate limiting for resend requests
-        const rateCheck = await OTPService.checkRateLimit(email, 'email_resend', 3);
-        if (!rateCheck.allowed) {
-            throw new AppError(`Too many resend attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`, 429);
-        }
-
-        // Generate and send new OTP
-        const otp = await OTPService.storeOTP(email, 'email_verification', 10);
-        await EmailService.sendEmailVerificationOTP(email, otp, user.name);
-
-        console.log(`✅ Email verification OTP resent to ${email}`);
-        return { message: "Verification code sent to your email" };
+    // Check if OTP already exists and hasn't expired
+    const otpExists = await OTPService.otpExists(email, "email_verification");
+    if (otpExists) {
+      const ttl = await OTPService.getOTPTTL(email, "email_verification");
+      throw new AppError(
+        `Verification code already sent. Please wait ${Math.ceil(ttl / 60)} minutes before requesting a new one.`,
+        429,
+      );
     }
 
-    static async createOrUpdateProfile(userId, profileData) {
-        let profile = await ProfileRepository.findByUserId(userId);
-
-        if (profile) {
-            await ProfileRepository.update(profile, profileData);
-        } else {
-            profile = await ProfileRepository.create({ ...profileData, userId });
-        }
-
-        profile = await ProfileRepository.findByUserIdWithUser(userId);
-
-        return profile;
+    // Check rate limiting for resend requests
+    const rateCheck = await OTPService.checkRateLimit(email, "email_resend", 3);
+    if (!rateCheck.allowed) {
+      throw new AppError(
+        `Too many resend attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`,
+        429,
+      );
     }
 
-    // Get user profile
-    static async getProfile(userId) {
-        const profile = await ProfileRepository.findByUserIdWithUser(userId);
+    // Generate and send new OTP
+    const otp = await OTPService.storeOTP(email, "email_verification", 10);
+    await EmailService.sendEmailVerificationOTP(email, otp, user.name);
 
-        if (!profile) {
-            throw new AppError("Profile not found", 404);
-        }
+    if (process.env.NODE_ENV !== "production") {
+      logger.info(`Email verification OTP resent to ${email}`);
+    }
+    return { message: "Verification code sent to your email" };
+  }
 
-        return profile;
+  static async createOrUpdateProfile(userId, profileData) {
+    let profile = await ProfileRepository.findByUserId(userId);
+
+    if (profile) {
+      await ProfileRepository.update(profile, profileData);
+    } else {
+      profile = await ProfileRepository.create({ ...profileData, userId });
     }
 
-    // Delete user profile
-    static async deleteProfile(userId) {
-        const profile = await ProfileRepository.findByUserId(userId);
+    profile = await ProfileRepository.findByUserIdWithUser(userId);
 
-        if (!profile) {
-            throw new AppError("Profile not found", 404);
-        }
+    return profile;
+  }
 
-        await ProfileRepository.deleteByUserId(userId);
-        return { message: "Profile deleted successfully" };
+  // Get user profile
+  static async getProfile(userId) {
+    const profile = await ProfileRepository.findByUserIdWithUser(userId);
+
+    if (!profile) {
+      throw new AppError("Profile not found", 404);
     }
 
-    // LIST all users (Admin Only)
-    static async getAllUsers() {
-        return await UserRepository.findAll();
+    return profile;
+  }
+
+  // Delete user profile
+  static async deleteProfile(userId) {
+    const profile = await ProfileRepository.findByUserId(userId);
+
+    if (!profile) {
+      throw new AppError("Profile not found", 404);
     }
 
-    // GET user by ID
-    static async getUserById(userId) {
-        const user = await UserRepository.findById(userId);
-        if (!user) {
-            throw new AppError("User not found", 404);
-        }
+    await ProfileRepository.deleteByUserId(userId);
+    return { message: "Profile deleted successfully" };
+  }
 
-        // Remove sensitive data
-        const userDataSafe = user.toJSON ? user.toJSON() : user;
-        delete userDataSafe.password;
+  // LIST all users (Admin Only)
+  static async getAllUsers({ page = 1, limit = 50 } = {}) {
+    const parsedPage = Math.max(Number.parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(Number.parseInt(limit, 10) || 50, 1);
+    const offset = (parsedPage - 1) * parsedLimit;
+    return await UserRepository.findAll({ limit: parsedLimit, offset });
+  }
 
-        return userDataSafe;
+  // GET user by ID
+  static async getUserById(userId) {
+    const user = await UserRepository.findById(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
     }
 
-    // TOGGLE admin status (Admin Only)
-    static async toggleAdminStatus(userId) {
-        const user = await UserRepository.findById(userId);
-        if (!user) throw new AppError("User not found", 404);
+    // Remove sensitive data
+    const userDataSafe = user.toJSON ? user.toJSON() : user;
+    delete userDataSafe.password;
 
-        const newAdminStatus = !user.isAdmin;
-        return await UserRepository.update(userId, { isAdmin: newAdminStatus });
+    return userDataSafe;
+  }
+
+  // TOGGLE admin status (Admin Only)
+  static async toggleAdminStatus(userId) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new AppError("User not found", 404);
+
+    const newAdminStatus = !user.isAdmin;
+    return await UserRepository.update(userId, { isAdmin: newAdminStatus });
+  }
+
+  // UPDATE user by Admin (Exclude password)
+  static async updateUserByAdmin(userId, updateData) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new AppError("User not found", 404);
+
+    // Explicitly prevent password updates via this method
+    if (updateData.password) {
+      delete updateData.password;
     }
 
-    // UPDATE user by Admin (Exclude password)
-    static async updateUserByAdmin(userId, updateData) {
-        const user = await UserRepository.findById(userId);
-        if (!user) throw new AppError("User not found", 404);
+    // Prevent modification of critical system fields if needed
+    // For now, only password is strictly forbidden as per requirements
 
-        // Explicitly prevent password updates via this method
-        if (updateData.password) {
-            delete updateData.password;
-        }
+    return await UserRepository.update(userId, updateData);
+  }
 
-        // Prevent modification of critical system fields if needed
-        // For now, only password is strictly forbidden as per requirements
+  // ADMIN Trigger OTP (Password Reset)
+  static async adminTriggerPasswordReset(userId) {
+    const user = await UserRepository.findById(userId);
+    if (!user) throw new AppError("User not found", 404);
 
-        return await UserRepository.update(userId, updateData);
-    }
+    if (!user.email)
+      throw new AppError("User does not have an email address", 400);
 
-    // ADMIN Trigger OTP (Password Reset)
-    static async adminTriggerPasswordReset(userId) {
-        const user = await UserRepository.findById(userId);
-        if (!user) throw new AppError("User not found", 404);
+    // Generate and send reset OTP
+    // Logic same as forgotPassword but initiated by admin (bypassing rate limit if strictly needed, but better to keep it safer)
+    // Here we just reuse forgotPassword logic but maybe we skip the public rate limit?
+    // Let's call forgotPassword logic directly for simplicity, or reimplement to ensure it works for admin context
+    // The requirement says "admin should just help to trigger otp", implying sending it to the USER.
 
-        if (!user.email) throw new AppError("User does not have an email address", 400);
+    return await AuthService.forgotPassword(user.email);
+  }
 
-        // Generate and send reset OTP
-        // Logic same as forgotPassword but initiated by admin (bypassing rate limit if strictly needed, but better to keep it safer)
-        // Here we just reuse forgotPassword logic but maybe we skip the public rate limit?
-        // Let's call forgotPassword logic directly for simplicity, or reimplement to ensure it works for admin context
-        // The requirement says "admin should just help to trigger otp", implying sending it to the USER.
+  // Social Auth Helper Methods
+  static async findUserByGoogleId(googleId) {
+    return await UserRepository.findOne({ googleId });
+  }
 
-        return await AuthService.forgotPassword(user.email);
-    }
+  static async findUserByAppleId(appleId) {
+    return await UserRepository.findOne({ appleId });
+  }
 
-    // Social Auth Helper Methods
-    static async findUserByGoogleId(googleId) {
-        return await UserRepository.findOne({ googleId });
-    }
+  static async linkGoogleAccount(userId, googleId) {
+    return await UserRepository.update(userId, {
+      googleId,
+    });
+  }
 
-    static async findUserByAppleId(appleId) {
-        return await UserRepository.findOne({ appleId });
-    }
+  static async linkAppleAccount(userId, appleId) {
+    return await UserRepository.update(userId, { appleId });
+  }
 
-    static async linkGoogleAccount(userId, googleId) {
-        return await UserRepository.update(userId, {
-            googleId,
-        });
-    }
+  static async createUserFromGoogle(data) {
+    return await UserRepository.create({
+      email: data.email,
+      name: data.name,
+      googleId: data.googleId,
+      emailVerified: true,
+      password: null, // No password for social auth
+    });
+  }
 
-    static async linkAppleAccount(userId, appleId) {
-        return await UserRepository.update(userId, { appleId });
-    }
-
-    static async createUserFromGoogle(data) {
-        return await UserRepository.create({
-            email: data.email,
-            name: data.name,
-            googleId: data.googleId,
-            emailVerified: true,
-            password: null, // No password for social auth
-        });
-    }
-
-    static async createUserFromApple(data) {
-        return await UserRepository.create({
-            email: data.email,
-            name: data.name,
-            appleId: data.appleId,
-            emailVerified: true,
-            password: null, // No password for social auth
-        });
-    }
+  static async createUserFromApple(data) {
+    return await UserRepository.create({
+      email: data.email,
+      name: data.name,
+      appleId: data.appleId,
+      emailVerified: true,
+      password: null, // No password for social auth
+    });
+  }
 }
 
 export default AuthService;

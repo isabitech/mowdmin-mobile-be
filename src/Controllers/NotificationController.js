@@ -4,30 +4,55 @@ import { validateCreateNotification } from "../middleware/Validation/Notificatio
 import { paginate } from "../Utils/helper.js";
 
 class NotificationController {
-    async create(req, res) {
-        const { error, value } = validateCreateNotification(req.body);
-        if (error) {
-            return sendError(res, { message: error.details[0].message, statusCode: 400 });
-        }
+  async create(req, res) {
+    const { error, value } = validateCreateNotification(req.body);
+    if (error) {
+      return sendError(res, {
+        message: error.details[0].message,
+        statusCode: 400,
+      });
+    }
 
-        const userId = req.user?.id;
-        const notification = await NotificationService.create(userId, value.title, value.message, value.type, value.metadata);
-        return sendSuccess(res, { message: "Notification created successfully", data: notification, statusCode: 201 });
-    }
-    async getUserNotifications(req, res) {
-        const userId = req.user?.id;
-        const { page, limit: pageSize } = req.query;
-        const pagination = page ? paginate(page, pageSize) : {};
-        const notifications = await NotificationService.getUserNotifications(userId, pagination);
-        return sendSuccess(res, { message: "Notifications fetched successfully", data: notifications });
-    }
-    async markAsRead(req, res) {
-        const { id } = req.params;
-        const userId = req.user?.id;
-        const notification = await NotificationService.markAsRead(id, userId);
-        if (!notification) return sendError(res, { message: "Notification not found", statusCode: 404 });
-        return sendSuccess(res, { message: "Notification marked as read", data: notification });
-
-    }
+    const userId = req.user?.id;
+    const notification = await NotificationService.create(
+      userId,
+      value.title,
+      value.message,
+      value.type,
+      value.metadata,
+    );
+    return sendSuccess(res, {
+      message: "Notification created successfully",
+      data: notification,
+      statusCode: 201,
+    });
+  }
+  async getUserNotifications(req, res) {
+    const userId = req.user?.id;
+    const { page, limit: pageSize } = req.query;
+    const pagination = paginate(page || 1, pageSize);
+    const notifications = await NotificationService.getUserNotifications(
+      userId,
+      pagination,
+    );
+    return sendSuccess(res, {
+      message: "Notifications fetched successfully",
+      data: notifications,
+    });
+  }
+  async markAsRead(req, res) {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const notification = await NotificationService.markAsRead(id, userId);
+    if (!notification)
+      return sendError(res, {
+        message: "Notification not found",
+        statusCode: 404,
+      });
+    return sendSuccess(res, {
+      message: "Notification marked as read",
+      data: notification,
+    });
+  }
 }
 export default new NotificationController();

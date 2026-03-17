@@ -1,25 +1,25 @@
 import { MinistryRepository } from "../repositories/MinistryRepository.js";
 
 class MinistryService {
-    async getAllMinistries() {
-        return await MinistryRepository.findAll();
-    }
+  async getAllMinistries(pagination = {}) {
+    return await MinistryRepository.findAll(pagination);
+  }
 
-    async getMinistryById(id) {
-        return await MinistryRepository.findById(id);
-    }
+  async getMinistryById(id) {
+    return await MinistryRepository.findById(id);
+  }
 
-    async createMinistry(data) {
-        return await MinistryRepository.create(data);
-    }
+  async createMinistry(data) {
+    return await MinistryRepository.create(data);
+  }
 
-    async updateMinistry(id, data) {
-        return await MinistryRepository.updateById(id, data);
-    }
+  async updateMinistry(id, data) {
+    return await MinistryRepository.updateById(id, data);
+  }
 
-    async deleteMinistry(id) {
-        return await MinistryRepository.deleteById(id);
-    }
+  async deleteMinistry(id) {
+    return await MinistryRepository.deleteById(id);
+  }
 }
 
 export default new MinistryService();

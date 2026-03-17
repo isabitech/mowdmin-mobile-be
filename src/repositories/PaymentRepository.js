@@ -3,19 +3,21 @@ let PaymentModel;
 let OrderModel;
 let UserModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
 
 export const PaymentRepository = {
   async getModels() {
     if (!PaymentModel || (!isMongo && (!OrderModel || !UserModel))) {
       if (isMongo) {
-        PaymentModel = (await import('../MongoModels/PaymentMongoModel.js')).default;
-        OrderModel = (await import('../MongoModels/OrderMongoModel.js')).default;
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        PaymentModel = (await import("../MongoModels/PaymentMongoModel.js"))
+          .default;
+        OrderModel = (await import("../MongoModels/OrderMongoModel.js"))
+          .default;
+        UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
       } else {
-        PaymentModel = (await import('../Models/PaymentModel.js')).default;
-        OrderModel = (await import('../Models/OrderModel.js')).default;
-        UserModel = (await import('../Models/UserModel.js')).default;
+        PaymentModel = (await import("../Models/PaymentModel.js")).default;
+        OrderModel = (await import("../Models/OrderModel.js")).default;
+        UserModel = (await import("../Models/UserModel.js")).default;
       }
     }
     return { PaymentModel, OrderModel, UserModel };
@@ -29,7 +31,9 @@ export const PaymentRepository = {
   async getAllPaymentsWithPagination(filters = {}) {
     const { PaymentModel, UserModel } = await this.getModels();
     const { page = 1, limit = 10, type, status } = filters;
-    const skip = (page - 1) * limit;
+    const parsedPage = Math.max(Number.parseInt(page, 10) || 1, 1);
+    const parsedLimit = Math.max(Number.parseInt(limit, 10) || 10, 1);
+    const skip = (parsedPage - 1) * parsedLimit;
 
     if (isMongo) {
       const query = {};
@@ -39,17 +43,22 @@ export const PaymentRepository = {
       const items = await PaymentModel.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit)
-        .populate('userId', 'name email');
+        .limit(parsedLimit)
+        .populate("userId", "name email")
+        .lean();
 
-      const total = await PaymentModel.countDocuments(query);
+      // Keep exact counts for financial records; only skip count on trivial first page.
+      const total =
+        parsedPage === 1 && items.length < parsedLimit
+          ? items.length
+          : await PaymentModel.countDocuments(query);
 
       return {
         items,
         total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        totalPages: Math.ceil(total / limit)
+        page: parsedPage,
+        limit: parsedLimit,
+        totalPages: Math.ceil(total / parsedLimit),
       };
     } else {
       const where = {};
@@ -58,16 +67,16 @@ export const PaymentRepository = {
 
       const { rows, count } = await PaymentModel.findAndCountAll({
         where,
-        order: [['createdAt', 'DESC']],
+        order: [["createdAt", "DESC"]],
         offset: skip,
         limit: parseInt(limit),
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
 
       return {
@@ -75,7 +84,7 @@ export const PaymentRepository = {
         total: count,
         page: parseInt(page),
         limit: parseInt(limit),
-        totalPages: Math.ceil(count / limit)
+        totalPages: Math.ceil(count / limit),
       };
     }
   },
@@ -83,16 +92,16 @@ export const PaymentRepository = {
   async getPaymentById(id) {
     const { PaymentModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return PaymentModel.findById(id).populate('userId', 'name email');
+      return PaymentModel.findById(id).populate("userId", "name email");
     } else {
       return PaymentModel.findByPk(id, {
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
     }
   },

@@ -1,24 +1,29 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const PrayerCommentMongoSchema = new mongoose.Schema({
+const PrayerCommentMongoSchema = new mongoose.Schema(
+  {
     prayerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'PrayerMongo',
-        required: true,
-        index: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PrayerMongo",
+      required: true,
+      index: true,
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'UserMongo',
-        required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "UserMongo",
+      required: true,
     },
     comment: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-}, {
+  },
+  {
     timestamps: true,
-    collection: 'prayer_comments',
-});
+    collection: "prayer_comments",
+  },
+);
 
-export default mongoose.model('PrayerCommentMongo', PrayerCommentMongoSchema);
+PrayerCommentMongoSchema.index({ prayerId: 1, createdAt: -1 });
+
+export default mongoose.model("PrayerCommentMongo", PrayerCommentMongoSchema);

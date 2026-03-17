@@ -1,20 +1,22 @@
 let UserModel;
 let ProfileModel;
 
-const getIsMongo = () => process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const UserRepository = {
   async getModels() {
     if (!UserModel || (!getIsMongo() && !ProfileModel)) {
       if (getIsMongo()) {
-        const userImport = await import('../MongoModels/UserMongoModel.js');
-        const profileImport = await import('../MongoModels/ProfileMongoModel.js');
+        const userImport = await import("../MongoModels/UserMongoModel.js");
+        const profileImport = await import(
+          "../MongoModels/ProfileMongoModel.js"
+        );
 
         UserModel = userImport.default;
         ProfileModel = profileImport.default;
       } else {
-        const userImport = await import('../Models/UserModel.js');
-        const profileImport = await import('../Models/ProfileModel.js');
+        const userImport = await import("../Models/UserModel.js");
+        const profileImport = await import("../Models/ProfileModel.js");
 
         UserModel = userImport.default;
         ProfileModel = profileImport.default;
@@ -28,7 +30,7 @@ export const UserRepository = {
     const { UserModel, ProfileModel } = await this.getModels();
 
     if (getIsMongo()) {
-      return UserModel.findOne({ email }).select('+password');
+      return UserModel.findOne({ email }).select("+password");
     }
 
     return UserModel.findOne({
@@ -36,9 +38,9 @@ export const UserRepository = {
       include: [
         {
           model: ProfileModel,
-          as: 'profile'
-        }
-      ]
+          as: "profile",
+        },
+      ],
     });
   },
 
@@ -49,7 +51,7 @@ export const UserRepository = {
       return UserModel.findById(id);
     }
     return UserModel.findByPk(id, {
-      attributes: { exclude: ['password'] }
+      attributes: { exclude: ["password"] },
     });
   },
 
@@ -60,24 +62,39 @@ export const UserRepository = {
 
   async findAll(options = {}) {
     const { UserModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
     if (getIsMongo()) {
-      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
+      const filter =
+        options.where ||
+        (options.order || options.limit || options.offset || options.include
+          ? {}
+          : options);
       let query = UserModel.find(filter);
 
       if (options.order) {
         const sort = {};
         options.order.forEach(([field, direction]) => {
-          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+          sort[field] = direction.toUpperCase() === "DESC" ? -1 : 1;
         });
         query = query.sort(sort);
       }
-      if (options.limit) query = query.limit(options.limit);
-      if (options.offset) query = query.skip(options.offset);
+      query = query.limit(limit).skip(offset);
 
       return query;
     }
-    const seqOptions = options.where || options.order || options.limit ? options : { where: options };
-    seqOptions.attributes = { exclude: ['password'] };
+    const seqOptions =
+      options.where || options.order || options.limit
+        ? options
+        : { where: options };
+    seqOptions.attributes = { exclude: ["password"] };
+    seqOptions.limit = limit;
+    seqOptions.offset = offset;
     return UserModel.findAll(seqOptions);
   },
 
@@ -101,5 +118,5 @@ export const UserRepository = {
       return UserModel.findOne(filter);
     }
     return UserModel.findOne({ where });
-  }
+  },
 };

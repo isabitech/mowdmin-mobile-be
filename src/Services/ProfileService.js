@@ -25,20 +25,21 @@ class ProfileService {
     return ProfileRepository.findByUserId(userId);
   }
 
-  async updateProfile(userId, dto) {
-    const existingProfile = await ProfileRepository.findByUserId(userId);
-    if (!existingProfile) {
+  async updateProfile(userId, dto, existingProfile = null) {
+    const profile =
+      existingProfile || (await ProfileRepository.findByUserId(userId));
+    if (!profile) {
       return ProfileRepository.create({ ...dto, userId });
     }
 
     // If a new photo was uploaded, clean up the previous local file
     if (dto.photoUrl) {
-      await deleteLocalPhotoIfExists(existingProfile.photoUrl);
+      deleteLocalPhotoIfExists(profile.photoUrl).catch((error) => {
+        console.error("Failed to delete old profile photo:", error.message);
+      });
     }
 
-    await ProfileRepository.updateByUserId(userId, dto);
-    // Fetch the updated profile to return a consistent instance/document
-    return ProfileRepository.findByUserId(userId);
+    return ProfileRepository.updateByUserId(userId, dto);
   }
 }
 

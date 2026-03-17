@@ -1,9 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 let PrayerRequestModel;
 let UserModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
+const DEFAULT_PRAYER_REQUEST_PAGE_SIZE = 20;
+const MAX_PRAYER_REQUEST_PAGE_SIZE = 100;
 
 export const PrayerRequestRepository = {
   isValidId(id) {
@@ -13,11 +15,14 @@ export const PrayerRequestRepository = {
   async getModels() {
     if (!PrayerRequestModel || (!isMongo && !UserModel)) {
       if (isMongo) {
-        PrayerRequestModel = (await import('../MongoModels/PrayerRequestMongoModel.js')).default;
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        PrayerRequestModel = (
+          await import("../MongoModels/PrayerRequestMongoModel.js")
+        ).default;
+        UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
       } else {
-        PrayerRequestModel = (await import('../Models/PrayerRequestModel.js')).default;
-        UserModel = (await import('../Models/UserModel.js')).default;
+        PrayerRequestModel = (await import("../Models/PrayerRequestModel.js"))
+          .default;
+        UserModel = (await import("../Models/UserModel.js")).default;
       }
     }
     return { PrayerRequestModel, UserModel };
@@ -32,17 +37,17 @@ export const PrayerRequestRepository = {
     const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
       if (!this.isValidId(id)) return null;
-      return PrayerRequestModel.findById(id).populate('userId', 'name email');
+      return PrayerRequestModel.findById(id).populate("userId", "name email");
     } else {
       return PrayerRequestModel.findByPk(id, {
         ...options,
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
     }
   },
@@ -50,7 +55,7 @@ export const PrayerRequestRepository = {
   async findOne(where, options = {}) {
     const { PrayerRequestModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return PrayerRequestModel.findOne(where).populate('userId', 'name email');
+      return PrayerRequestModel.findOne(where).populate("userId", "name email");
     } else {
       return PrayerRequestModel.findOne({
         where,
@@ -58,41 +63,62 @@ export const PrayerRequestRepository = {
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
     }
   },
 
   async findAll(options = {}) {
     const { PrayerRequestModel, UserModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, MAX_PRAYER_REQUEST_PAGE_SIZE)
+        : DEFAULT_PRAYER_REQUEST_PAGE_SIZE;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
     if (isMongo) {
-      const filter = options.where || (options.order || options.limit || options.offset || options.include ? {} : options);
-      let query = PrayerRequestModel.find(filter).populate('userId', 'name email');
+      const {
+        where,
+        order,
+        include,
+        limit: _limit,
+        offset: _offset,
+        ...rawFilter
+      } = options;
+      const filter = where || rawFilter;
+      let query = PrayerRequestModel.find(filter).populate(
+        "userId",
+        "name email",
+      );
 
       if (options.order) {
         const sort = {};
         options.order.forEach(([field, direction]) => {
-          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+          sort[field] = direction.toUpperCase() === "DESC" ? -1 : 1;
         });
         query = query.sort(sort);
       }
-      if (options.limit) query = query.limit(options.limit);
-      if (options.offset) query = query.skip(options.offset);
+      query = query.limit(limit).skip(offset);
 
       return query;
     } else {
       return PrayerRequestModel.findAll({
         ...options,
+        limit,
+        offset,
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
     }
   },
@@ -123,22 +149,35 @@ export const PrayerRequestRepository = {
 
   async findAllByUserId(userId, options = {}) {
     const { PrayerRequestModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, MAX_PRAYER_REQUEST_PAGE_SIZE)
+        : DEFAULT_PRAYER_REQUEST_PAGE_SIZE;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
     if (isMongo) {
       let query = PrayerRequestModel.find({ userId });
 
       if (options.order) {
         const sort = {};
         options.order.forEach(([field, direction]) => {
-          sort[field] = direction.toUpperCase() === 'DESC' ? -1 : 1;
+          sort[field] = direction.toUpperCase() === "DESC" ? -1 : 1;
         });
         query = query.sort(sort);
       }
-      if (options.limit) query = query.limit(options.limit);
-      if (options.offset) query = query.skip(options.offset);
+      query = query.limit(limit).skip(offset);
 
       return query;
     } else {
-      return PrayerRequestModel.findAll({ where: { userId }, ...options });
+      return PrayerRequestModel.findAll({
+        where: { userId },
+        ...options,
+        limit,
+        offset,
+      });
     }
   },
 };

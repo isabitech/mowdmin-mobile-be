@@ -1,41 +1,45 @@
 import { ProductRepository } from "../repositories/ProductRepository.js";
 
 class ProductService {
-    async createProduct(data) {
-        return ProductRepository.create(data);
-    }
+  async createProduct(data) {
+    return ProductRepository.create(data);
+  }
 
-    async updateProduct(id, data) {
-        const updated = await ProductRepository.updateById(id, data);
-        if (!updated) throw new Error("Product not found");
-        return updated;
-    }
+  async updateProduct(id, data) {
+    const updated = await ProductRepository.updateById(id, data);
+    if (!updated) throw new Error("Product not found");
+    return updated;
+  }
 
-    async getProductById(id) {
-        return ProductRepository.findById(id);
-    }
+  async getProductById(id) {
+    return ProductRepository.findById(id);
+  }
 
-    async getProductsByCategory(categoryId) {
-        return ProductRepository.findAll({ category: categoryId });
-    }
+  async getProductsByCategory(categoryId, pagination = {}) {
+    return ProductRepository.findAll({
+      where: { category: categoryId },
+      ...pagination,
+    });
+  }
 
-    async getAll() {
-        return ProductRepository.findAll({
-            order: [["createdAt", "ASC"]],
-        });
-    }
+  async getAll(pagination = {}) {
+    return ProductRepository.findAll({
+      order: [["createdAt", "ASC"]],
+      ...pagination,
+    });
+  }
 
-    async deleteProduct(id) {
-        const deleted = await ProductRepository.deleteById(id);
-        if (!deleted) throw new Error("Product not found");
-        return deleted;
-    }
+  async deleteProduct(id) {
+    const deleted = await ProductRepository.deleteById(id);
+    if (!deleted) throw new Error("Product not found");
+    return deleted;
+  }
 
-    async getAllByUserId(userId) {
-        return ProductRepository.findAllByUserId(userId, {
-            order: [["createdAt", "ASC"]],
-        });
-    }
+  async getAllByUserId(userId) {
+    return ProductRepository.findAllByUserId(userId, {
+      order: [["createdAt", "ASC"]],
+    });
+  }
 }
 
 export default new ProductService();

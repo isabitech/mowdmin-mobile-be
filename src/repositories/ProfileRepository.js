@@ -1,17 +1,17 @@
-
 let ProfileModel;
 let UserModel;
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
 
 const ProfileRepository = {
   async getModels() {
     if (!ProfileModel || (!isMongo && !UserModel)) {
       if (isMongo) {
-        ProfileModel = (await import('../MongoModels/ProfileMongoModel.js')).default;
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        ProfileModel = (await import("../MongoModels/ProfileMongoModel.js"))
+          .default;
+        UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
       } else {
-        ProfileModel = (await import('../Models/ProfileModel.js')).default;
-        UserModel = (await import('../Models/UserModel.js')).default;
+        ProfileModel = (await import("../Models/ProfileModel.js")).default;
+        UserModel = (await import("../Models/UserModel.js")).default;
       }
     }
     return { ProfileModel, UserModel };
@@ -19,16 +19,20 @@ const ProfileRepository = {
 
   async findByUserId(userId) {
     const { ProfileModel } = await this.getModels();
-    return isMongo ? ProfileModel.findOne({ userId }) : ProfileModel.findOne({ where: { userId } });
+    return isMongo
+      ? ProfileModel.findOne({ userId })
+      : ProfileModel.findOne({ where: { userId } });
   },
 
   async findByIdWithUser(id) {
     const { ProfileModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return ProfileModel.findById(id).populate('userId', 'id name email');
+      return ProfileModel.findById(id).populate("userId", "id name email");
     } else {
       return ProfileModel.findByPk(id, {
-        include: [{ model: UserModel, as: 'user', attributes: ['id', 'name', 'email'] }],
+        include: [
+          { model: UserModel, as: "user", attributes: ["id", "name", "email"] },
+        ],
       });
     }
   },
@@ -52,17 +56,27 @@ const ProfileRepository = {
     if (isMongo) {
       return ProfileModel.findOneAndUpdate({ userId }, payload, { new: true });
     } else {
-      return ProfileModel.update(payload, { where: { userId } });
+      await ProfileModel.update(payload, { where: { userId } });
+      return ProfileModel.findOne({ where: { userId } });
     }
   },
   async findByUserIdWithUser(userId) {
     const { ProfileModel, UserModel } = await this.getModels();
     if (isMongo) {
-      return ProfileModel.findOne({ userId }).populate('userId', 'id name email emailVerified');
+      return ProfileModel.findOne({ userId }).populate(
+        "userId",
+        "id name email emailVerified",
+      );
     } else {
       return ProfileModel.findOne({
         where: { userId },
-        include: [{ model: UserModel, as: 'user', attributes: ['id', 'name', 'email', 'emailVerified'] }],
+        include: [
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "name", "email", "emailVerified"],
+          },
+        ],
       });
     }
   },

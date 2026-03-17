@@ -3,6 +3,21 @@ import ProfileRepository from "./ProfileRepository.js";
 let GroupModel, MemberModel, MessageModel, UserModel;
 
 const isMongo = process.env.DB_CONNECTION === "mongodb";
+const DEFAULT_GROUP_PAGE_SIZE = 20;
+const MAX_GROUP_PAGE_SIZE = 100;
+
+const getListOptions = (pagination = {}) => {
+  const parsedLimit = Number.parseInt(pagination.limit, 10);
+  const parsedOffset = Number.parseInt(pagination.offset, 10);
+  return {
+    limit:
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, MAX_GROUP_PAGE_SIZE)
+        : DEFAULT_GROUP_PAGE_SIZE,
+    offset:
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0,
+  };
+};
 
 export const GroupRepository = {
   async getModels() {
@@ -33,11 +48,15 @@ export const GroupRepository = {
     return await GroupModel.create(data);
   },
 
-  async findAllGroups(filters = {}) {
+  async findAllGroups(filters = {}, pagination = {}) {
     const { GroupModel, MemberModel } = await this.getModels();
+    const { limit, offset } = getListOptions(pagination);
     if (isMongo) {
       const groups = await GroupModel.find(filters)
         .populate("creatorId", "name email photo")
+        .sort({ createdAt: -1 })
+        .skip(offset)
+        .limit(limit)
         .lean();
 
       const groupIds = groups.map((g) => g._id);
@@ -57,6 +76,9 @@ export const GroupRepository = {
     const { UserModel } = await this.getModels();
     return await GroupModel.findAll({
       where: filters,
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
       include: [
         {
           model: UserModel,
@@ -201,14 +223,17 @@ export const GroupRepository = {
     return await MessageModel.create(data);
   },
 
-  async findMessagesByGroup(groupId) {
+  async findMessagesByGroup(groupId, pagination = {}) {
     const { MessageModel, UserModel } = await this.getModels();
     const { ProfileModel } = await ProfileRepository.getModels();
+    const { limit, offset } = getListOptions(pagination);
 
     if (isMongo) {
       const messages = await MessageModel.find({ groupId })
         .populate("senderId", "name email photo")
         .sort({ createdAt: 1 })
+        .skip(offset)
+        .limit(limit)
         .lean();
 
       const senderIds = [
@@ -240,6 +265,8 @@ export const GroupRepository = {
 
     const messages = await MessageModel.findAll({
       where: { groupId },
+      limit,
+      offset,
       include: [
         {
           model: UserModel,

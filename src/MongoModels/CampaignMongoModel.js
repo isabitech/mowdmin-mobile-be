@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const CampaignSchema = new mongoose.Schema(
   {
@@ -32,8 +32,10 @@ const CampaignSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: 'campaigns',
-  }
+    collection: "campaigns",
+  },
 );
 
-export default mongoose.model('Campaign', CampaignSchema);
+CampaignSchema.index({ isActive: 1, createdAt: -1 });
+
+export default mongoose.model("Campaign", CampaignSchema);

@@ -7,11 +7,11 @@ let sequelize = null;
 // Create sequelize instance only when needed and after env vars are loaded
 function getSequelize() {
   if (!sequelize) {
-    console.log('🔧 Creating Sequelize instance');
+    console.log("🔧 Creating Sequelize instance");
     // Removed credential logging for security
 
     sequelize = new Sequelize({
-      dialect: 'postgres',
+      dialect: "postgres",
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
       database: process.env.DB_DATABASE,
@@ -20,16 +20,16 @@ function getSequelize() {
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false
-        }
+          rejectUnauthorized: false,
+        },
       },
       pool: {
-        max: process.env.NODE_ENV === 'production' ? 20 : 5,
+        max: process.env.NODE_ENV === "production" ? 20 : 5,
         min: 2,
         acquire: 30000,
-        idle: 10000
+        idle: 10000,
       },
-      logging: process.env.NODE_ENV === "development" ? console.log : false
+      logging: process.env.NODE_ENV === "development" ? console.log : false,
     });
   }
   return sequelize;
@@ -45,15 +45,19 @@ export const connectDB = async () => {
 
     // Setup model associations after all models are loaded
     try {
-      const setupAssociations = await import('../Models/associations.js');
+      const setupAssociations = await import("../Models/associations.js");
       setupAssociations.default();
     } catch (error) {
       console.warn("⚠️ Could not load associations:", error.message);
     }
 
-    if (process.env.NODE_ENV === "development") {
+    const disableSync =
+      String(process.env.DISABLE_DB_SYNC).toLowerCase() === "true";
+    if (process.env.NODE_ENV === "development" && !disableSync) {
       await seq.sync({ alter: true });
       console.log("✅ Database synced successfully.");
+    } else if (process.env.NODE_ENV === "development" && disableSync) {
+      console.log("ℹ️ Database sync skipped because DISABLE_DB_SYNC=true");
     }
   } catch (error) {
     console.error("❌ Unable to connect to the database:");
