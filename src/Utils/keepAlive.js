@@ -3,6 +3,14 @@ import { logger } from "../core/logger.js";
 
 const DEFAULT_KEEP_ALIVE_CRON = "*/1 * * * *";
 
+const resolveRenderServiceHost = () => {
+  const rawServiceName = process.env.RENDER_SERVICE_NAME?.trim();
+  if (!rawServiceName) return null;
+  const normalizedServiceName = rawServiceName.replace(/[^a-zA-Z0-9-]/g, "");
+  if (!normalizedServiceName) return null;
+  return `https://${normalizedServiceName}.onrender.com`;
+};
+
 const getKeepAliveSource = () => {
   if (process.env.RENDER_KEEP_ALIVE_URL) return "RENDER_KEEP_ALIVE_URL";
   if (process.env.RENDER_EXTERNAL_URL) return "RENDER_EXTERNAL_URL";
@@ -16,9 +24,7 @@ const resolveKeepAliveUrl = (port) => {
     process.env.RENDER_KEEP_ALIVE_URL ||
     process.env.RENDER_EXTERNAL_URL ||
     process.env.BASE_URL ||
-    (process.env.RENDER_SERVICE_NAME
-      ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com`
-      : null) ||
+    resolveRenderServiceHost() ||
     `http://127.0.0.1:${port}`
   )?.trim();
 

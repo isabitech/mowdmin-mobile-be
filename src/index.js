@@ -222,8 +222,11 @@ async function bootstrap() {
       logger.info("Connecting to MongoDB...");
       await connectMongoDB();
       mongoConnectionReady = true;
-    } else if (process.env.DB_CONNECTION === "mysql") {
-      logger.info("Connecting to MySQL...");
+    } else if (
+      process.env.DB_CONNECTION === "mysql" ||
+      process.env.DB_CONNECTION === "postgres"
+    ) {
+      logger.info(`Connecting to SQL database (${process.env.DB_CONNECTION})...`);
       await connectDB();
       sqlConnectionReady = true;
 

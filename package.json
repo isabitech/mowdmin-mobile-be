@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "jest",
     "dev": "nodemon ./src/index.js",

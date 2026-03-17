@@ -96,9 +96,41 @@ export const ProductRepository = {
 
   async findAllByUserId(userId, options = {}) {
     const Model = await this.getModel();
-    return isMongo
-      ? Model.find({ userId, ...options })
-      : Model.findAll({ where: { userId }, ...options });
+    if (isMongo) {
+      const {
+        where,
+        order,
+        include,
+        limit: rawLimit,
+        offset: rawOffset,
+        ...rawFilter
+      } = options;
+      const parsedLimit = Number.parseInt(rawLimit, 10);
+      const parsedOffset = Number.parseInt(rawOffset, 10);
+      const limit =
+        Number.isFinite(parsedLimit) && parsedLimit > 0
+          ? Math.min(parsedLimit, MAX_PRODUCT_PAGE_SIZE)
+          : DEFAULT_PRODUCT_PAGE_SIZE;
+      const offset =
+        Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
+      const filter = where || rawFilter;
+      let query = Model.find({ userId, ...filter })
+        .skip(offset)
+        .limit(limit);
+
+      if (order?.length) {
+        const sort = {};
+        order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === "DESC" ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+
+      return query.lean();
+    }
+
+    return Model.findAll({ where: { userId }, ...options });
   },
 };
 

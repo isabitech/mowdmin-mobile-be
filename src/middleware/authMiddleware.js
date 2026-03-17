@@ -116,6 +116,18 @@ export const protectUser = async (req, res, next) => {
             const sessionId = (session?._id || tokenHash).toString();
             if (!shouldSkipSessionTouch(sessionId)) {
               markSessionTouch(sessionId);
+              // Keep cached session activity fresh so timeout checks do not use stale lastLogin.
+              if (!isMutationMethod) {
+                setCachedSessionUser(tokenHash, {
+                  session: {
+                    ...(typeof session?.toObject === "function"
+                      ? session.toObject()
+                      : session),
+                    lastLogin: new Date(nowMs),
+                  },
+                  user,
+                });
+              }
               setImmediate(async () => {
                 try {
                   await AuthRepository.touchToken(tokenHash, new Date(nowMs));

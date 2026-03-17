@@ -34,11 +34,16 @@ export const MediaCategoryRepository = {
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     if (isMongo) {
-      const { limit: _limit, offset: _offset, ...mongoOptions } = options;
-      return Model.find(mongoOptions.where || {})
-        .skip(offset)
-        .limit(limit)
-        .lean();
+      const {
+        where,
+        order,
+        include,
+        limit: _limit,
+        offset: _offset,
+        ...rawFilter
+      } = options;
+      const filter = where || rawFilter;
+      return Model.find(filter).skip(offset).limit(limit).lean();
     } else {
       return Model.findAll({ ...options, limit, offset });
     }
