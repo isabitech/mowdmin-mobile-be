@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "jest",
     "dev": "nodemon ./src/index.js",
@@ -49,6 +52,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.2",
+    "lru-cache": "^11.2.7",
     "mongoose": "^9.1.1",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",

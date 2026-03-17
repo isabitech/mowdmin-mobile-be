@@ -11,6 +11,10 @@ class CloudinaryService {
    */
   static async upload(fileBuffer, { folder = "mowdmin", resourceType = "image" } = {}) {
     return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Cloudinary upload timed out"));
+      }, 15000);
+
       const stream = cloudinary.uploader.upload_stream(
         {
           folder,
@@ -18,6 +22,7 @@ class CloudinaryService {
           transformation: [{ quality: "auto", fetch_format: "auto" }],
         },
         (error, result) => {
+          clearTimeout(timeoutId);
           if (error) return reject(error);
           resolve({
             url: result.secure_url,

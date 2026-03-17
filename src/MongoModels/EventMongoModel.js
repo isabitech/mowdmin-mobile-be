@@ -34,4 +34,6 @@ const EventMongoSchema = new mongoose.Schema({
   collection: 'events',
 });
 
+EventMongoSchema.index({ date: 1 });
+
 export default mongoose.model('EventMongo', EventMongoSchema);

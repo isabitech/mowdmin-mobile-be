@@ -1,6 +1,7 @@
 import ProfileRepository from "../repositories/ProfileRepository.js";
 import fs from "fs";
 import path from "path";
+import { logger } from "../core/logger.js";
 
 // Delete an existing local file when a new photo replaces it
 const deleteLocalPhotoIfExists = async (photoUrl) => {
@@ -25,20 +26,25 @@ class ProfileService {
     return ProfileRepository.findByUserId(userId);
   }
 
-  async updateProfile(userId, dto) {
-    const existingProfile = await ProfileRepository.findByUserId(userId);
-    if (!existingProfile) {
+  async updateProfile(userId, dto, existingProfile = null) {
+    const profile =
+      existingProfile || (await ProfileRepository.findByUserId(userId));
+    if (!profile) {
       return ProfileRepository.create({ ...dto, userId });
     }
 
     // If a new photo was uploaded, clean up the previous local file
     if (dto.photoUrl) {
-      await deleteLocalPhotoIfExists(existingProfile.photoUrl);
+      deleteLocalPhotoIfExists(profile.photoUrl).catch((error) => {
+        logger.error("Failed to delete old profile photo", {
+          userId,
+          photoUrl: profile.photoUrl,
+          message: error.message,
+        });
+      });
     }
 
-    await ProfileRepository.updateByUserId(userId, dto);
-    // Fetch the updated profile to return a consistent instance/document
-    return ProfileRepository.findByUserId(userId);
+    return ProfileRepository.updateByUserId(userId, dto);
   }
 }
 

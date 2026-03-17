@@ -15,7 +15,6 @@ class MediaService {
     return await this.createMedia(data);
   }
 
-
   async update(id, data) {
     return await MediaRepository.updateById(id, data);
   }
@@ -24,8 +23,8 @@ class MediaService {
     return await MediaRepository.findById(id);
   }
 
-  async getAll(filters = {}) {
-    return await MediaRepository.findAll(filters);
+  async getAll(filters = {}, pagination = {}) {
+    return await MediaRepository.findAll({ where: filters, ...pagination });
   }
 
   async delete(id) {

@@ -1,7 +1,6 @@
-
 let MediaCategoryModel;
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
-import mongoose from 'mongoose';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
+import mongoose from "mongoose";
 
 export const MediaCategoryRepository = {
   isValidId(id) {
@@ -11,9 +10,12 @@ export const MediaCategoryRepository = {
   async getModel() {
     if (!MediaCategoryModel) {
       if (isMongo) {
-        MediaCategoryModel = (await import('../MongoModels/MediaCategoryMongoModel.js')).default;
+        MediaCategoryModel = (
+          await import("../MongoModels/MediaCategoryMongoModel.js")
+        ).default;
       } else {
-        MediaCategoryModel = (await import('../Models/MediaCategory.js')).default;
+        MediaCategoryModel = (await import("../Models/MediaCategory.js"))
+          .default;
       }
     }
     return MediaCategoryModel;
@@ -25,10 +27,25 @@ export const MediaCategoryRepository = {
   },
   async findAll(options = {}) {
     const Model = await this.getModel();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     if (isMongo) {
-      return Model.find({});
+      const {
+        where,
+        order,
+        include,
+        limit: _limit,
+        offset: _offset,
+        ...rawFilter
+      } = options;
+      const filter = where || rawFilter;
+      return Model.find(filter).skip(offset).limit(limit).lean();
     } else {
-      return Model.findAll(options);
+      return Model.findAll({ ...options, limit, offset });
     }
   },
 

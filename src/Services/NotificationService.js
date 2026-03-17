@@ -20,16 +20,7 @@ class NotificationService {
   }
 
   async markAsRead(notificationId, userId) {
-    const notification = await NotificationRepository.findById(notificationId);
-    if (!notification) return null;
-    // Verify ownership
-    const ownerId = notification.userId?._id || notification.userId;
-    if (ownerId && ownerId.toString() !== userId.toString()) {
-      return null;
-    }
-    notification.isRead = true;
-    await notification.save();
-    return notification;
+    return NotificationRepository.markAsReadByUserId(notificationId, userId);
   }
 }
 

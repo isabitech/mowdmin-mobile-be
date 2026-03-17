@@ -1,9 +1,8 @@
-
 let MediaBookmarkModel;
 let UserModel;
 let MediaModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
 
 export const MediaBookmarkRepository = {
   isValidId(id) {
@@ -13,13 +12,17 @@ export const MediaBookmarkRepository = {
   async getModels() {
     if (!MediaBookmarkModel || (!isMongo && (!UserModel || !MediaModel))) {
       if (isMongo) {
-        MediaBookmarkModel = (await import('../MongoModels/MediaBookmarksMongoModel.js')).default;
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
-        MediaModel = (await import('../MongoModels/MediaMongoModel.js')).default;
+        MediaBookmarkModel = (
+          await import("../MongoModels/MediaBookmarksMongoModel.js")
+        ).default;
+        UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
+        MediaModel = (await import("../MongoModels/MediaMongoModel.js"))
+          .default;
       } else {
-        MediaBookmarkModel = (await import('../Models/MediaBookmarksModel.js')).default;
-        UserModel = (await import('../Models/UserModel.js')).default;
-        MediaModel = (await import('../Models/MediaModel.js')).default;
+        MediaBookmarkModel = (await import("../Models/MediaBookmarksModel.js"))
+          .default;
+        UserModel = (await import("../Models/UserModel.js")).default;
+        MediaModel = (await import("../Models/MediaModel.js")).default;
       }
     }
     return { MediaBookmarkModel, UserModel, MediaModel };
@@ -31,71 +34,94 @@ export const MediaBookmarkRepository = {
   },
 
   async findAll(options = {}) {
-    const { MediaBookmarkModel, UserModel, MediaModel } = await this.getModels();
+    const { MediaBookmarkModel, UserModel, MediaModel } =
+      await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     if (isMongo) {
       return MediaBookmarkModel.find({})
-        .populate('userId', 'name email')
-        .populate('mediaId')
+        .skip(offset)
+        .limit(limit)
+        .populate("userId", "name email")
+        .populate("mediaId", "title type media_url thumbnail createdAt")
         .lean();
     } else {
       return MediaBookmarkModel.findAll({
         ...options,
+        limit,
+        offset,
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
+            as: "user",
+            attributes: ["id", "name", "email"],
           },
           {
             model: MediaModel,
-            as: 'media'
-          }
-        ]
+            as: "media",
+          },
+        ],
       });
     }
   },
 
   async findAllByUserId(userId, options = {}) {
     const { MediaBookmarkModel, MediaModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     if (isMongo) {
-      return MediaBookmarkModel.find({ userId, ...options })
-        .populate('mediaId')
+      const { limit: _limit, offset: _offset, ...mongoOptions } = options;
+      return MediaBookmarkModel.find({ userId, ...mongoOptions })
+        .skip(offset)
+        .limit(limit)
+        .populate("mediaId", "title type media_url thumbnail createdAt")
         .lean();
     } else {
       return MediaBookmarkModel.findAll({
         where: { userId },
         ...options,
+        limit,
+        offset,
         include: [
           {
             model: MediaModel,
-            as: 'media'
-          }
-        ]
+            as: "media",
+          },
+        ],
       });
     }
   },
 
   async findById(id, options = {}) {
-    const { MediaBookmarkModel, UserModel, MediaModel } = await this.getModels();
+    const { MediaBookmarkModel, UserModel, MediaModel } =
+      await this.getModels();
     if (isMongo) {
       if (!this.isValidId(id)) return null;
       return MediaBookmarkModel.findById(id)
-        .populate('userId', 'name email')
-        .populate('mediaId');
+        .populate("userId", "name email")
+        .populate("mediaId", "title type media_url thumbnail createdAt");
     } else {
       return MediaBookmarkModel.findByPk(id, {
         ...options,
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
+            as: "user",
+            attributes: ["id", "name", "email"],
           },
           {
             model: MediaModel,
-            as: 'media'
-          }
-        ]
+            as: "media",
+          },
+        ],
       });
     }
   },
@@ -104,7 +130,9 @@ export const MediaBookmarkRepository = {
     const { MediaBookmarkModel } = await this.getModels();
     if (isMongo) {
       if (!this.isValidId(id)) return null;
-      return MediaBookmarkModel.findByIdAndUpdate(id, payload, { new: true }).populate('mediaId');
+      return MediaBookmarkModel.findByIdAndUpdate(id, payload, {
+        new: true,
+      }).populate("mediaId", "title type media_url thumbnail createdAt");
     } else {
       const res = await MediaBookmarkModel.findByPk(id, options);
       if (!res) return null;

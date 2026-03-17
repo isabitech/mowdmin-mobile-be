@@ -1,17 +1,17 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const DonationMongoSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'UserMongo',
+      ref: "UserMongo",
       required: true,
       index: true,
     },
 
     campaign: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Campaign',
+      ref: "Campaign",
       required: true,
       index: true,
     },
@@ -23,7 +23,7 @@ const DonationMongoSchema = new mongoose.Schema(
 
     currency: {
       type: String,
-      default: 'USD',
+      default: "USD",
     },
 
     transactionRef: {
@@ -35,14 +35,18 @@ const DonationMongoSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ['pending', 'success', 'failed', 'refunded'],
-      default: 'pending',
+      enum: ["pending", "success", "failed", "refunded"],
+      default: "pending",
     },
   },
   {
     timestamps: true,
-    collection: 'donations',
-  }
+    collection: "donations",
+  },
 );
 
-export default mongoose.model('DonationMongo', DonationMongoSchema);
+DonationMongoSchema.index({ campaign: 1, createdAt: -1 });
+DonationMongoSchema.index({ userId: 1, createdAt: -1 });
+DonationMongoSchema.index({ status: 1, createdAt: -1 });
+
+export default mongoose.model("DonationMongo", DonationMongoSchema);

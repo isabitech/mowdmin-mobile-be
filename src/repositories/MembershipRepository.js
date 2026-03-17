@@ -2,17 +2,20 @@
 let MembershipModel;
 let UserModel;
 
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const isMongo = process.env.DB_CONNECTION === "mongodb";
 
 export const MembershipRepository = {
   async getModels() {
     if (!MembershipModel || (!isMongo && !UserModel)) {
       if (isMongo) {
-        MembershipModel = (await import('../MongoModels/MembershipMongoModel.js')).default;
-        UserModel = (await import('../MongoModels/UserMongoModel.js')).default;
+        MembershipModel = (
+          await import("../MongoModels/MembershipMongoModel.js")
+        ).default;
+        UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
       } else {
-        MembershipModel = (await import('../Models/MembershipModel.js')).default;
-        UserModel = (await import('../Models/UserModel.js')).default;
+        MembershipModel = (await import("../Models/MembershipModel.js"))
+          .default;
+        UserModel = (await import("../Models/UserModel.js")).default;
       }
     }
     return { MembershipModel, UserModel };
@@ -25,23 +28,32 @@ export const MembershipRepository = {
 
   async findAll(query) {
     const { MembershipModel, UserModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(query?.limit, 10);
+    const parsedOffset = Number.parseInt(query?.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    const { limit: _limit, offset: _offset, ...where } = query || {};
 
     if (isMongo) {
       // Mongo implementation (basic find, can add populate if needed later)
-      return MembershipModel.find(query || {});
+      return MembershipModel.find(where).skip(offset).limit(limit).lean();
     } else {
       return MembershipModel.findAll({
-        where: query,
+        where,
+        limit,
+        offset,
         include: [
           {
             model: UserModel,
-            as: 'user',
-            attributes: ['id', 'name', 'email']
-          }
-        ]
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
       });
     }
-  }
+  },
 };
 
 export default MembershipRepository;
