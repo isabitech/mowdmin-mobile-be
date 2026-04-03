@@ -54,7 +54,7 @@ export const PrayerCommentRepository = {
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit)
-        .populate("userId", "name email");
+        .populate("userId", "name email photo");
     }
     return Model.findAll({
       where: { prayerId },
