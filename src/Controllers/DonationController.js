@@ -27,6 +27,16 @@ class DonationController {
     });
   }
 
+  async getMine(req, res, next) {
+    const userId = req.user?._id || req.user?.id;
+    const filters = { ...req.query, userId };
+    const result = await DonationService.getAllDonationsWithPagination(filters);
+    return sendSuccess(res, {
+      message: "Your donations fetched successfully",
+      data: result,
+    });
+  }
+
   async getOne(req, res, next) {
     const donation = await DonationService.getDonationById(req.params.id);
     if (!donation) {
