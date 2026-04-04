@@ -87,28 +87,21 @@ app.use(
 );
 
 // Core middleware
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
-  : ["http://localhost:3000", "http://localhost:3001"]; // Default for development
-
+// TEMP: Open CORS for all origins while frontend integration is in progress.
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     maxAge: 86400, // 24 hours
   }),
 );
+
+// Robust CORS policy is intentionally disabled for now.
+// Restore allowlist mode later by re-adding origin validation with:
+// - ALLOWED_ORIGINS from env
+// - wildcard subdomain handling (e.g. https://*.vercel.app)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("tiny"));
 }
@@ -226,7 +219,9 @@ async function bootstrap() {
       process.env.DB_CONNECTION === "mysql" ||
       process.env.DB_CONNECTION === "postgres"
     ) {
-      logger.info(`Connecting to SQL database (${process.env.DB_CONNECTION})...`);
+      logger.info(
+        `Connecting to SQL database (${process.env.DB_CONNECTION})...`,
+      );
       await connectDB();
       sqlConnectionReady = true;
 
