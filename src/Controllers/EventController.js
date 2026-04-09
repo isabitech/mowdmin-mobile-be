@@ -35,7 +35,7 @@ class EventController {
     }
     const event = await EventService.updateEvent(req.params.id, updateData);
     if (!event) {
-      return sendError(res, { message: "Event not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     return sendSuccess(res, {
       message: "Event Updated Successfully",
@@ -66,7 +66,7 @@ class EventController {
   async getOne(req, res, next) {
     const event = await EventService.getEventById(req.params.id);
     if (!event) {
-      return sendError(res, { message: "Event not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     return sendSuccess(res, {
       message: "Event fetched successfully",

@@ -86,11 +86,11 @@ class OTPService {
           const storedOTP = await redis.get(key);
 
           if (!storedOTP) {
-            return { valid: false, message: "OTP expired or not found" };
+            return { valid: false, message: "Invalid verification code" };
           }
 
           if (storedOTP !== otp) {
-            return { valid: false, message: "Invalid OTP" };
+            return { valid: false, message: "Invalid verification code" };
           }
 
           // OTP is valid, delete it to prevent reuse
@@ -109,16 +109,16 @@ class OTPService {
       const stored = memoryStore.get(key);
 
       if (!stored) {
-        return { valid: false, message: "OTP expired or not found" };
+        return { valid: false, message: "Invalid verification code" };
       }
 
       if (Date.now() > stored.expiryTime) {
         memoryStore.delete(key);
-        return { valid: false, message: "OTP expired" };
+        return { valid: false, message: "Invalid verification code" };
       }
 
       if (stored.otp !== otp) {
-        return { valid: false, message: "Invalid OTP" };
+        return { valid: false, message: "Invalid verification code" };
       }
 
       // OTP is valid, delete it to prevent reuse
@@ -258,7 +258,10 @@ class OTPService {
         const redis = await getRedisClient();
         if (redis) {
           const attempts = await redis.get(key);
-          if (!attempts) return { allowed: true, remaining: maxAttempts };
+          if (!attempts) {
+            await redis.setEx(key, 60 * 60, "1");
+            return { allowed: true, remaining: maxAttempts - 1 };
+          }
 
           const currentAttempts = parseInt(attempts, 10);
           if (currentAttempts >= maxAttempts) {

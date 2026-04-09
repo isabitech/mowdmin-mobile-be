@@ -13,7 +13,7 @@ export const validateEventRegistration = [
         .custom(async (value) => {
             const event = await EventRepository.findById(value);
             if (!event) {
-                throw new Error("Invalid event ID — event not found");
+                throw new Error("Invalid request");
             }
             return true;
         }),

@@ -8,7 +8,7 @@ class PrayerCommentController {
     if (!comment) return sendError(res, { message: "Comment is required", statusCode: 400 });
 
     const newComment = await PrayerService.commentPrayer(id, req.user.id, comment);
-    if (!newComment) return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
+    if (!newComment) return sendError(res, { message: "Resource not found", statusCode: 404 });
     return sendSuccess(res, { message: "Comment Added", data: newComment });
   }
 
@@ -23,7 +23,7 @@ class PrayerCommentController {
     const { commentId } = req.params;
     const result = await PrayerService.deleteComment(commentId, req.user.id);
     if (!result.success) {
-      return sendError(res, { message: result.message || "Failed to delete comment", statusCode: result.message === "Unauthorized to delete this comment" ? 403 : 404 });
+      return sendError(res, { message: result.message || "Request failed", statusCode: result.message === "Forbidden" ? 403 : 404 });
     }
     return sendSuccess(res, { message: "Comment Deleted" });
   }

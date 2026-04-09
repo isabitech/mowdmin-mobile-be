@@ -14,7 +14,7 @@ export class ProfileController {
     }
     const profile = await profileService.getProfile(userId);
     if (!profile) {
-      return sendError(res, { message: "Profile not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     return sendSuccess(res, {
       message: "Profile retrieved successfully",

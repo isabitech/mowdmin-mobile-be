@@ -9,13 +9,16 @@ export const validatePrayerCreate = [
     .bail()
     .custom(async (value) => {
       const request = await PrayerRequestRepository.findById(value);
-      if (!request) throw new Error("Prayer request not found");
+      if (!request) throw new Error("Invalid request");
       return true;
     }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return sendValidationError(res, { statusCode: 400, errors: errors.array() });
+      return sendValidationError(res, {
+        statusCode: 400,
+        errors: errors.array(),
+      });
     }
     next();
   },

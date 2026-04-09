@@ -1,4 +1,3 @@
-
 import { EventRepository } from "../repositories/EventRepository.js";
 
 class EventService {
@@ -16,7 +15,7 @@ class EventService {
   async getEventById(id) {
     const event = await EventRepository.findById(id);
 
-    if (!event) throw new Error("Event not found");
+    if (!event) throw new Error("Resource not found");
     return event;
   }
 

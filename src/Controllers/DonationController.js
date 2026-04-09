@@ -40,7 +40,7 @@ class DonationController {
   async getOne(req, res, next) {
     const donation = await DonationService.getDonationById(req.params.id);
     if (!donation) {
-      return sendError(res, { message: "Donation not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     // Verify ownership unless admin
     const donationUserId = donation.userId?._id || donation.userId;
@@ -51,7 +51,7 @@ class DonationController {
       donationUserId.toString() !== requestUserId.toString()
     ) {
       return sendError(res, {
-        message: "You do not have permission to view this donation",
+        message: "Forbidden",
         statusCode: 403,
       });
     }
@@ -94,21 +94,21 @@ class DonationController {
     // Fetch the donation and validate
     const donation = await DonationService.getDonationById(donationId);
     if (!donation) {
-      return sendError(res, { message: "Donation not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
 
     // Verify ownership
     const donationUserId = donation.userId?._id || donation.userId;
     if (donationUserId && donationUserId.toString() !== userId.toString()) {
       return sendError(res, {
-        message: "You do not have permission to perform this action",
+        message: "Forbidden",
         statusCode: 403,
       });
     }
 
     if (donation.status !== "pending") {
       return sendError(res, {
-        message: `Cannot pay for a donation with status '${donation.status}'`,
+        message: "Cannot pay for this donation",
         statusCode: 400,
       });
     }

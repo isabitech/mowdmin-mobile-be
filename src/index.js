@@ -88,15 +88,30 @@ app.use(
 
 // Core middleware
 // TEMP: Open CORS for all origins while frontend integration is in progress.
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    maxAge: 86400, // 24 hours
-  }),
-);
+const rawAllowedOrigins = process.env.ALLOWED_ORIGINS || "";
+const allowedOrigins = rawAllowedOrigins
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 86400, // 24 hours
+};
+
+if (allowedOrigins.length > 0) {
+  corsOptions.origin = (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS origin not allowed"));
+  };
+}
+
+app.use(cors(corsOptions));
 
 // Robust CORS policy is intentionally disabled for now.
 // Restore allowlist mode later by re-adding origin validation with:

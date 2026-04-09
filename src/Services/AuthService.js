@@ -75,7 +75,8 @@ class AuthService {
     AuthService.validatePassword(password);
 
     const existingUser = await UserRepository.findByEmail(email);
-    if (existingUser) throw new AppError("Email already in use", 400);
+    if (existingUser)
+      throw new AppError("Unable to register with provided details", 400);
     const newUser = await UserRepository.create({
       // Create user with email unverified
       email,
@@ -142,7 +143,7 @@ class AuthService {
   // Login user
   static async login(email, password, meta = {}) {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("Invalid email or password", 401);
+    if (!user) throw new AppError("Invalid credentials", 401);
 
     // Check if user has a password (not a social-only account)
     if (!user.password || user.password === null) {
@@ -152,14 +153,11 @@ class AuthService {
         : user.appleId
           ? "Apple"
           : "social";
-      throw new AppError(
-        `This account uses ${authMethod} sign-in. Please use the "${authMethod} Sign-In" button instead.`,
-        400,
-      );
+      throw new AppError("Invalid credentials", 400);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new AppError("Invalid email or password", 401);
+    if (!isPasswordValid) throw new AppError("Invalid credentials", 401);
 
     const { token, expiresAt } = AuthService.generateToken(user.id);
     const { refreshToken, expiresAt: refreshExpiresAt } =
@@ -191,11 +189,11 @@ class AuthService {
         algorithms: ["HS256"],
       });
     } catch (err) {
-      throw new AppError("Invalid or expired refresh token", 401);
+      throw new AppError("Unauthorized", 401);
     }
 
     if (decoded.type !== "refresh") {
-      throw new AppError("Invalid token type", 401);
+      throw new AppError("Unauthorized", 401);
     }
 
     // Find the session by refresh token hash
@@ -204,7 +202,7 @@ class AuthService {
       await AuthRepository.findByRefreshTokenHash(refreshTokenHash);
 
     if (!session || session.isLoggedOut) {
-      throw new AppError("Session has ended. Please login again.", 401);
+      throw new AppError("Unauthorized", 401);
     }
 
     // Check if refresh token has expired at DB level
@@ -213,7 +211,7 @@ class AuthService {
       new Date() > session.refreshTokenExpiresAt
     ) {
       await AuthRepository.revokeToken(session.userId, session.tokenHash);
-      throw new AppError("Refresh token expired. Please login again.", 401);
+      throw new AppError("Unauthorized", 401);
     }
 
     // Revoke old session
@@ -257,7 +255,7 @@ class AuthService {
   // Forgot password: send reset token via email
   static async forgotPassword(email) {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("Email not found", 404);
+    if (!user) throw new AppError("Request failed", 404);
 
     // Check rate limiting for password reset requests
     const rateCheck = await OTPService.checkRateLimit(
@@ -266,10 +264,7 @@ class AuthService {
       3,
     );
     if (!rateCheck.allowed) {
-      throw new AppError(
-        `Too many password reset attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`,
-        429,
-      );
+      throw new AppError("Too many requests. Try again later.", 429);
     }
 
     // Generate and store reset OTP in Redis
@@ -286,7 +281,7 @@ class AuthService {
     AuthService.validatePassword(newPassword);
 
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Request failed", 404);
 
     // Verify OTP from Redis
     const verification = await OTPService.verifyOTP(
@@ -314,14 +309,13 @@ class AuthService {
     AuthService.validatePassword(newPassword);
 
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Request failed", 404);
 
     const isValidPassword = await bcrypt.compare(
       currentPassword,
       user.password,
     );
-    if (!isValidPassword)
-      throw new AppError("Current password is incorrect", 400);
+    if (!isValidPassword) throw new AppError("Invalid credentials", 400);
 
     user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
@@ -332,10 +326,10 @@ class AuthService {
   // Verify email with OTP
   static async verifyEmail(email, otp) {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Request failed", 404);
 
     if (user.emailVerified) {
-      throw new AppError("Email is already verified", 400);
+      throw new AppError("Request failed", 400);
     }
 
     // Verify OTP from Redis
@@ -382,10 +376,10 @@ class AuthService {
   // Resend email verification OTP
   static async resendEmailVerification(email) {
     const user = await UserRepository.findByEmail(email);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Request failed", 404);
 
     if (user.emailVerified) {
-      throw new AppError("Email is already verified", 400);
+      throw new AppError("Request failed", 400);
     }
 
     // Check if OTP already exists and hasn't expired
@@ -393,7 +387,7 @@ class AuthService {
     if (otpExists) {
       const ttl = await OTPService.getOTPTTL(email, "email_verification");
       throw new AppError(
-        `Verification code already sent. Please wait ${Math.ceil(ttl / 60)} minutes before requesting a new one.`,
+        "Verification code already sent. Please wait before requesting a new one.",
         429,
       );
     }
@@ -401,10 +395,7 @@ class AuthService {
     // Check rate limiting for resend requests
     const rateCheck = await OTPService.checkRateLimit(email, "email_resend", 3);
     if (!rateCheck.allowed) {
-      throw new AppError(
-        `Too many resend attempts. Try again in ${Math.ceil(rateCheck.resetTime / 60)} minutes.`,
-        429,
-      );
+      throw new AppError("Too many requests. Try again later.", 429);
     }
 
     // Generate and send new OTP
@@ -436,7 +427,7 @@ class AuthService {
     const profile = await ProfileRepository.findByUserIdWithUser(userId);
 
     if (!profile) {
-      throw new AppError("Profile not found", 404);
+      throw new AppError("Resource not found", 404);
     }
 
     return profile;
@@ -447,7 +438,7 @@ class AuthService {
     const profile = await ProfileRepository.findByUserId(userId);
 
     if (!profile) {
-      throw new AppError("Profile not found", 404);
+      throw new AppError("Resource not found", 404);
     }
 
     await ProfileRepository.deleteByUserId(userId);
@@ -465,9 +456,7 @@ class AuthService {
   // GET user by ID
   static async getUserById(userId) {
     const user = await UserRepository.findById(userId);
-    if (!user) {
-      throw new AppError("User not found", 404);
-    }
+    if (!user) throw new AppError("Resource not found", 404);
 
     // Remove sensitive data
     const userDataSafe = user.toJSON ? user.toJSON() : user;
@@ -479,7 +468,7 @@ class AuthService {
   // TOGGLE admin status (Admin Only)
   static async toggleAdminStatus(userId) {
     const user = await UserRepository.findById(userId);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Resource not found", 404);
 
     const newAdminStatus = !user.isAdmin;
     return await UserRepository.update(userId, { isAdmin: newAdminStatus });
@@ -488,7 +477,7 @@ class AuthService {
   // UPDATE user by Admin (Exclude password)
   static async updateUserByAdmin(userId, updateData) {
     const user = await UserRepository.findById(userId);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Resource not found", 404);
 
     // Explicitly prevent password updates via this method
     if (updateData.password) {
@@ -504,10 +493,9 @@ class AuthService {
   // ADMIN Trigger OTP (Password Reset)
   static async adminTriggerPasswordReset(userId) {
     const user = await UserRepository.findById(userId);
-    if (!user) throw new AppError("User not found", 404);
+    if (!user) throw new AppError("Resource not found", 404);
 
-    if (!user.email)
-      throw new AppError("User does not have an email address", 400);
+    if (!user.email) throw new AppError("Request failed", 400);
 
     // Generate and send reset OTP
     // Logic same as forgotPassword but initiated by admin (bypassing rate limit if strictly needed, but better to keep it safer)

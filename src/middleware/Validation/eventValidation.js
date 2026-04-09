@@ -44,7 +44,7 @@ export const validateEventUpdate = [
         .custom(async (value) => {
             const event = await EventRepository.findById(value);
             if (!event) {
-                throw new Error("Event not found");
+                throw new Error("Invalid request");
             }
             return true;
         }),

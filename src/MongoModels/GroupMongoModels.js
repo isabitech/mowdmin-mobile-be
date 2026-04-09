@@ -18,7 +18,7 @@ const groupMemberSchema = new mongoose.Schema({
     role: { type: String, enum: ['Admin', 'Member'], default: 'Member' }
 }, { timestamps: true });
 
-groupMemberSchema.index({ groupId: 1, userId: 1 });
+groupMemberSchema.index({ groupId: 1, userId: 1 }, { unique: true });
 groupMemberSchema.index({ userId: 1 });
 
 export const GroupMember = mongoose.model('GroupMember', groupMemberSchema);

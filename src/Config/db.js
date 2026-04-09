@@ -10,8 +10,15 @@ function getSequelize() {
     console.log("🔧 Creating Sequelize instance");
     // Removed credential logging for security
 
+    const rejectUnauthorized = process.env.DB_SSL_REJECT_UNAUTHORIZED
+      ? process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false"
+      : process.env.NODE_ENV === "production";
+
+    const rawDialect = (process.env.DB_CONNECTION || "postgres").toLowerCase();
+    const dialect = rawDialect === "mysql" ? "mysql" : "postgres";
+
     sequelize = new Sequelize({
-      dialect: "postgres",
+      dialect,
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
       database: process.env.DB_DATABASE,
@@ -20,7 +27,7 @@ function getSequelize() {
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false,
+          rejectUnauthorized,
         },
       },
       pool: {

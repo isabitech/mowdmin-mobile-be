@@ -10,7 +10,7 @@ class DonationService {
     // Validate campaign is active before donating
     const campaign = await CampaignService.getCampaignById(campaignId);
     if (!campaign.isActive) {
-      throw new AppError("Cannot donate to an inactive campaign", 400);
+      throw new AppError("Cannot process donation", 400);
     }
 
     return await DonationRepository.createDonation(data);
@@ -19,7 +19,7 @@ class DonationService {
   async getDonationById(id) {
     const donation = await DonationRepository.getDonationById(id);
     if (!donation) {
-      throw new AppError("Donation not found", 404);
+      throw new AppError("Resource not found", 404);
     }
     return donation;
   }
@@ -34,10 +34,7 @@ class DonationService {
     // Cannot mark failed donation as success without payment verification
     if (donation.status === "failed" && status === "success") {
       if (!paymentVerificationData || !paymentVerificationData.verified) {
-        throw new AppError(
-          "Cannot mark a failed donation as success without payment verification",
-          400,
-        );
+        throw new AppError("Cannot update donation status", 400);
       }
     }
 

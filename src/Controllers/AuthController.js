@@ -76,11 +76,8 @@ class AuthController {
 
   // Reset Password — verify token and set new password
   static async resetPassword(req, res) {
-    await AuthService.resetPassword(
-      req.body.email,
-      req.body.token,
-      req.body.newPassword,
-    );
+    const otp = req.body.otp || req.body.token;
+    await AuthService.resetPassword(req.body.email, otp, req.body.newPassword);
     return sendSuccess(res, {
       message: "Password reset successfully",
       data: {},
@@ -144,7 +141,7 @@ class AuthController {
     }
     const profile = await AuthService.getProfile(userId);
     if (!profile) {
-      return sendError(res, { message: "Profile not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     return sendSuccess(res, {
       message: "Profile retrieved successfully",
@@ -226,7 +223,7 @@ class AuthController {
     }
     const user = await AuthService.getUserById(userId);
     if (!user) {
-      return sendError(res, { message: "User not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     return sendSuccess(res, {
       message: "User retrieved successfully",

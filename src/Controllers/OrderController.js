@@ -27,8 +27,14 @@ class OrderController {
   }
   async getAll(req, res) {
     const { page, limit: pageSize } = req.query;
-    const pagination = paginate(page || 1, pageSize);
+
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(pageSize, 10) || 10;
+
+    const pagination = paginate(pageNum, limitNum);
+
     const orders = await OrderService.getAllOrders(pagination);
+
     return sendSuccess(res, {
       message: "All Orders Fetched Successfully",
       data: orders,
@@ -76,7 +82,7 @@ class OrderController {
   async cancel(req, res) {
     const order = await OrderService.cancelOrder(req.params.id);
     if (!order)
-      return sendError(res, { message: "Order not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     return sendSuccess(res, {
       message: "Order cancelled successfully (Admin)",
       data: order,
@@ -90,11 +96,11 @@ class OrderController {
     // Fetch the order and validate
     const order = await OrderService.getOrderById(orderId);
     if (!order) {
-      return sendError(res, { message: "Order not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     }
     if (order.status !== "pending") {
       return sendError(res, {
-        message: `Cannot pay for an order with status '${order.status}'`,
+        message: "Cannot pay for this order",
         statusCode: 400,
       });
     }
