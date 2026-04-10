@@ -25,6 +25,9 @@ export const PaymentRepository = {
 
   async createPayment(data) {
     const { PaymentModel } = await this.getModels();
+    if (!isMongo && data?.transactionRef && !data.reference) {
+      data = { ...data, reference: data.transactionRef };
+    }
     return PaymentModel.create(data);
   },
 

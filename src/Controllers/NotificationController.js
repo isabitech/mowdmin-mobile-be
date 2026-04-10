@@ -46,7 +46,7 @@ class NotificationController {
     const notification = await NotificationService.markAsRead(id, userId);
     if (!notification)
       return sendError(res, {
-        message: "Notification not found",
+        message: "Resource not found",
         statusCode: 404,
       });
     return sendSuccess(res, {

@@ -59,6 +59,10 @@ class GroupService {
   async deleteGroup(groupId) {
     return await GroupRepository.deleteGroup(groupId);
   }
+
+  async isMember(groupId, userId) {
+    return await GroupRepository.findMember(groupId, userId);
+  }
 }
 
 export default new GroupService();

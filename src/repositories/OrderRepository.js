@@ -50,17 +50,22 @@ export const OrderRepository = {
       const order = await OrderModel.create(orderData);
 
       if (items && Array.isArray(items)) {
-        const itemDocs = items.map((item) => ({
-          ...item,
-          orderId: order._id,
-          price: item.price || 0,
-        }));
-        const createdItems = await OrderItemModel.insertMany(itemDocs);
-        const createdItemIds = createdItems.map((item) => item._id);
+        try {
+          const itemDocs = items.map((item) => ({
+            ...item,
+            orderId: order._id,
+            price: item.price || 0,
+          }));
+          const createdItems = await OrderItemModel.insertMany(itemDocs);
+          const createdItemIds = createdItems.map((item) => item._id);
 
-        // Update the order with item IDs
-        order.items = createdItemIds;
-        await order.save();
+          // Update the order with item IDs
+          order.items = createdItemIds;
+          await order.save();
+        } catch (err) {
+          await OrderModel.findByIdAndDelete(order._id);
+          throw err;
+        }
       }
       return order;
     }

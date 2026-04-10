@@ -23,13 +23,13 @@ class MinistryController {
   getMinistryById = async (req, res) => {
     if (!this.isValidId(req.params.id)) {
       return sendError(res, {
-        message: "Invalid Ministry ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
     const ministry = await MinistryService.getMinistryById(req.params.id);
     if (!ministry)
-      return sendError(res, { message: "Ministry not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     return sendSuccess(res, {
       message: "Ministry fetched successfully",
       data: ministry,
@@ -48,7 +48,7 @@ class MinistryController {
   updateMinistry = async (req, res) => {
     if (!this.isValidId(req.params.id)) {
       return sendError(res, {
-        message: "Invalid Ministry ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
@@ -57,7 +57,7 @@ class MinistryController {
       req.body,
     );
     if (!ministry)
-      return sendError(res, { message: "Ministry not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     return sendSuccess(res, {
       message: "Ministry updated successfully",
       data: ministry,
@@ -67,7 +67,7 @@ class MinistryController {
   deleteMinistry = async (req, res) => {
     if (!this.isValidId(req.params.id)) {
       return sendError(res, {
-        message: "Invalid Ministry ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }

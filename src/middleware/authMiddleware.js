@@ -28,7 +28,7 @@ export const protectUser = async (req, res, next) => {
     }
 
     if (!token) {
-      return next(new AppError("Auth Token is Required", 401));
+      return next(new AppError("Unauthorized", 401));
     }
 
     // Verify JWT token with pinned algorithm
@@ -66,11 +66,11 @@ export const protectUser = async (req, res, next) => {
 
     if (!session || session.isLoggedOut) {
       invalidateCachedSessionUser(tokenHash);
-      return next(new AppError("Session has ended. Please login again.", 401));
+      return next(new AppError("Unauthorized", 401));
     }
 
     if (!user) {
-      return next(new AppError("User no longer exists", 401));
+      return next(new AppError("Unauthorized", 401));
     }
 
     // Server-side session timeout (sliding, based on last activity; independent of JWT expiry)
@@ -100,7 +100,7 @@ export const protectUser = async (req, res, next) => {
           await AuthRepository.revokeToken(null, tokenHash);
           invalidateCachedSessionUser(tokenHash);
           return next(
-            new AppError("Session expired. Please login again.", 401, {
+            new AppError("Unauthorized", 401, {
               reason: "session_timeout",
               expiresAt: expiresAt.toISOString(),
               timeoutMinutes,
@@ -148,11 +148,11 @@ export const protectUser = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return next(new AppError("Token has expired", 401));
+      return next(new AppError("Unauthorized", 401));
     }
 
     if (error.name === "JsonWebTokenError") {
-      return next(new AppError("Invalid token", 401));
+      return next(new AppError("Unauthorized", 401));
     }
 
     next(error);
@@ -163,9 +163,7 @@ export const protectAdmin = async (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     return next();
   }
-  return next(
-    new AppError("Admin privileges required to access this route", 403),
-  );
+  return next(new AppError("Forbidden", 403));
 };
 /**
  * Middleware to restrict access based on user roles.

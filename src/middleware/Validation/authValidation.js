@@ -17,14 +17,7 @@ export const validateUserRegistration = [
     .isLength({ min: 2 })
     .withMessage("Name must be at least 2 characters"),
 
-  body("email")
-    .trim()
-    .isEmail()
-    .withMessage("Invalid email format")
-    .custom(async (value) => {
-      const existing = await UserRepository.findByEmail(value);
-      if (existing) throw new Error("Email already exists");
-    }),
+  body("email").trim().isEmail().withMessage("Invalid email format"),
 
   body("password")
     .isLength({ min: 6 })
@@ -32,7 +25,7 @@ export const validateUserRegistration = [
     .custom((value) => {
       if (!validatePassword(value)) {
         throw new Error(
-          "Password must include uppercase, lowercase, number, and special character"
+          "Password must include uppercase, lowercase, number, and special character",
         );
       }
       return true;
@@ -47,31 +40,19 @@ export const validateUserLogin = [
     .withMessage("Valid email is required")
     .custom(async (email) => {
       const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("No account found with this email");
+      if (!user) throw new Error("Invalid credentials");
     }),
 
-  body("password")
-    .notEmpty()
-    .withMessage("Password is required")
-    .custom((value) => {
-      if (!validatePassword(value)) {
-        throw new Error(
-          "Password must include uppercase, lowercase, number, and special character"
-        );
-      }
-      return true;
-    }),
+  body("password").notEmpty().withMessage("Password is required"),
 ];
 
 // ✅ Forgot password validation
 export const validateForgotPassword = [
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email")
-    .custom(async (email) => {
-      const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("Email not found");
-    }),
+  body("email").isEmail().withMessage("Invalid email"),
+  // .custom(async (email) => {
+  //   const user = await UserRepository.findByEmail(email);
+  //   if (!user) throw new Error("Email not found");
+  // }),
 ];
 
 // ✅ Reset password validation
@@ -81,7 +62,7 @@ export const validateResetPassword = [
     .withMessage("Invalid email")
     .custom(async (email) => {
       const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("Email not found");
+      if (!user) throw new Error("Invalid request");
     }),
   body("otp")
     .isLength({ min: 4, max: 4 })
@@ -93,18 +74,17 @@ export const validateResetPassword = [
     .custom((value) => {
       if (!validatePassword(value)) {
         throw new Error(
-          "Password must include uppercase, lowercase, number, and special character"
+          "Password must include uppercase, lowercase, number, and special character",
         );
       }
       return true;
     }),
-  body("confirmPassword")
-    .custom((value, { req }) => {
-      if (value !== req.body.newPassword) {
-        throw new Error("Password confirmation does not match");
-      }
-      return true;
-    }),
+  body("confirmPassword").custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error("Password confirmation does not match");
+    }
+    return true;
+  }),
 ];
 
 // ✅ Change password validation
@@ -114,7 +94,7 @@ export const validateChangePassword = [
     .withMessage("Invalid email")
     .custom(async (email) => {
       const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("User not found");
+      if (!user) throw new Error("Invalid request");
     }),
   body("currentPassword")
     .notEmpty()
@@ -125,7 +105,7 @@ export const validateChangePassword = [
     .custom((value) => {
       if (!validatePassword(value)) {
         throw new Error(
-          "Password must include uppercase, lowercase, number, and special character"
+          "Password must include uppercase, lowercase, number, and special character",
         );
       }
       return true;
@@ -139,8 +119,8 @@ export const validateEmailVerification = [
     .withMessage("Invalid email")
     .custom(async (email) => {
       const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("Email not found");
-      if (user.emailVerified) throw new Error("Email is already verified");
+      if (!user) throw new Error("Invalid request");
+      if (user.emailVerified) throw new Error("Invalid request");
     }),
   body("otp")
     .isLength({ min: 4, max: 4 })
@@ -155,8 +135,8 @@ export const validateResendVerification = [
     .withMessage("Invalid email")
     .custom(async (email) => {
       const user = await UserRepository.findByEmail(email);
-      if (!user) throw new Error("Email not found");
-      if (user.emailVerified) throw new Error("Email is already verified");
+      if (!user) throw new Error("Invalid request");
+      if (user.emailVerified) throw new Error("Invalid request");
     }),
 ];
 // middleware to check validation errors

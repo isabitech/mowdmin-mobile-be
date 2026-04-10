@@ -27,7 +27,7 @@ class PrayerRequestController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer Request ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
@@ -35,7 +35,7 @@ class PrayerRequestController {
 
     if (!request)
       return sendError(res, {
-        message: "Prayer Request Not Found",
+        message: "Resource not found",
         statusCode: 404,
       });
 
@@ -45,7 +45,7 @@ class PrayerRequestController {
       request.userId.toString() !== req.user.id.toString()
     ) {
       return sendError(res, {
-        message: "Unauthorized to update this prayer request",
+        message: "Forbidden",
         statusCode: 403,
       });
     }
@@ -84,16 +84,27 @@ class PrayerRequestController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer Request ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
     const request = await PrayerRequestService.findById(id);
     if (!request)
       return sendError(res, {
-        message: "Prayer Request Not Found",
+        message: "Resource not found",
         statusCode: 404,
       });
+
+    const ownerId = request.userId?._id || request.userId;
+    const requesterId = req.user?.id || req.user?._id;
+    const isOwner =
+      ownerId && requesterId && ownerId.toString() === requesterId.toString();
+    if (!request.isPublic && !isOwner && !req.user?.isAdmin) {
+      return sendError(res, {
+        message: "Forbidden",
+        statusCode: 403,
+      });
+    }
 
     return sendSuccess(res, {
       message: "Prayer Request Fetched Successfully",
@@ -105,7 +116,7 @@ class PrayerRequestController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer Request ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
@@ -113,7 +124,7 @@ class PrayerRequestController {
 
     if (!request)
       return sendError(res, {
-        message: "Prayer Request Not Found",
+        message: "Resource not found",
         statusCode: 404,
       });
 
@@ -123,7 +134,7 @@ class PrayerRequestController {
       request.userId.toString() !== req.user.id.toString()
     ) {
       return sendError(res, {
-        message: "Unauthorized to delete this prayer request",
+        message: "Forbidden",
         statusCode: 403,
       });
     }

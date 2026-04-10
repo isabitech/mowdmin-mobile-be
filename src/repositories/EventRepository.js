@@ -87,7 +87,7 @@ export const EventRepository = {
 
   async findById(id, options = {}) {
     const { EventModel, EventRegistrationModel } = await this.getModels();
-    if (isMongo) {
+    if (isMongo()) {
       if (!this.isValidId(id)) return null;
       return EventModel.findById(id).populate(
         "registrations",
@@ -108,7 +108,7 @@ export const EventRepository = {
 
   async deleteById(id, options = {}) {
     const { EventModel } = await this.getModels();
-    if (isMongo) {
+    if (isMongo()) {
       if (!this.isValidId(id)) return false;
       const result = await EventModel.findByIdAndDelete(id);
       return !!result;
@@ -224,6 +224,45 @@ export const EventRepository = {
         ],
       });
     }
+  },
+
+  async updateRegistrationById(id, payload) {
+    const { EventRegistrationModel } = await this.getModels();
+    if (isMongo()) {
+      if (!this.isValidId(id)) return null;
+      return EventRegistrationModel.findByIdAndUpdate(id, payload, {
+        new: true,
+      }).populate([
+        {
+          path: "eventId",
+          select: "title date time location description image type",
+        },
+        { path: "userId", select: "name email photo" },
+      ]);
+    }
+
+    const registration = await EventRegistrationModel.findByPk(id);
+    if (!registration) return null;
+    return registration.update(payload);
+  },
+
+  async deleteRegistrationById(id) {
+    const { EventRegistrationModel, EventModel } = await this.getModels();
+    if (isMongo()) {
+      if (!this.isValidId(id)) return null;
+      const registration = await EventRegistrationModel.findByIdAndDelete(id);
+      if (registration?.eventId) {
+        await EventModel.findByIdAndUpdate(registration.eventId, {
+          $pull: { registrations: registration._id },
+        });
+      }
+      return registration;
+    }
+
+    const registration = await EventRegistrationModel.findByPk(id);
+    if (!registration) return null;
+    await registration.destroy();
+    return registration;
   },
 
   async unregister(eventId, userId) {

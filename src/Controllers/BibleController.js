@@ -40,7 +40,7 @@ class BibleController {
     const verse = await BibleService.getDailyVerse();
     if (!verse)
       return sendError(res, {
-        message: "Daily verse not found",
+        message: "Resource not found",
         statusCode: 404,
       });
     return sendSuccess(res, {

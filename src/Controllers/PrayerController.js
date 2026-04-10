@@ -14,7 +14,7 @@ class PrayerController {
     const { requestId } = req.params;
     if (!this.isValidId(requestId)) {
       return sendError(res, {
-        message: "Invalid Prayer Request ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
@@ -24,7 +24,7 @@ class PrayerController {
     );
     if (!prayer)
       return sendError(res, {
-        message: "Prayer Request Not Found",
+        message: "Resource not found",
         statusCode: 404,
       });
     return sendSuccess(res, {
@@ -74,13 +74,13 @@ class PrayerController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
     const prayer = await PrayerService.findById(id);
     if (!prayer)
-      return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
 
     return sendSuccess(res, {
       message: "Prayer Fetched Successfully",
@@ -92,13 +92,13 @@ class PrayerController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
     const updated = await PrayerService.update(id, req.body);
     if (!updated)
-      return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
 
     return sendSuccess(res, {
       message: "Prayer Updated Successfully",
@@ -110,13 +110,13 @@ class PrayerController {
     const { id } = req.params;
     if (!this.isValidId(id)) {
       return sendError(res, {
-        message: "Invalid Prayer ID format",
+        message: "Invalid request",
         statusCode: 400,
       });
     }
     const prayer = await PrayerService.findById(id); // Admin can delete any prayer
     if (!prayer)
-      return sendError(res, { message: "Prayer Not Found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
 
     await PrayerService.delete(id);
     return sendSuccess(res, {

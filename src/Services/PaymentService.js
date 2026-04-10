@@ -10,6 +10,7 @@ import OrderModel from "../MongoModels/OrderMongoModel.js";
 import CampaignModel from "../MongoModels/CampaignMongoModel.js";
 import DonationModel from "../MongoModels/DonationMongoModel.js";
 import DonationRepository from "../repositories/DonationRepository.js";
+import CampaignRepository from "../repositories/CampaignRepository.js";
 
 // Initialize Stripe instance - fail fast if not configured
 const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -35,7 +36,7 @@ class PaymentService {
     }
 
     if (!process.env.STRIPE_SECRET_KEY) {
-      throw new AppError("Stripe configuration is missing", 500);
+      throw new AppError("Payment service unavailable", 500);
     }
 
     // Convert amount to cents for Stripe (assuming amount is passed in standard currency units)
@@ -89,7 +90,7 @@ class PaymentService {
   async handleStripeWebhook(signature, rawBody) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      throw new AppError("Stripe webhook secret is missing", 500);
+      throw new AppError("Payment service unavailable", 500);
     }
 
     let event;
@@ -98,7 +99,7 @@ class PaymentService {
       event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
     } catch (err) {
       console.error(`⚠️ Webhook signature verification failed.`, err.message);
-      throw new AppError(`Webhook Error: ${err.message}`, 400);
+      throw new AppError("Webhook Error", 400);
     }
 
     // Process the event
@@ -182,7 +183,7 @@ class PaymentService {
           err,
         );
         // Throw to let Stripe know things failed hard
-        throw new AppError(`Transaction failed: ${err.message}`, 500);
+        throw new AppError("Payment processing failed", 500);
       } finally {
         await session.endSession();
       }
@@ -285,11 +286,14 @@ class PaymentService {
         );
       }
     } else {
-      await CampaignModel.findByIdAndUpdate(
-        campaignId,
-        { $inc: { totalRaised: amountDecimal } },
-        { new: true },
-      );
+      const campaign = await CampaignRepository.getCampaignById(campaignId);
+      if (campaign) {
+        const currentTotal = campaign.totalRaised || 0;
+        const nextTotal = parseFloat(currentTotal.toString()) + amountDecimal;
+        await CampaignRepository.updateCampaign(campaignId, {
+          totalRaised: nextTotal,
+        });
+      }
 
       if (donationId) {
         await DonationRepository.updateDonationStatus(donationId, "success");
@@ -315,7 +319,7 @@ class PaymentService {
   async getPaymentById(id) {
     const payment = await PaymentRepository.getPaymentById(id);
     if (!payment) {
-      throw new AppError("Payment not found", 404);
+      throw new AppError("Resource not found", 404);
     }
     return payment;
   }

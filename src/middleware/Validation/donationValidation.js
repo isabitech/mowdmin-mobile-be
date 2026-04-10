@@ -9,7 +9,7 @@ export const validateDonation = [
     .custom(async (value) => {
       const user = await User.findByPk(value);
       if (!user) {
-        throw new Error("Invalid user ID — user not found");
+        throw new Error("Invalid user ID");
       }
       return true;
     }),

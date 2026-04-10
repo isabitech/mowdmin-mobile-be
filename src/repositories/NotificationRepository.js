@@ -79,7 +79,7 @@ export const NotificationRepository = {
 
     const notification = await Model.findOne({ where: { id, userId } });
     if (!notification) return null;
-    notification.isRead = true;
+    notification.read = true;
     return notification.save();
   },
 };

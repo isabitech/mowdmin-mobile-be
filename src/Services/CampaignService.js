@@ -9,7 +9,7 @@ class CampaignService {
   async getCampaignById(id) {
     const campaign = await CampaignRepository.getCampaignById(id);
     if (!campaign) {
-      throw new AppError("Campaign not found", 404);
+      throw new AppError("Resource not found", 404);
     }
     return campaign;
   }
@@ -26,7 +26,7 @@ class CampaignService {
   async updateCampaign(id, data) {
     const campaign = await CampaignRepository.updateCampaign(id, data);
     if (!campaign) {
-      throw new AppError("Campaign not found", 404);
+      throw new AppError("Resource not found", 404);
     }
     return campaign;
   }
@@ -34,7 +34,7 @@ class CampaignService {
   async deleteCampaign(id) {
     const campaign = await CampaignRepository.deleteCampaign(id);
     if (!campaign) {
-      throw new AppError("Campaign not found", 404);
+      throw new AppError("Resource not found", 404);
     }
     return campaign;
   }

@@ -7,7 +7,7 @@ class ProductService {
 
   async updateProduct(id, data) {
     const updated = await ProductRepository.updateById(id, data);
-    if (!updated) throw new Error("Product not found");
+    if (!updated) throw new Error("Resource not found");
     return updated;
   }
 
@@ -31,7 +31,7 @@ class ProductService {
 
   async deleteProduct(id) {
     const deleted = await ProductRepository.deleteById(id);
-    if (!deleted) throw new Error("Product not found");
+    if (!deleted) throw new Error("Resource not found");
     return deleted;
   }
 

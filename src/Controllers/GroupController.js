@@ -36,7 +36,7 @@ class GroupController {
     const groupId = req.params.id;
     const group = await GroupService.getGroupById(groupId);
     if (!group)
-      return sendError(res, { message: "Group not found", statusCode: 404 });
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
     return sendSuccess(res, { message: "Group details fetched", data: group });
   }
 
@@ -61,6 +61,19 @@ class GroupController {
     const { message, type } = req.body;
     const groupId = req.params.id;
     const userId = req.user.id;
+    const group = await GroupService.getGroupById(groupId);
+    if (!group) {
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
+    }
+    if (group.isPrivate) {
+      const member = await GroupService.isMember(groupId, userId);
+      if (!member && !req.user.isAdmin) {
+        return sendError(res, {
+          message: "Forbidden",
+          statusCode: 403,
+        });
+      }
+    }
     const sentMessage = await GroupService.sendMessage(
       groupId,
       userId,
@@ -77,6 +90,19 @@ class GroupController {
   async getGroupMessages(req, res) {
     const groupId = req.params.id;
     const { page, limit: pageSize } = req.query;
+    const group = await GroupService.getGroupById(groupId);
+    if (!group) {
+      return sendError(res, { message: "Resource not found", statusCode: 404 });
+    }
+    if (group.isPrivate) {
+      const member = await GroupService.isMember(groupId, req.user.id);
+      if (!member && !req.user.isAdmin) {
+        return sendError(res, {
+          message: "Forbidden",
+          statusCode: 403,
+        });
+      }
+    }
     const messages = await GroupService.getGroupMessages(
       groupId,
       paginate(page || 1, pageSize),

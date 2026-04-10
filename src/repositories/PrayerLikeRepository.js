@@ -32,8 +32,15 @@ export const PrayerLikeRepository = {
         await Model.deleteOne({ _id: existing._id });
         return { liked: false };
       } else {
-        await Model.create({ prayerId, userId });
-        return { liked: true };
+        try {
+          await Model.create({ prayerId, userId });
+          return { liked: true };
+        } catch (err) {
+          if (err?.code === 11000) {
+            return { liked: true };
+          }
+          throw err;
+        }
       }
     } else {
       const existing = await Model.findOne({ where: { prayerId, userId } });
