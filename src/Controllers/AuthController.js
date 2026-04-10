@@ -201,9 +201,18 @@ class AuthController {
   static async getAllUsers(req, res) {
     const parsedPage = Math.max(Number.parseInt(req.query.page, 10) || 1, 1);
     const parsedLimit = Math.max(Number.parseInt(req.query.limit, 10) || 50, 1);
+    const rawSearch =
+      typeof req.query.search === "string" && req.query.search.trim().length > 0
+        ? req.query.search
+        : typeof req.query.q === "string"
+          ? req.query.q
+          : "";
+    const maxSearchLength = 100;
+    const search = rawSearch.replace(/\s+/g, " ").trim().slice(0, maxSearchLength);
     const users = await AuthService.getAllUsers({
       page: parsedPage,
       limit: parsedLimit,
+      search: search || undefined,
     });
     return sendSuccess(res, {
       message: "Users retrieved successfully",

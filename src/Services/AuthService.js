@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { Op } from "sequelize";
 import EmailService from "./emailService.js";
 import TokenService from "./TokenService.js";
 import OTPService from "./OTPService.js";
@@ -446,11 +447,43 @@ class AuthService {
   }
 
   // LIST all users (Admin Only)
-  static async getAllUsers({ page = 1, limit = 50 } = {}) {
+  static async getAllUsers({ page = 1, limit = 50, search } = {}) {
     const parsedPage = Math.max(Number.parseInt(page, 10) || 1, 1);
     const parsedLimit = Math.max(Number.parseInt(limit, 10) || 50, 1);
     const offset = (parsedPage - 1) * parsedLimit;
-    return await UserRepository.findAll({ limit: parsedLimit, offset });
+    const maxSearchLength = 100;
+    const trimmedSearch =
+      typeof search === "string"
+        ? search.replace(/\s+/g, " ").trim().slice(0, maxSearchLength)
+        : "";
+    const isMongo = process.env.DB_CONNECTION === "mongodb";
+    let where;
+
+    const escapeLike = (value) => value.replace(/[\\%_]/g, "\\$&");
+
+    if (trimmedSearch) {
+      if (isMongo) {
+        const escaped = trimmedSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(escaped, "i");
+        where = { $or: [{ name: regex }, { email: regex }] };
+      } else {
+        const likeOp =
+          process.env.DB_CONNECTION === "mysql" ? Op.like : Op.iLike;
+        const escapedSearch = escapeLike(trimmedSearch);
+        where = {
+          [Op.or]: [
+            { name: { [likeOp]: `%${escapedSearch}%` } },
+            { email: { [likeOp]: `%${escapedSearch}%` } },
+          ],
+        };
+      }
+    }
+
+    return await UserRepository.findAll({
+      limit: parsedLimit,
+      offset,
+      ...(where ? { where } : {}),
+    });
   }
 
   // GET user by ID
