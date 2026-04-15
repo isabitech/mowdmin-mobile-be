@@ -55,12 +55,38 @@ class EventController {
     });
   }
   async getAll(req, res, next) {
-    const { page, limit: pageSize } = req.query;
+    const { page, limit: pageSize, includePast } = req.query;
     const pagination = paginate(page || 1, pageSize);
-    const events = await EventService.getAllEvents(pagination);
+    
+    // Check if user wants to include past events (query param: includePast=true)
+    const options = {
+      includePastEvents: includePast === 'true'
+    };
+    
+    const events = await EventService.getAllEvents(pagination, options);
     return sendSuccess(res, {
       message: "Events fetched successfully",
       data: events,
+    });
+  }
+  
+  async getAllAdmin(req, res, next) {
+    // Admin-only endpoint to get all events including past ones
+    const { page, limit: pageSize } = req.query;
+    const pagination = paginate(page || 1, pageSize);
+    const events = await EventService.getAllEventsAdmin(pagination);
+    return sendSuccess(res, {
+      message: "All events fetched successfully (including past)",
+      data: events,
+    });
+  }
+  
+  async cleanupPastEvents(req, res, next) {
+    // Admin-only endpoint to cleanup past events
+    const result = await EventService.cleanupPastEvents();
+    return sendSuccess(res, {
+      message: `Cleanup completed. Deleted ${result.deletedCount} past events`,
+      data: result,
     });
   }
   async getOne(req, res, next) {
