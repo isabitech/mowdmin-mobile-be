@@ -4,12 +4,13 @@ let DonationModel;
 let UserModel;
 let CampaignModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_DONATION_PAGE_SIZE = 20;
 const MAX_DONATION_PAGE_SIZE = 100;
 
 export const DonationRepository = {
   async getModels() {
+    const isMongo = getIsMongo();
     if (!DonationModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         DonationModel = (await import("../MongoModels/DonationMongoModel.js"))
@@ -32,13 +33,13 @@ export const DonationRepository = {
   },
 
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
 
   async getDonationById(id) {
     const { DonationModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return DonationModel.findById(id)
         .populate("userId", "name email")
@@ -68,7 +69,7 @@ export const DonationRepository = {
     // Handle MongoDB filters
     const processedFilters = { ...filters };
     if (
-      isMongo &&
+      getIsMongo() &&
       processedFilters.userId &&
       typeof processedFilters.userId === "string"
     ) {
@@ -80,7 +81,7 @@ export const DonationRepository = {
     }
 
     if (search) {
-      if (isMongo) {
+      if (getIsMongo()) {
         processedFilters.$or = [
           { transactionRef: { $regex: search, $options: "i" } },
         ];
@@ -90,7 +91,7 @@ export const DonationRepository = {
       }
     }
 
-    if (isMongo) {
+    if (getIsMongo()) {
       const parsedPage = Math.max(Number.parseInt(page, 10) || 1, 1);
       const parsedLimit = Math.max(Number.parseInt(limit, 10) || 10, 1);
       const skip = (parsedPage - 1) * parsedLimit;
@@ -137,7 +138,7 @@ export const DonationRepository = {
 
   async updateDonationStatus(id, status) {
     const { DonationModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return await DonationModel.findByIdAndUpdate(
         id,
         { status },
@@ -162,7 +163,7 @@ export const DonationRepository = {
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
 
-    if (isMongo) {
+    if (getIsMongo()) {
       return await DonationModel.find({ campaign: campaignId })
         .populate("userId", "name email")
         .sort({ createdAt: -1 })

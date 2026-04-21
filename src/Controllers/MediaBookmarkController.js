@@ -4,6 +4,7 @@ import {
   validateCreateMediaBookmark,
   validateUpdateMediaBookmark,
 } from "../middleware/Validation/MediaBookmarkValidation.js";
+import { paginate } from "../Utils/helper.js";
 
 const normalizeId = (value) => {
   if (!value) return null;
@@ -33,20 +34,68 @@ class MediaBookmarkController {
   }
   async getAll(req, res, next) {
     const userId = req.user?.id;
-    const bookmarks =
-      await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
+    const { page, limit: pageSize } = req.query;
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } =
+        await MediaBookmarkService.getAllMediaBookmarksByUserIdWithCount(
+          userId,
+          pagination,
+        );
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
+    }
     return sendSuccess(res, {
       message: "All Bookmarks Fetched Successfully",
-      data: bookmarks,
+      data,
+      meta,
     });
   }
   async getAllByUser(req, res, next) {
     const userId = req.user?.id;
-    const bookmarks =
-      await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
+    const { page, limit: pageSize } = req.query;
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } =
+        await MediaBookmarkService.getAllMediaBookmarksByUserIdWithCount(
+          userId,
+          pagination,
+        );
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await MediaBookmarkService.getAllMediaBookmarksByUserId(userId);
+    }
     return sendSuccess(res, {
       message: "User Bookmarks Fetched Successfully",
-      data: bookmarks,
+      data,
+      meta,
     });
   }
   async getOne(req, res, next) {

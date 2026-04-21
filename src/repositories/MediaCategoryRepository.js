@@ -1,15 +1,15 @@
 let MediaCategoryModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 import mongoose from "mongoose";
 
 export const MediaCategoryRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModel() {
     if (!MediaCategoryModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         MediaCategoryModel = (
           await import("../MongoModels/MediaCategoryMongoModel.js")
         ).default;
@@ -33,7 +33,7 @@ export const MediaCategoryRepository = {
       Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
-    if (isMongo) {
+    if (getIsMongo()) {
       const {
         where,
         order,
@@ -49,17 +49,52 @@ export const MediaCategoryRepository = {
     }
   },
 
+  async findAllWithCount(options = {}) {
+    const Model = await this.getModel();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    if (getIsMongo()) {
+      const {
+        where,
+        order,
+        include,
+        limit: _limit,
+        offset: _offset,
+        ...rawFilter
+      } = options;
+      const filter = where || rawFilter;
+      const [items, total] = await Promise.all([
+        Model.find(filter).skip(offset).limit(limit).lean(),
+        Model.countDocuments(filter),
+      ]);
+      return { items, total };
+    } else {
+      const { rows, count } = await Model.findAndCountAll({
+        ...options,
+        limit,
+        offset,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
   async findOne(options = {}) {
     const Model = await this.getModel();
-    return isMongo ? Model.findOne(options) : Model.findOne({ where: options });
+    return getIsMongo()
+      ? Model.findOne(options)
+      : Model.findOne({ where: options });
   },
   async findById(id) {
     const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id);
+    return getIsMongo() ? Model.findById(id) : Model.findByPk(id);
   },
   async updateById(id, payload) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return Model.findByIdAndUpdate(id, payload, { new: true });
     } else {
@@ -70,7 +105,7 @@ export const MediaCategoryRepository = {
   },
   async deleteById(id) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const result = await Model.findByIdAndDelete(id);
       return !!result;
     } else {

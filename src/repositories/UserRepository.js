@@ -5,12 +5,12 @@ const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const UserRepository = {
   async getModels() {
-    if (!UserModel || (!getIsMongo() && !ProfileModel)) {
-      if (getIsMongo()) {
+    const isMongo = getIsMongo();
+    if (!UserModel || (!isMongo && !ProfileModel)) {
+      if (isMongo) {
         const userImport = await import("../MongoModels/UserMongoModel.js");
-        const profileImport = await import(
-          "../MongoModels/ProfileMongoModel.js"
-        );
+        const profileImport =
+          await import("../MongoModels/ProfileMongoModel.js");
 
         UserModel = userImport.default;
         ProfileModel = profileImport.default;

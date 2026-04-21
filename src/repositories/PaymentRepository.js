@@ -3,12 +3,12 @@ let PaymentModel;
 let OrderModel;
 let UserModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const PaymentRepository = {
   async getModels() {
-    if (!PaymentModel || (!isMongo && (!OrderModel || !UserModel))) {
-      if (isMongo) {
+    if (!PaymentModel || (!getIsMongo() && (!OrderModel || !UserModel))) {
+      if (getIsMongo()) {
         PaymentModel = (await import("../MongoModels/PaymentMongoModel.js"))
           .default;
         OrderModel = (await import("../MongoModels/OrderMongoModel.js"))
@@ -25,7 +25,7 @@ export const PaymentRepository = {
 
   async createPayment(data) {
     const { PaymentModel } = await this.getModels();
-    if (!isMongo && data?.transactionRef && !data.reference) {
+    if (!getIsMongo() && data?.transactionRef && !data.reference) {
       data = { ...data, reference: data.transactionRef };
     }
     return PaymentModel.create(data);
@@ -38,7 +38,7 @@ export const PaymentRepository = {
     const parsedLimit = Math.max(Number.parseInt(limit, 10) || 10, 1);
     const skip = (parsedPage - 1) * parsedLimit;
 
-    if (isMongo) {
+    if (getIsMongo()) {
       const query = {};
       if (type) query.type = type;
       if (status) query.status = status;
@@ -94,7 +94,7 @@ export const PaymentRepository = {
 
   async getPaymentById(id) {
     const { PaymentModel, UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return PaymentModel.findById(id).populate("userId", "name email");
     } else {
       return PaymentModel.findByPk(id, {
@@ -111,14 +111,14 @@ export const PaymentRepository = {
 
   async findByPaymentIntentId(paymentIntentId) {
     const { PaymentModel } = await this.getModels();
-    return isMongo
+    return getIsMongo()
       ? PaymentModel.findOne({ paymentIntentId })
       : PaymentModel.findOne({ where: { paymentIntentId } });
   },
 
   async findByWebhookEventId(webhookEventId) {
     const { PaymentModel } = await this.getModels();
-    return isMongo
+    return getIsMongo()
       ? PaymentModel.findOne({ webhookEventId })
       : PaymentModel.findOne({ where: { webhookEventId } });
   },
@@ -127,7 +127,7 @@ export const PaymentRepository = {
     const { PaymentModel } = await this.getModels();
     const updateData = { status, ...extraData };
 
-    if (isMongo) {
+    if (getIsMongo()) {
       return PaymentModel.findByIdAndUpdate(id, updateData, { new: true });
     } else {
       const payment = await PaymentModel.findByPk(id);
@@ -138,7 +138,7 @@ export const PaymentRepository = {
 
   async deleteById(id) {
     const { PaymentModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return PaymentModel.findByIdAndDelete(id);
     } else {
       const payment = await PaymentModel.findByPk(id);

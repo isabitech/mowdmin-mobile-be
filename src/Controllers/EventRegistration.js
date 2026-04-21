@@ -1,5 +1,6 @@
 import EventRegistrationService from "../Services/EventRegistration.js";
 import { sendSuccess, sendError } from "../core/response.js";
+import { paginate } from "../Utils/helper.js";
 
 const normalizeId = (value) => {
   if (!value) return null;
@@ -33,10 +34,32 @@ class EventRegistrationController {
   }
 
   static async GetAll(req, res) {
-    const registrations = await EventRegistrationService.getAllReg();
+    const { page, limit: pageSize } = req.query;
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } =
+        await EventRegistrationService.getAllRegWithCount(pagination);
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await EventRegistrationService.getAllReg();
+    }
     return sendSuccess(res, {
       message: "All event registrations fetched successfully",
-      data: registrations,
+      data,
+      meta,
     });
   }
   static async GetAllByEventId(req, res) {

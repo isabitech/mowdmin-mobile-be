@@ -1,14 +1,15 @@
 // TokenRepository.js
 let TokenModel;
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const TokenRepository = {
   async getModel() {
     if (!TokenModel) {
-      if (isMongo) {
-        TokenModel = (await import('../MongoModels/TokenMongoModel.js')).default;
+      if (getIsMongo()) {
+        TokenModel = (await import("../MongoModels/TokenMongoModel.js"))
+          .default;
       } else {
-        TokenModel = (await import('../Models/TokenModel.js')).default;
+        TokenModel = (await import("../Models/TokenModel.js")).default;
       }
     }
     return TokenModel;
@@ -21,13 +22,15 @@ export const TokenRepository = {
 
   async findAll(query) {
     const Model = await this.getModel();
-    return isMongo ? Model.find(query) : Model.findAll({ where: query });
+    return getIsMongo() ? Model.find(query) : Model.findAll({ where: query });
   },
 
   async findOne(query) {
     const Model = await this.getModel();
-    return isMongo ? Model.findOne(query) : Model.findOne({ where: query });
-  }
+    return getIsMongo()
+      ? Model.findOne(query)
+      : Model.findOne({ where: query });
+  },
 };
 
 export default TokenRepository;

@@ -5,10 +5,21 @@ class EventService {
     return await EventRepository.create(data);
   }
 
-  async getAllEvents(pagination = {}) {
+  async getAllEvents({ pagination, year } = {}) {
+    const paginationOptions = pagination ? { ...pagination } : {};
     return await EventRepository.findAll({
       order: [["date", "ASC"]],
-      ...pagination,
+      year,
+      ...paginationOptions,
+    });
+  }
+
+  async getAllEventsWithCount({ pagination, year } = {}) {
+    const paginationOptions = pagination ? { ...pagination } : {};
+    return await EventRepository.findAllWithCount({
+      order: [["date", "ASC"]],
+      year,
+      ...paginationOptions,
     });
   }
 

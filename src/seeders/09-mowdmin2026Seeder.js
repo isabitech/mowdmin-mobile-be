@@ -3,6 +3,9 @@ import { connectMongoDB } from "../Config/mongodb.js";
 import { connectDB } from "../Config/db.js";
 import "../env.js";
 
+// =======================
+// EVENT DEFINITIONS
+// =======================
 const mowdminEvents = [
   // ONLINE PROGRAM
   {
@@ -15,7 +18,7 @@ const mowdminEvents = [
   },
   {
     title: "The voice of the presence of God",
-    description: "Psalm 29v3-4. Every 1st Sunday of the Month Online Program",
+    description: "Psalm 29v3-4. Every 1st Sunday",
     time: "18:00",
     location: "Online",
     type: "Online",
@@ -23,7 +26,7 @@ const mowdminEvents = [
   },
   {
     title: "Everyday people Everyday life",
-    description: "Every 2nd Thursday of the Month Online Program",
+    description: "Every 2nd Thursday",
     time: "19:00",
     location: "Online",
     type: "Online",
@@ -31,8 +34,7 @@ const mowdminEvents = [
   },
   {
     title: "My Rod shall blossom because I am the chosen one",
-    description:
-      "Numbers 17:8; 1 Peter 2:9. Every 3rd Friday of the Month Online Program",
+    description: "3rd Friday",
     time: "20:00",
     location: "Online",
     type: "Online",
@@ -40,8 +42,7 @@ const mowdminEvents = [
   },
   {
     title: "Power that swallows up powers",
-    description:
-      "Colossians 2v15. Every last Wednesday of the Month Online Program",
+    description: "Last Wednesday",
     time: "19:00",
     location: "Online",
     type: "Online",
@@ -49,18 +50,25 @@ const mowdminEvents = [
   },
   {
     title: "Hour of the Truth",
-    description: "John 8:32. Every last Saturday of the Month Online Program",
+    description: "Last Saturday",
     time: "18:00",
     location: "Online",
     type: "Online",
     recurring: "Last Saturday",
   },
+  {
+    title: "The Lord Supper",
+    description: "First Sunday and last day of the month",
+    time: "18:00",
+    location: "TBD",
+    type: "Communion",
+    recurring: "Lord Supper",
+  },
 
-  // SPECIFIC DATES
+  // FIXED EVENTS
   {
     title: "Seminar: A fulfilling holistic well-being",
-    description:
-      "In light of 3 John 2. Biblical insights on being healthy Seminars.",
+    description: "3 John 2 Seminar",
     date: "2026-05-16",
     time: "14:00",
     location:
@@ -76,30 +84,6 @@ const mowdminEvents = [
     type: "Tour",
   },
   {
-    title: "Evangelisation Tour - Kenya",
-    description: "Open-air evangelism and gospel Music",
-    date: "2026-09-10",
-    time: "16:00",
-    location: "Kenya",
-    type: "Tour",
-  },
-  {
-    title: "Evangelisation Tour - Tanzania",
-    description: "Open-air evangelism and gospel Music",
-    date: "2026-09-15",
-    time: "16:00",
-    location: "Tanzania",
-    type: "Tour",
-  },
-  {
-    title: "Evangelisation Tour - Pakistan",
-    description: "Open-air evangelism and gospel Music",
-    date: "2026-09-25",
-    time: "16:00",
-    location: "Pakistan",
-    type: "Tour",
-  },
-  {
     title: "Open-air evangelism and gospel Music",
     description:
       "Willy Brandt Platz, Opposite the railway station Hamm Germany",
@@ -110,7 +94,7 @@ const mowdminEvents = [
     type: "Tour",
   },
   {
-    title: "Seminars, Follow-up, Education, Worship, Gospel Music",
+    title: "Seminars, Follow-up, Education, Worship",
     description: "Bürgersaal der Sachsenhalle, Hamm Germany",
     date: "2026-09-20",
     time: "10:00",
@@ -118,193 +102,161 @@ const mowdminEvents = [
       "Bürgersaal der Sachsenhalle, Sachsen-Halle, Piebrockskamp, 59073 Hamm Germany",
     type: "Seminar",
   },
-
-  // PLACEHOLDERS / RECURRING
-  {
-    title: "Next Open Air Evangelization",
-    date: "2026-10-10",
-    time: "12:00",
-    location: "TBD",
-    type: "Tour",
-    description: "Upcoming Open Air Evangelization",
-  },
-  {
-    title: "Next Water Baptism",
-    date: "2026-06-20",
-    time: "10:00",
-    location: "TBD",
-    type: "Baptism",
-    description: "Upcoming Water Baptism",
-  },
-  {
-    title: "The Lord Supper",
-    description:
-      "The Lord Supper - Every first Sunday and last day of the month.",
-    time: "18:00",
-    location: "TBD",
-    type: "Communion",
-    recurring: "Lord Supper",
-  },
-  {
-    title: "The Holy Spirit Convention",
-    date: "2026-08-15",
-    time: "09:00",
-    location: "TBD",
-    type: "Convention",
-    description: "The Holy Spirit Convention",
-  },
-  {
-    title: "The Conference",
-    date: "2026-11-20",
-    time: "09:00",
-    location: "TBD",
-    type: "Conference",
-    description: "Annual Conference",
-  },
-  {
-    title: "Symposium",
-    date: "2026-12-05",
-    time: "14:00",
-    location: "TBD",
-    type: "Symposium",
-    description: "End of year Symposium",
-  },
-  {
-    title: "Concert",
-    date: "2026-12-24",
-    time: "18:00",
-    location: "TBD",
-    type: "Concert",
-    description: "Christmas Concert",
-  },
 ];
 
-const getDatesForRecurring = (year, recurringType) => {
+// =======================
+// DATE HELPERS
+// =======================
+const getAllDaysInYear = (year) => {
   const dates = [];
-  const startDate = new Date(Date.UTC(year, 0, 1));
-  const endDate = new Date(Date.UTC(year, 11, 31));
+  const start = new Date(Date.UTC(year, 0, 1));
+  const end = new Date(Date.UTC(year, 11, 31));
 
-  for (
-    let d = new Date(startDate);
-    d <= endDate;
-    d.setUTCDate(d.getUTCDate() + 1)
-  ) {
-    const day = d.getUTCDay();
-    const date = d.getUTCDate();
-    const month = d.getUTCMonth();
-
-    if (recurringType === "Every Monday" && day === 1) {
-      dates.push(new Date(d));
-    } else if (recurringType === "1st Sunday" && day === 0 && date <= 7) {
-      dates.push(new Date(d));
-    } else if (
-      recurringType === "2nd Thursday" &&
-      day === 4 &&
-      date > 7 &&
-      date <= 14
-    ) {
-      dates.push(new Date(d));
-    } else if (
-      recurringType === "3rd Friday" &&
-      day === 5 &&
-      date > 14 &&
-      date <= 21
-    ) {
-      dates.push(new Date(d));
-    } else if (recurringType === "Last Wednesday" && day === 3) {
-      const nextWeek = new Date(d);
-      nextWeek.setUTCDate(d.getUTCDate() + 7);
-      if (nextWeek.getUTCMonth() !== month) {
-        dates.push(new Date(d));
-      }
-    } else if (recurringType === "Last Saturday" && day === 6) {
-      const nextWeek = new Date(d);
-      nextWeek.setUTCDate(d.getUTCDate() + 7);
-      if (nextWeek.getUTCMonth() !== month) {
-        dates.push(new Date(d));
-      }
-    } else if (recurringType === "Lord Supper") {
-      // Every 1st Sunday
-      if (day === 0 && date <= 7) {
-        dates.push(new Date(d));
-      }
-      // Every last day of the month
-      const nextDay = new Date(d);
-      nextDay.setUTCDate(d.getUTCDate() + 1);
-      if (nextDay.getUTCMonth() !== month) {
-        // Prevent doubling if 1st Sunday is also last day (unlikely but safe)
-        if (!dates.some((dt) => dt.getTime() === d.getTime())) {
-          dates.push(new Date(d));
-        }
-      }
-    }
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(new Date(d));
   }
+
   return dates;
 };
 
+const isNthWeekday = (date, weekday, nth) => {
+  if (date.getUTCDay() !== weekday) return false;
+
+  const day = date.getUTCDate();
+  const weekNumber = Math.ceil(day / 7);
+
+  return weekNumber === nth;
+};
+
+const isLastWeekday = (date, weekday) => {
+  if (date.getUTCDay() !== weekday) return false;
+
+  const nextWeek = new Date(date);
+  nextWeek.setUTCDate(date.getUTCDate() + 7);
+
+  return nextWeek.getUTCMonth() !== date.getUTCMonth();
+};
+
+const isLastDayOfMonth = (date) => {
+  const nextDay = new Date(date);
+  nextDay.setUTCDate(date.getUTCDate() + 1);
+  return nextDay.getUTCMonth() !== date.getUTCMonth();
+};
+
+const getDatesForRecurring = (year, type) => {
+  const allDates = getAllDaysInYear(year);
+
+  return allDates.filter((date) => {
+    const day = date.getUTCDay();
+
+    switch (type) {
+      case "Every Monday":
+        return day === 1;
+
+      case "1st Sunday":
+        return isNthWeekday(date, 0, 1);
+
+      case "2nd Thursday":
+        return isNthWeekday(date, 4, 2);
+
+      case "3rd Friday":
+        return isNthWeekday(date, 5, 3);
+
+      case "Last Wednesday":
+        return isLastWeekday(date, 3);
+
+      case "Last Saturday":
+        return isLastWeekday(date, 6);
+
+      case "Lord Supper":
+        return (
+          isNthWeekday(date, 0, 1) || // first Sunday
+          isLastDayOfMonth(date)
+        );
+
+      default:
+        return false;
+    }
+  });
+};
+
+// =======================
+// SEED FUNCTION
+// =======================
 const seedMowdmin2026 = async () => {
   try {
-    console.log("🌱 Seeding Mowdministries 2026 Program Events...");
+    console.log("🌱 Seeding Mowdministries 2026 Events...");
 
+    // Connect DB
     if (process.env.DB_CONNECTION === "mongodb") {
       await connectMongoDB();
-    } else if (
-      process.env.DB_CONNECTION === "postgres" ||
-      process.env.DB_CONNECTION === "mysql"
-    ) {
-      await connectDB();
     } else {
-      console.warn("⚠️ No valid DB_CONNECTION found.");
+      await connectDB();
     }
 
-    const titlesToClear = [...new Set(mowdminEvents.map((e) => e.title))];
-    console.log(
-      `🧹 Clearing existing events for: ${titlesToClear.length} titles...`,
-    );
-    const { EventModel } = await EventRepository.getModels();
+    // Clear old data
+    const { EventModel, EventRegistrationModel } =
+      await EventRepository.getModels();
 
-    for (const title of titlesToClear) {
-      if (process.env.DB_CONNECTION === "mongodb") {
-        await EventModel.deleteMany({ title });
-      } else if (EventModel && EventModel.destroy) {
-        await EventModel.destroy({ where: { title } });
-      }
+    console.log("🗑️ Clearing existing data...");
+
+    if (process.env.DB_CONNECTION === "mongodb") {
+      await EventRegistrationModel.deleteMany({});
+      await EventModel.deleteMany({});
+    } else {
+      await EventRegistrationModel.destroy({ where: {}, truncate: true });
+      await EventModel.destroy({ where: {}, truncate: true });
     }
 
+    console.log("✅ Cleared.");
+
+    // Insert events
     for (const eventDef of mowdminEvents) {
       if (eventDef.recurring) {
         const dates = getDatesForRecurring(2026, eventDef.recurring);
-        console.log(
-          `   🔁 Creating recurring event: ${eventDef.title} (${dates.length} occurrences)`,
-        );
+
+        console.log(`🔁 ${eventDef.title} → ${dates.length} occurrences`);
+
         for (const date of dates) {
+          try {
+            await EventRepository.create({
+              title: eventDef.title,
+              description: eventDef.description,
+              date,
+              time: eventDef.time,
+              location: eventDef.location,
+              type: eventDef.type,
+            });
+          } catch (err) {
+            console.error(
+              `❌ Failed: ${eventDef.title} ${date.toISOString()}`,
+              err,
+            );
+          }
+        }
+      } else {
+        console.log(`📅 ${eventDef.title} → ${eventDef.date}`);
+
+        try {
           await EventRepository.create({
             title: eventDef.title,
             description: eventDef.description,
-            date: date,
+            date: new Date(eventDef.date),
             time: eventDef.time,
             location: eventDef.location,
             type: eventDef.type,
           });
+        } catch (err) {
+          console.error(`❌ Failed: ${eventDef.title}`, err);
         }
-      } else {
-        console.log(
-          `   📅 Creating event: ${eventDef.title} on ${eventDef.date}`,
-        );
-        await EventRepository.create({
-          title: eventDef.title,
-          description: eventDef.description,
-          date: new Date(eventDef.date),
-          time: eventDef.time,
-          location: eventDef.location,
-          type: eventDef.type,
-        });
       }
     }
 
-    console.log("✅ Mowdministries 2026 Program Events seeded successfully.");
+    console.log("✅ Seeding completed successfully.");
+    process.exit(0);
   } catch (error) {
-    console.error("❌ Error seeding events:", error);
+    console.error("❌ Seeding failed:", error);
+    process.exit(1);
   }
 };
 

@@ -1,17 +1,17 @@
 let NotificationModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_NOTIFICATION_PAGE_SIZE = 20;
 const MAX_NOTIFICATION_PAGE_SIZE = 100;
 
 const isValidMongoId = (id) => {
-  if (!isMongo) return true;
+  if (!getIsMongo()) return true;
   return /^[0-9a-fA-F]{24}$/.test(String(id || ""));
 };
 
 export const NotificationRepository = {
   async getModel() {
     if (!NotificationModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         NotificationModel = (
           await import("../MongoModels/NotificationMongoModel.js")
         ).default;
@@ -38,7 +38,7 @@ export const NotificationRepository = {
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
 
-    if (isMongo) {
+    if (getIsMongo()) {
       let query = Model.find({ userId })
         .sort({ createdAt: -1 })
         .limit(limit)
@@ -55,11 +55,11 @@ export const NotificationRepository = {
   },
   async findById(id) {
     const Model = await this.getModel();
-    return isMongo ? Model.findById(id) : Model.findByPk(id);
+    return getIsMongo() ? Model.findById(id) : Model.findByPk(id);
   },
   async updateById(id, payload) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.findByIdAndUpdate(id, payload, { new: true });
     } else {
       return Model.update(payload, { where: { id }, returning: true });
@@ -68,7 +68,7 @@ export const NotificationRepository = {
 
   async markAsReadByUserId(id, userId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!isValidMongoId(id)) return null;
       return Model.findOneAndUpdate(
         { _id: id, userId },

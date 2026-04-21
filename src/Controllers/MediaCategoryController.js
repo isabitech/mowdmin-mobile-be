@@ -4,6 +4,7 @@ import {
   validateCreateMediaCategory,
   validateUpdateMediaCategory,
 } from "../middleware/Validation/MediaCategoryValidation.js";
+import { paginate } from "../Utils/helper.js";
 
 class MediaCategoryController {
   async create(req, res, next) {
@@ -24,10 +25,32 @@ class MediaCategoryController {
   }
 
   async getAll(req, res, next) {
-    const categories = await MediaCategoryService.getAllMediaCategories();
+    const { page, limit: pageSize } = req.query;
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } =
+        await MediaCategoryService.getAllMediaCategoriesWithCount(pagination);
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await MediaCategoryService.getAllMediaCategories();
+    }
     return sendSuccess(res, {
       message: "All Media Categories Fetched Successfully",
-      data: categories,
+      data,
+      meta,
     });
   }
   async getOne(req, res, next) {

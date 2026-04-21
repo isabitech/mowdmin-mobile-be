@@ -27,6 +27,13 @@ class MediaService {
     return await MediaRepository.findAll({ where: filters, ...pagination });
   }
 
+  async getAllWithCount(filters = {}, pagination = {}) {
+    return await MediaRepository.findAllWithCount({
+      where: filters,
+      ...pagination,
+    });
+  }
+
   async delete(id) {
     const res = await this.findById(id);
     if (!res) return null;

@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
 let PrayerLikeModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const PrayerLikeRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModel() {
     if (!PrayerLikeModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         // Ensure PrayerMongo model is registered for population
         await import("../MongoModels/PrayerMongoModel.js");
         PrayerLikeModel = (
@@ -26,7 +26,7 @@ export const PrayerLikeRepository = {
 
   async toggleLike(prayerId, userId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const existing = await Model.findOne({ prayerId, userId });
       if (existing) {
         await Model.deleteOne({ _id: existing._id });
@@ -56,7 +56,7 @@ export const PrayerLikeRepository = {
 
   async findOne(prayerId, userId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.findOne({ prayerId, userId });
     }
     return Model.findOne({ where: { prayerId, userId } });
@@ -64,7 +64,7 @@ export const PrayerLikeRepository = {
 
   async findAllByUserId(userId, { limit = 20, offset = 0 } = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.find({ userId })
         .populate("prayerId", "title description userId createdAt")
         .sort({ createdAt: -1 })
@@ -83,7 +83,7 @@ export const PrayerLikeRepository = {
 
   async countByPrayerId(prayerId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.countDocuments({ prayerId });
     }
     return Model.count({ where: { prayerId } });
@@ -91,7 +91,7 @@ export const PrayerLikeRepository = {
 
   async findLikedPrayerIdsByUserId(userId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const likes = await Model.find({ userId }).select("prayerId").lean();
       return likes.map((like) => like.prayerId.toString());
     } else {

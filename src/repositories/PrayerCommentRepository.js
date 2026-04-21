@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { LRUCache } from "lru-cache";
 
 let PrayerCommentModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const COMMENT_COUNT_CACHE_TTL_MS = 15000;
 const prayerCommentCountCache = new LRUCache({
   max: 1000,
@@ -12,12 +12,12 @@ const prayerCommentCountCache = new LRUCache({
 
 export const PrayerCommentRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModel() {
     if (!PrayerCommentModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         PrayerCommentModel = (
           await import("../MongoModels/PrayerCommentMongoModel.js")
         ).default;
@@ -32,7 +32,7 @@ export const PrayerCommentRepository = {
   async create(payload) {
     const Model = await this.getModel();
     const created = await Model.create(payload);
-    if (isMongo && payload?.prayerId) {
+    if (getIsMongo() && payload?.prayerId) {
       prayerCommentCountCache.delete(String(payload.prayerId));
     }
     return created;
@@ -40,7 +40,7 @@ export const PrayerCommentRepository = {
 
   async findById(id) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return Model.findById(id);
     }
@@ -49,7 +49,7 @@ export const PrayerCommentRepository = {
 
   async findAllByPrayerId(prayerId, { limit = 10, offset = 0 } = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.find({ prayerId })
         .sort({ createdAt: -1 })
         .skip(offset)
@@ -66,7 +66,7 @@ export const PrayerCommentRepository = {
 
   async countByPrayerId(prayerId) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const cacheKey = String(prayerId);
       const cached = prayerCommentCountCache.get(cacheKey);
       if (cached && cached.expiresAt > Date.now()) {
@@ -88,7 +88,7 @@ export const PrayerCommentRepository = {
 
   async deleteById(id) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return false;
       const result = await Model.findByIdAndDelete(id);
       if (result?.prayerId) {

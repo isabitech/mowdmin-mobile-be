@@ -1,12 +1,13 @@
 let CampaignModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_CAMPAIGN_PAGE_SIZE = 20;
 const MAX_CAMPAIGN_PAGE_SIZE = 100;
 
 const CampaignRepository = {
   async getModels() {
     if (!CampaignModel) {
+      const isMongo = getIsMongo();
       CampaignModel = (
         await import(
           isMongo
@@ -25,7 +26,7 @@ const CampaignRepository = {
 
   async getCampaignById(id) {
     const { CampaignModel } = await this.getModels();
-    return isMongo
+    return getIsMongo()
       ? await CampaignModel.findById(id)
       : await CampaignModel.findByPk(id);
   },
@@ -41,7 +42,7 @@ const CampaignRepository = {
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
 
-    if (isMongo) {
+    if (getIsMongo()) {
       return await CampaignModel.find(query)
         .sort({ createdAt: -1 })
         .skip(offset)
@@ -57,9 +58,41 @@ const CampaignRepository = {
     }
   },
 
+  async getAllCampaignsWithCount(query = {}, pagination = {}) {
+    const { CampaignModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(pagination.limit, 10);
+    const parsedOffset = Number.parseInt(pagination.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, MAX_CAMPAIGN_PAGE_SIZE)
+        : DEFAULT_CAMPAIGN_PAGE_SIZE;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+
+    if (getIsMongo()) {
+      const [items, total] = await Promise.all([
+        CampaignModel.find(query)
+          .sort({ createdAt: -1 })
+          .skip(offset)
+          .limit(limit)
+          .lean(),
+        CampaignModel.countDocuments(query),
+      ]);
+      return { items, total };
+    } else {
+      const { rows, count } = await CampaignModel.findAndCountAll({
+        where: query,
+        order: [["createdAt", "DESC"]],
+        offset,
+        limit,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
   async updateCampaign(id, data) {
     const { CampaignModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return await CampaignModel.findByIdAndUpdate(id, data, {
         new: true,
         runValidators: true,
@@ -73,7 +106,7 @@ const CampaignRepository = {
 
   async deleteCampaign(id) {
     const { CampaignModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return await CampaignModel.findByIdAndDelete(id);
     } else {
       const campaign = await CampaignModel.findByPk(id);

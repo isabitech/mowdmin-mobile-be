@@ -1,19 +1,20 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 let PrayerModel;
-const isMongo = process.env.DB_CONNECTION === 'mongodb';
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const PrayerRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModel() {
     if (!PrayerModel) {
-      if (isMongo) {
-        PrayerModel = (await import('../MongoModels/PrayerMongoModel.js')).default;
+      if (getIsMongo()) {
+        PrayerModel = (await import("../MongoModels/PrayerMongoModel.js"))
+          .default;
       } else {
-        PrayerModel = (await import('../Models/PrayerModel.js')).default;
+        PrayerModel = (await import("../Models/PrayerModel.js")).default;
       }
     }
     return PrayerModel;
@@ -25,7 +26,7 @@ export const PrayerRepository = {
   },
   async findById(id, options = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return Model.findById(id);
     }
@@ -33,16 +34,20 @@ export const PrayerRepository = {
   },
   async findOne(where, options = {}) {
     const Model = await this.getModel();
-    return isMongo ? Model.findOne(where) : Model.findOne({ where, ...options });
+    return getIsMongo()
+      ? Model.findOne(where)
+      : Model.findOne({ where, ...options });
   },
   async findAll(options = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const filter = options.where || {};
       let query = Model.find(filter);
       if (options.order) {
         const sort = {};
-        options.order.forEach(([field, dir]) => { sort[field] = dir === 'DESC' ? -1 : 1; });
+        options.order.forEach(([field, dir]) => {
+          sort[field] = dir === "DESC" ? -1 : 1;
+        });
         query = query.sort(sort);
       }
       if (options.limit) {
@@ -56,7 +61,7 @@ export const PrayerRepository = {
   },
   async updateById(id, payload, options = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       return Model.findByIdAndUpdate(id, payload, { new: true });
     } else {
       const res = await Model.findByPk(id, options);
@@ -66,7 +71,7 @@ export const PrayerRepository = {
   },
   async deleteById(id, options = {}) {
     const Model = await this.getModel();
-    if (isMongo) {
+    if (getIsMongo()) {
       const result = await Model.findByIdAndDelete(id);
       return !!result;
     } else {

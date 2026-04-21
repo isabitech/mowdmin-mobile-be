@@ -1,9 +1,10 @@
 let ProfileModel;
 let UserModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 const ProfileRepository = {
   async getModels() {
+    const isMongo = getIsMongo();
     if (!ProfileModel || (!isMongo && !UserModel)) {
       if (isMongo) {
         ProfileModel = (await import("../MongoModels/ProfileMongoModel.js"))
@@ -19,14 +20,14 @@ const ProfileRepository = {
 
   async findByUserId(userId) {
     const { ProfileModel } = await this.getModels();
-    return isMongo
+    return getIsMongo()
       ? ProfileModel.findOne({ userId })
       : ProfileModel.findOne({ where: { userId } });
   },
 
   async findByIdWithUser(id) {
     const { ProfileModel, UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return ProfileModel.findById(id).populate("userId", "id name email");
     } else {
       return ProfileModel.findByPk(id, {
@@ -38,7 +39,7 @@ const ProfileRepository = {
   },
 
   async update(profile, payload) {
-    if (isMongo) {
+    if (getIsMongo()) {
       Object.assign(profile, payload);
       return profile.save();
     } else {
@@ -53,7 +54,7 @@ const ProfileRepository = {
 
   async updateByUserId(userId, payload) {
     const { ProfileModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return ProfileModel.findOneAndUpdate({ userId }, payload, { new: true });
     } else {
       await ProfileModel.update(payload, { where: { userId } });
@@ -62,7 +63,7 @@ const ProfileRepository = {
   },
   async findByUserIdWithUser(userId) {
     const { ProfileModel, UserModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return ProfileModel.findOne({ userId }).populate(
         "userId",
         "id name email emailVerified",
@@ -83,7 +84,7 @@ const ProfileRepository = {
 
   async deleteByUserId(userId) {
     const { ProfileModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       return ProfileModel.findOneAndDelete({ userId });
     } else {
       return ProfileModel.destroy({ where: { userId } });
