@@ -99,6 +99,26 @@ class EventController {
       meta,
     });
   }
+
+  async getAllAdmin(req, res, next) {
+    // Admin-only endpoint to get all events including past ones
+    const { page, limit: pageSize } = req.query;
+    const pagination = paginate(page || 1, pageSize);
+    const events = await EventService.getAllEventsAdmin(pagination);
+    return sendSuccess(res, {
+      message: "All events fetched successfully (including past)",
+      data: events,
+    });
+  }
+
+  async cleanupPastEvents(req, res, next) {
+    // Admin-only endpoint to cleanup past events
+    const result = await EventService.cleanupPastEvents();
+    return sendSuccess(res, {
+      message: `Cleanup completed. Deleted ${result.deletedCount} past events`,
+      data: result,
+    });
+  }
   async getOne(req, res, next) {
     const event = await EventService.getEventById(req.params.id);
     if (!event) {

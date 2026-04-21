@@ -12,6 +12,7 @@ import { connectDB } from "./Config/db.js";
 import { initializeRedis, isRedisAvailable } from "./Config/redis.js";
 import { attachRequestMeta } from "./middleware/requestMeta.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import EventCleanupWorker from "./Services/EventCleanupWorker.js";
 
 // Routes
 import auth from "./Routes/AuthRoute.js";
@@ -256,7 +257,8 @@ async function bootstrap() {
 
     // Start background jobs
     logger.info("Starting background cron jobs...");
-    // Run at minute 0 past every hour
+    
+    // Payment cleanup - Run at minute 0 past every hour
     cron.schedule("0 * * * *", async () => {
       try {
         const PaymentService = (await import("./Services/PaymentService.js"))
@@ -268,6 +270,16 @@ async function bootstrap() {
         });
       }
     });
+
+    // Event cleanup - Run daily at 2 AM to remove past events
+    try {
+      EventCleanupWorker.start("0 2 * * *"); // Daily at 2 AM UTC
+      logger.info("Event cleanup worker scheduled");
+    } catch (err) {
+      logger.error("Failed to start event cleanup worker", {
+        message: err.message,
+      });
+    }
 
     scheduleRenderKeepAlive({ port: PORT });
 

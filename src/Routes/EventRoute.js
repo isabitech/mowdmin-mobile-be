@@ -24,6 +24,10 @@ Event.post(
     ...createEventPipeline
 );
 
+// Admin routes (order matters - specific routes before general ones)
+Event.get("/admin/all", protectUser, protectAdmin, tryCatch(EventController.getAllAdmin));
+Event.post("/admin/cleanup", protectUser, protectAdmin, tryCatch(EventController.cleanupPastEvents));
+
 // Alias so clients can POST /api/v1/event/
 Event.post(
     "/",
