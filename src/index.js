@@ -194,6 +194,7 @@ apiRouter.use("/profile", profile);
 apiRouter.use("/donation", donation);
 apiRouter.use("/info", info);
 apiRouter.use("/payments", payment); // Standard JSON payment endpoints
+apiRouter.use("/admin/payments", payment); // Standard JSON payment endpoints
 apiRouter.use("/groups", group);
 apiRouter.use("/campaigns", campaign);
 
