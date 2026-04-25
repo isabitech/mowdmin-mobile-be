@@ -30,7 +30,7 @@ class MediaCategoryService {
   async deleteMediaCategory(id) {
     const res = await this.findById(id);
     if (!res) return null;
-    await res.destroy();
+    await MediaCategoryRepository.deleteById(id);
     return true;
   }
 }

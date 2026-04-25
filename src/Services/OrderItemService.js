@@ -69,7 +69,7 @@ class OrderItemService {
     const item = await OrderItemRepository.findById(id);
     if (!item) return null;
 
-    await item.destroy();
+    await OrderItemRepository.deleteById(id);
     return { message: "Order item deleted successfully" };
   }
 
