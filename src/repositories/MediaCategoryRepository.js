@@ -112,4 +112,10 @@ export const MediaCategoryRepository = {
       return Model.destroy({ where: { id } });
     }
   },
+  async findByName(name) {
+    const Model = await this.getModel();
+    if (getIsMongo()) {
+      const result = await Model.find({ name: name });
+    }
+  },
 };

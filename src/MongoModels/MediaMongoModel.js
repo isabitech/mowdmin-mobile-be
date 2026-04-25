@@ -16,7 +16,6 @@ const MediaMongoSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ["audio", "video", "text"],
-      required: true,
     },
     media_url: {
       type: String,
