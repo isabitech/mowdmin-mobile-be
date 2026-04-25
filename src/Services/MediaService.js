@@ -1,15 +1,64 @@
 import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 import { MediaRepository } from "../repositories/MediaRepository.js";
-
-export const createMedia = async (data) => {
-  return await MediaRepository.create(data);
-};
-
-export const create = createMedia; // Alias
-
+import mongoose from "mongoose";
 class MediaService {
   async createMedia(data) {
-    return await MediaRepository.create(data);
+    if (!data) {
+      return await MediaRepository.create(data);
+    }
+
+    const payload = { ...data };
+    const categoryValueRaw = payload.category_id ?? payload.categoryId;
+
+    if (
+      process.env.DB_CONNECTION !== "mongodb" ||
+      categoryValueRaw === undefined ||
+      categoryValueRaw === null ||
+      categoryValueRaw === ""
+    ) {
+      return await MediaRepository.create(payload);
+    }
+
+    const categoryValue = String(categoryValueRaw).trim();
+
+    if (!categoryValue) {
+      return await MediaRepository.create(payload);
+    }
+
+    let finalCategoryId;
+
+    // 1. Check if it's a valid ObjectId
+    const isValidId = mongoose.Types.ObjectId.isValid(categoryValue);
+
+    if (isValidId) {
+      // Optional: confirm it actually exists
+      const existingCategory =
+        await MediaCategoryRepository.findById(categoryValue);
+
+      if (existingCategory) {
+        finalCategoryId = existingCategory._id;
+      } else {
+        throw new Error("Category ID does not exist");
+      }
+    } else {
+      // 2. Treat as name
+      let findCategory =
+        await MediaCategoryRepository.findByName(categoryValue);
+
+      if (findCategory) {
+        finalCategoryId = findCategory._id;
+      } else {
+        const newCategory = await MediaCategoryRepository.create({
+          name: categoryValue,
+        });
+        finalCategoryId = newCategory._id;
+      }
+    }
+
+    payload.category_id = finalCategoryId;
+    delete payload.categoryId;
+
+    return await MediaRepository.create(payload);
   }
   async create(data) {
     return await this.createMedia(data);

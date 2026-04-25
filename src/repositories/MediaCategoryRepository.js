@@ -114,8 +114,13 @@ export const MediaCategoryRepository = {
   },
   async findByName(name) {
     const Model = await this.getModel();
+    const normalizedName = typeof name === "string" ? name.trim() : "";
+    if (!normalizedName) return null;
+
     if (getIsMongo()) {
-      const result = await Model.find({ name: name });
+      return Model.findOne({ name: normalizedName });
     }
+
+    return Model.findOne({ where: { name: normalizedName } });
   },
 };
