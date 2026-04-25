@@ -6,13 +6,12 @@ class EventService {
     return await EventRepository.create(data);
   }
 
-  async getAllEvents(pagination = {}, options = {}) {
+  async getAllEvents({ pagination, year, includePastEvents = false } = {}) {
+    const paginationOptions = pagination ? { ...pagination } : {};
+
     // Get today's date (start of day) to filter out past events
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    // Allow override to include past events (for admin purposes)
-    const includePastEvents = options.includePastEvents || false;
 
     let whereClause = {};
     if (!includePastEvents) {
