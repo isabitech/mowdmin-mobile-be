@@ -35,10 +35,9 @@ class MediaService {
   }
 
   async delete(id) {
-    const res = await this.findById(id);
-    if (!res) return null;
-    await res.destroy();
-    return true;
+    const media = await this.findById(id);
+    if (!media) return null;
+    return await MediaRepository.deleteById(id);
   }
 }
 
