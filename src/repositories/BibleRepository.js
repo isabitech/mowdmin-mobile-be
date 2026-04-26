@@ -1,7 +1,7 @@
 let BibleStoryModel;
 let BibleVerseModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_BIBLE_PAGE_SIZE = 20;
 const MAX_BIBLE_PAGE_SIZE = 100;
 
@@ -21,7 +21,7 @@ const getPagination = (filters = {}) => {
 export const BibleRepository = {
   async getModels() {
     if (!BibleStoryModel || !BibleVerseModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         BibleStoryModel = (
           await import("../MongoModels/BibleStoryMongoModel.js")
         ).default;
@@ -43,7 +43,7 @@ export const BibleRepository = {
     const { BibleStoryModel } = await this.getModels();
     const { limit, offset } = getPagination(filters);
     const { limit: _limit, offset: _offset, ...where } = filters;
-    if (isMongo) {
+    if (getIsMongo()) {
       await import("../MongoModels/MediaMongoModel.js");
       return BibleStoryModel.find(where)
         .populate("media", "title media_url type thumbnail")
@@ -72,14 +72,14 @@ export const BibleRepository = {
     const { BibleVerseModel } = await this.getModels();
     const { limit, offset } = getPagination(filters);
     const { limit: _limit, offset: _offset, ...where } = filters;
-    if (isMongo)
+    if (getIsMongo())
       return BibleVerseModel.find(where).skip(offset).limit(limit).lean();
     return BibleVerseModel.findAll({ where, offset, limit });
   },
 
   async findDailyVerse() {
     const { BibleVerseModel } = await this.getModels();
-    if (isMongo) return BibleVerseModel.findOne({ isDaily: true });
+    if (getIsMongo()) return BibleVerseModel.findOne({ isDaily: true });
     return BibleVerseModel.findOne({ where: { isDaily: true } });
   },
 

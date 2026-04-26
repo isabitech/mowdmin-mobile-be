@@ -34,13 +34,33 @@ class MediaController {
   }
   async getAll(req, res, next) {
     const { page, limit: pageSize, ...filters } = req.query;
-    const mediaList = await MediaService.getAll(
-      filters,
-      paginate(page || 1, pageSize),
-    );
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } = await MediaService.getAllWithCount(
+        filters,
+        pagination,
+      );
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await MediaService.getAll(filters, pagination);
+    }
     return sendSuccess(res, {
       message: "All Media Fetched Successfully",
-      data: mediaList,
+      data,
+      meta,
     });
   }
   async getOne(req, res, next) {

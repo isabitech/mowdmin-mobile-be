@@ -2,12 +2,12 @@
 let MembershipModel;
 let UserModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const MembershipRepository = {
   async getModels() {
-    if (!MembershipModel || (!isMongo && !UserModel)) {
-      if (isMongo) {
+    if (!MembershipModel || (!getIsMongo() && !UserModel)) {
+      if (getIsMongo()) {
         MembershipModel = (
           await import("../MongoModels/MembershipMongoModel.js")
         ).default;
@@ -36,7 +36,7 @@ export const MembershipRepository = {
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     const { limit: _limit, offset: _offset, ...where } = query || {};
 
-    if (isMongo) {
+    if (getIsMongo()) {
       // Mongo implementation (basic find, can add populate if needed later)
       return MembershipModel.find(where).skip(offset).limit(limit).lean();
     } else {

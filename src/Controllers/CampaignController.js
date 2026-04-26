@@ -15,13 +15,33 @@ class CampaignController {
 
   async getAll(req, res, next) {
     const { page, limit: pageSize, ...filters } = req.query;
-    const campaigns = await CampaignService.getAllCampaigns(
-      filters,
-      paginate(page || 1, pageSize),
-    );
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } = await CampaignService.getAllCampaignsWithCount(
+        filters,
+        pagination,
+      );
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await CampaignService.getAllCampaigns(filters, pagination);
+    }
     return sendSuccess(res, {
       message: "Campaigns fetched successfully",
-      data: campaigns,
+      data,
+      meta,
     });
   }
 

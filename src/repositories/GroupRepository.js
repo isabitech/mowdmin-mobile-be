@@ -2,7 +2,7 @@ import ProfileRepository from "./ProfileRepository.js";
 
 let GroupModel, MemberModel, MessageModel, UserModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_GROUP_PAGE_SIZE = 20;
 const MAX_GROUP_PAGE_SIZE = 100;
 
@@ -22,7 +22,7 @@ const getListOptions = (pagination = {}) => {
 export const GroupRepository = {
   async getModels() {
     if (!GroupModel || !MemberModel || !MessageModel || !UserModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         const mongoModels = await import("../MongoModels/GroupMongoModels.js");
         GroupModel = mongoModels.Group;
         MemberModel = mongoModels.GroupMember;
@@ -51,7 +51,7 @@ export const GroupRepository = {
   async findAllGroups(filters = {}, pagination = {}) {
     const { GroupModel, MemberModel } = await this.getModels();
     const { limit, offset } = getListOptions(pagination);
-    if (isMongo) {
+    if (getIsMongo()) {
       const groups = await GroupModel.find(filters)
         .populate("creatorId", "name email photo")
         .sort({ createdAt: -1 })
@@ -91,7 +91,7 @@ export const GroupRepository = {
 
   async findGroupById(id) {
     const { GroupModel, MemberModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       const group = await GroupModel.findById(id).populate(
         "creatorId",
         "name email photo",
@@ -143,7 +143,7 @@ export const GroupRepository = {
 
   async findMembersByGroup(groupId) {
     const { MemberModel, UserModel } = await this.getModels();
-    if (isMongo)
+    if (getIsMongo())
       return await MemberModel.find({ groupId }).populate(
         "userId",
         "name email photo",
@@ -162,19 +162,20 @@ export const GroupRepository = {
 
   async findMember(groupId, userId) {
     const { MemberModel } = await this.getModels();
-    if (isMongo) return await MemberModel.findOne({ groupId, userId });
+    if (getIsMongo()) return await MemberModel.findOne({ groupId, userId });
     return await MemberModel.findOne({ where: { groupId, userId } });
   },
 
   async removeMember(groupId, userId) {
     const { MemberModel } = await this.getModels();
-    if (isMongo) return await MemberModel.findOneAndDelete({ groupId, userId });
+    if (getIsMongo())
+      return await MemberModel.findOneAndDelete({ groupId, userId });
     return await MemberModel.destroy({ where: { groupId, userId } });
   },
 
   async findGroupsByUserId(userId) {
     const { MemberModel, GroupModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       const memberships = await MemberModel.find({ userId }).populate({
         path: "groupId",
         populate: { path: "creatorId", select: "name email photo" },
@@ -228,7 +229,7 @@ export const GroupRepository = {
     const { ProfileModel } = await ProfileRepository.getModels();
     const { limit, offset } = getListOptions(pagination);
 
-    if (isMongo) {
+    if (getIsMongo()) {
       const messages = await MessageModel.find({ groupId })
         .populate("senderId", "name email photo")
         .sort({ createdAt: 1 })
@@ -304,7 +305,7 @@ export const GroupRepository = {
 
   async deleteGroup(id) {
     const { GroupModel, MemberModel, MessageModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       // Also clean up members and messages when deleting a group
       await MemberModel.deleteMany({ groupId: id });
       await MessageModel.deleteMany({ groupId: id });

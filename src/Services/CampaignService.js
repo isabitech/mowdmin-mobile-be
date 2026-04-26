@@ -23,6 +23,14 @@ class CampaignService {
     return await CampaignRepository.getAllCampaigns(query, pagination);
   }
 
+  async getAllCampaignsWithCount(filters = {}, pagination = {}) {
+    const query = {};
+    if (filters.isActive !== undefined) {
+      query.isActive = filters.isActive === "true" || filters.isActive === true;
+    }
+    return await CampaignRepository.getAllCampaignsWithCount(query, pagination);
+  }
+
   async updateCampaign(id, data) {
     const campaign = await CampaignRepository.updateCampaign(id, data);
     if (!campaign) {

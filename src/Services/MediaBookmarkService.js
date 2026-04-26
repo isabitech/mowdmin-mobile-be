@@ -20,6 +20,13 @@ class MediaBookmarkService {
     });
   }
 
+  async getAllMediaBookmarksWithCount(pagination = {}) {
+    return await MediaBookmarkRepository.findAllWithCount({
+      order: [["createdAt", "ASC"]],
+      ...pagination,
+    });
+  }
+
   async deleteMediaBookmark(id) {
     return await MediaBookmarkRepository.deleteById(id);
   }
@@ -27,6 +34,13 @@ class MediaBookmarkService {
   async getAllMediaBookmarksByUserId(userId) {
     return await MediaBookmarkRepository.findAllByUserId(userId, {
       order: [["createdAt", "ASC"]],
+    });
+  }
+
+  async getAllMediaBookmarksByUserIdWithCount(userId, pagination = {}) {
+    return await MediaBookmarkRepository.findAllByUserIdWithCount(userId, {
+      order: [["createdAt", "ASC"]],
+      ...pagination,
     });
   }
 }

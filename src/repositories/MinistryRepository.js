@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 
 let MinistryModel;
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_MINISTRY_PAGE_SIZE = 20;
 const MAX_MINISTRY_PAGE_SIZE = 100;
 
 export const MinistryRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModels() {
     if (!MinistryModel) {
-      if (isMongo) {
+      if (getIsMongo()) {
         MinistryModel = (await import("../MongoModels/MinistryMongoModel.js"))
           .default;
       } else {
@@ -34,14 +34,14 @@ export const MinistryRepository = {
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
     const { limit: _limit, offset: _offset, ...where } = filters;
 
-    if (isMongo)
+    if (getIsMongo())
       return MinistryModel.find(where).skip(offset).limit(limit).lean();
     return MinistryModel.findAll({ where, offset, limit });
   },
 
   async findById(id) {
     const { MinistryModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return MinistryModel.findById(id);
     }
@@ -54,7 +54,7 @@ export const MinistryRepository = {
   },
   async updateById(id, data) {
     const { MinistryModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return await MinistryModel.findByIdAndUpdate(id, data, { new: true });
     }
@@ -65,7 +65,7 @@ export const MinistryRepository = {
 
   async deleteById(id) {
     const { MinistryModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return await MinistryModel.findByIdAndDelete(id);
     }

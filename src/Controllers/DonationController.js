@@ -21,9 +21,20 @@ class DonationController {
   async getAll(req, res, next) {
     const filters = req.query;
     const result = await DonationService.getAllDonationsWithPagination(filters);
+    const hasPagination =
+      filters.page !== undefined || filters.limit !== undefined;
+    const meta = hasPagination
+      ? {
+          totalItems: result.total,
+          totalPages: result.totalPages,
+          currentPage: result.page,
+          pageSize: result.limit,
+        }
+      : {};
     return sendSuccess(res, {
       message: "Donations fetched successfully",
-      data: result,
+      data: result.donations || result,
+      meta,
     });
   }
 
@@ -31,9 +42,20 @@ class DonationController {
     const userId = req.user?._id || req.user?.id;
     const filters = { ...req.query, userId };
     const result = await DonationService.getAllDonationsWithPagination(filters);
+    const hasPagination =
+      filters.page !== undefined || filters.limit !== undefined;
+    const meta = hasPagination
+      ? {
+          totalItems: result.total,
+          totalPages: result.totalPages,
+          currentPage: result.page,
+          pageSize: result.limit,
+        }
+      : {};
     return sendSuccess(res, {
       message: "Your donations fetched successfully",
-      data: result,
+      data: result.donations || result,
+      meta,
     });
   }
 

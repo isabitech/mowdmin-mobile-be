@@ -94,9 +94,20 @@ class PaymentController {
   async getAll(req, res) {
     const filters = req.query;
     const payments = await PaymentService.getAllPayments(filters);
+    const hasPagination =
+      filters.page !== undefined || filters.limit !== undefined;
+    const meta = hasPagination
+      ? {
+          totalItems: payments.total,
+          totalPages: payments.totalPages,
+          currentPage: payments.page,
+          pageSize: payments.limit,
+        }
+      : {};
     return sendSuccess(res, {
       message: "Payments Fetched Successfully",
-      data: payments,
+      data: payments.items || payments,
+      meta,
     });
   }
 

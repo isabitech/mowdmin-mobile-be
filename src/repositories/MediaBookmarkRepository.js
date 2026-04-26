@@ -4,16 +4,16 @@ let MediaBookmarkModel;
 let UserModel;
 let MediaModel;
 
-const isMongo = process.env.DB_CONNECTION === "mongodb";
+const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const MediaBookmarkRepository = {
   isValidId(id) {
-    if (!isMongo) return true;
+    if (!getIsMongo()) return true;
     return mongoose.Types.ObjectId.isValid(id);
   },
   async getModels() {
-    if (!MediaBookmarkModel || (!isMongo && (!UserModel || !MediaModel))) {
-      if (isMongo) {
+    if (!MediaBookmarkModel || (!getIsMongo() && (!UserModel || !MediaModel))) {
+      if (getIsMongo()) {
         MediaBookmarkModel = (
           await import("../MongoModels/MediaBookmarksMongoModel.js")
         ).default;
@@ -44,7 +44,7 @@ export const MediaBookmarkRepository = {
       Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
-    if (isMongo) {
+    if (getIsMongo()) {
       return MediaBookmarkModel.find({})
         .skip(offset)
         .limit(limit)
@@ -71,6 +71,48 @@ export const MediaBookmarkRepository = {
     }
   },
 
+  async findAllWithCount(options = {}) {
+    const { MediaBookmarkModel, UserModel, MediaModel } =
+      await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    if (getIsMongo()) {
+      const [items, total] = await Promise.all([
+        MediaBookmarkModel.find({})
+          .skip(offset)
+          .limit(limit)
+          .populate("userId", "name email")
+          .populate("mediaId", "title type media_url thumbnail createdAt")
+          .lean(),
+        MediaBookmarkModel.countDocuments({}),
+      ]);
+      return { items, total };
+    } else {
+      const { rows, count } = await MediaBookmarkModel.findAndCountAll({
+        ...options,
+        limit,
+        offset,
+        include: [
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+          {
+            model: MediaModel,
+            as: "media",
+          },
+        ],
+        distinct: true,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
   async findAllByUserId(userId, options = {}) {
     const { MediaBookmarkModel, MediaModel } = await this.getModels();
     const parsedLimit = Number.parseInt(options.limit, 10);
@@ -79,7 +121,7 @@ export const MediaBookmarkRepository = {
       Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
     const offset =
       Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
-    if (isMongo) {
+    if (getIsMongo()) {
       const { limit: _limit, offset: _offset, ...mongoOptions } = options;
       return MediaBookmarkModel.find({ userId, ...mongoOptions })
         .skip(offset)
@@ -102,10 +144,48 @@ export const MediaBookmarkRepository = {
     }
   },
 
+  async findAllByUserIdWithCount(userId, options = {}) {
+    const { MediaBookmarkModel, MediaModel } = await this.getModels();
+    const parsedLimit = Number.parseInt(options.limit, 10);
+    const parsedOffset = Number.parseInt(options.offset, 10);
+    const limit =
+      Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 50;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    if (getIsMongo()) {
+      const { limit: _limit, offset: _offset, ...mongoOptions } = options;
+      const filter = { userId, ...mongoOptions };
+      const [items, total] = await Promise.all([
+        MediaBookmarkModel.find(filter)
+          .skip(offset)
+          .limit(limit)
+          .populate("mediaId", "title type media_url thumbnail createdAt")
+          .lean(),
+        MediaBookmarkModel.countDocuments(filter),
+      ]);
+      return { items, total };
+    } else {
+      const { rows, count } = await MediaBookmarkModel.findAndCountAll({
+        where: { userId },
+        ...options,
+        limit,
+        offset,
+        include: [
+          {
+            model: MediaModel,
+            as: "media",
+          },
+        ],
+        distinct: true,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
   async findById(id, options = {}) {
     const { MediaBookmarkModel, UserModel, MediaModel } =
       await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return MediaBookmarkModel.findById(id)
         .populate("userId", "name email")
@@ -130,7 +210,7 @@ export const MediaBookmarkRepository = {
 
   async updateById(id, payload, options = {}) {
     const { MediaBookmarkModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return null;
       return MediaBookmarkModel.findByIdAndUpdate(id, payload, {
         new: true,
@@ -144,7 +224,7 @@ export const MediaBookmarkRepository = {
 
   async deleteById(id, options = {}) {
     const { MediaBookmarkModel } = await this.getModels();
-    if (isMongo) {
+    if (getIsMongo()) {
       if (!this.isValidId(id)) return false;
       const result = await MediaBookmarkModel.findByIdAndDelete(id);
       return !!result;

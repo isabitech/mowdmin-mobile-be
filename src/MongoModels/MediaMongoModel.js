@@ -12,12 +12,10 @@ const MediaMongoSchema = new mongoose.Schema(
     category_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "MediaCategoryMongo",
-      required: true,
     },
     type: {
       type: String,
       enum: ["audio", "video", "text"],
-      required: true,
     },
     media_url: {
       type: String,

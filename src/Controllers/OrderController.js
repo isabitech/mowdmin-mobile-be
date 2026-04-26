@@ -33,11 +33,18 @@ class OrderController {
 
     const pagination = paginate(pageNum, limitNum);
 
-    const orders = await OrderService.getAllOrders(pagination);
+    const { items, total } =
+      await OrderService.getAllOrdersWithCount(pagination);
 
     return sendSuccess(res, {
       message: "All Orders Fetched Successfully",
-      data: orders,
+      data: items,
+      meta: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limitNum),
+        currentPage: pageNum,
+        pageSize: limitNum,
+      },
     });
   }
   async getOne(req, res) {
@@ -50,10 +57,21 @@ class OrderController {
   async getUserOrders(req, res) {
     const { page, limit: pageSize } = req.query;
     const pagination = paginate(page || 1, pageSize);
-    const orders = await OrderService.getOrdersByUser(req.user.id, pagination);
+    const { items, total } = await OrderService.getOrdersByUserWithCount(
+      req.user.id,
+      pagination,
+    );
+    const pageNum = Number.parseInt(page || 1, 10);
+    const limitNum = pagination.limit;
     return sendSuccess(res, {
       message: "User Orders Fetched Successfully",
-      data: orders,
+      data: items,
+      meta: {
+        totalItems: total,
+        totalPages: Math.ceil(total / limitNum),
+        currentPage: pageNum,
+        pageSize: limitNum,
+      },
     });
   }
   async update(req, res) {

@@ -33,10 +33,40 @@ class OrderService {
     });
   }
 
+  async getAllOrdersWithCount(pagination = {}) {
+    const { User } = await this.getModels();
+    return OrderRepository.findAllWithCount({
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      ...pagination,
+    });
+  }
+
   // Fetch all orders for a single user
   async getOrdersByUser(userId, pagination = {}) {
     const { User } = await this.getModels();
     return OrderRepository.findAllByUserId(userId, {
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      ...pagination,
+    });
+  }
+
+  async getOrdersByUserWithCount(userId, pagination = {}) {
+    const { User } = await this.getModels();
+    return OrderRepository.findAllByUserIdWithCount(userId, {
       include: [
         {
           model: User,

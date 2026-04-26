@@ -193,7 +193,8 @@ apiRouter.use("/membership", membership);
 apiRouter.use("/profile", profile);
 apiRouter.use("/donation", donation);
 apiRouter.use("/info", info);
-apiRouter.use("/payment", payment); // Standard JSON payment endpoints
+apiRouter.use("/payments", payment); // Standard JSON payment endpoints
+apiRouter.use("/admin/payments", payment); // Standard JSON payment endpoints
 apiRouter.use("/groups", group);
 apiRouter.use("/campaigns", campaign);
 
@@ -241,9 +242,8 @@ async function bootstrap() {
       await connectDB();
       sqlConnectionReady = true;
 
-      const { default: defineAssociations } = await import(
-        "./Models/associations.js"
-      );
+      const { default: defineAssociations } =
+        await import("./Models/associations.js");
       defineAssociations();
     } else {
       throw new Error(
@@ -257,7 +257,7 @@ async function bootstrap() {
 
     // Start background jobs
     logger.info("Starting background cron jobs...");
-    
+
     // Payment cleanup - Run at minute 0 past every hour
     cron.schedule("0 * * * *", async () => {
       try {

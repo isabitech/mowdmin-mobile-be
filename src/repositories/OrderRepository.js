@@ -7,6 +7,58 @@ let OrderItemModel;
 const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 const DEFAULT_ORDER_PAGE_SIZE = 20;
 const MAX_ORDER_PAGE_SIZE = 100;
+const PRODUCT_SELECT_FIELDS =
+  "name description price category imageUrl stock createdAt updatedAt";
+
+const getOrderItemId = (value) => {
+  if (!value) return null;
+  if (mongoose.isValidObjectId(value)) return value.toString();
+  if (value._id && mongoose.isValidObjectId(value._id)) {
+    return value._id.toString();
+  }
+  return null;
+};
+
+const populateOrderItems = async (orders, OrderItemModel) => {
+  if (!orders) return orders;
+  const list = Array.isArray(orders) ? orders : [orders];
+  const ids = new Set();
+
+  for (const order of list) {
+    if (!order || !Array.isArray(order.items)) continue;
+    for (const item of order.items) {
+      const id = getOrderItemId(item);
+      if (id) ids.add(id);
+    }
+  }
+
+  if (ids.size === 0) return orders;
+
+  const itemDocs = await OrderItemModel.find({
+    _id: { $in: Array.from(ids) },
+  })
+    .populate({
+      path: "productId",
+      model: "ProductMongo",
+      select: PRODUCT_SELECT_FIELDS,
+    })
+    .lean();
+
+  const itemMap = new Map(itemDocs.map((item) => [item._id.toString(), item]));
+
+  for (const order of list) {
+    if (!order || !Array.isArray(order.items)) continue;
+    order.items = order.items.map((item) => {
+      if (item && typeof item === "object" && !getOrderItemId(item)) {
+        return item;
+      }
+      const id = getOrderItemId(item);
+      return (id && itemMap.get(id)) || item;
+    });
+  }
+
+  return orders;
+};
 
 const getPaginationOptions = (options = {}) => {
   const parsedLimit = Number.parseInt(options.limit, 10);
@@ -23,8 +75,9 @@ const getPaginationOptions = (options = {}) => {
 
 export const OrderRepository = {
   async getModels() {
-    if (!OrderModel || (!getIsMongo() && (!UserModel || !OrderItemModel))) {
-      if (getIsMongo()) {
+    const isMongo = getIsMongo();
+    if (!OrderModel || (!isMongo && (!UserModel || !OrderItemModel))) {
+      if (isMongo) {
         OrderModel = (await import("../MongoModels/OrderMongoModel.js"))
           .default;
         UserModel = (await import("../MongoModels/UserMongoModel.js")).default;
@@ -77,22 +130,13 @@ export const OrderRepository = {
     const { limit, offset } = getPaginationOptions(options);
 
     if (getIsMongo()) {
-      let query = OrderModel.find({})
+      const items = await OrderModel.find({})
         .populate("userId", "name email")
-        .populate({
-          path: "items",
-          populate: {
-            path: "productId",
-            model: "ProductMongo",
-            select:
-              "name description price category imageUrl stock createdAt updatedAt",
-          },
-        })
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit)
         .lean();
-      return query;
+      return populateOrderItems(items, OrderItemModel);
     } else {
       return OrderModel.findAll({
         ...options,
@@ -112,21 +156,50 @@ export const OrderRepository = {
     }
   },
 
+  async findAllWithCount(options = {}) {
+    const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
+    const { limit, offset } = getPaginationOptions(options);
+
+    if (getIsMongo()) {
+      const [items, total] = await Promise.all([
+        OrderModel.find({})
+          .populate("userId", "name email")
+          .sort({ createdAt: -1 })
+          .skip(offset)
+          .limit(limit)
+          .lean(),
+        OrderModel.countDocuments({}),
+      ]);
+      return {
+        items: await populateOrderItems(items, OrderItemModel),
+        total,
+      };
+    } else {
+      const { rows, count } = await OrderModel.findAndCountAll({
+        ...options,
+        limit,
+        offset,
+        include: [
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "name", "email"],
+          },
+        ],
+        distinct: true,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
   async findById(id, options = {}) {
     const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
 
     if (getIsMongo()) {
-      return OrderModel.findById(id)
+      const order = await OrderModel.findById(id)
         .populate("userId", "name email")
-        .populate({
-          path: "items",
-          populate: {
-            path: "productId",
-            model: "ProductMongo",
-            select:
-              "name description price category imageUrl stock createdAt updatedAt",
-          },
-        });
+        .lean();
+      return populateOrderItems(order, OrderItemModel);
     } else {
       return OrderModel.findByPk(id, {
         ...options,
@@ -142,7 +215,7 @@ export const OrderRepository = {
   },
 
   async findAllByUserId(userId, options = {}) {
-    const { OrderModel, UserModel } = await this.getModels();
+    const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
     const { limit, offset } = getPaginationOptions(options);
 
     if (getIsMongo()) {
@@ -150,22 +223,16 @@ export const OrderRepository = {
         ? new mongoose.Types.ObjectId(userId)
         : userId;
       const { include, order, where, ...mongoOptions } = options;
-      let query = OrderModel.find({ userId: queryUserId, ...mongoOptions })
+      const items = await OrderModel.find({
+        userId: queryUserId,
+        ...mongoOptions,
+      })
         .populate("userId", "name email")
-        .populate({
-          path: "items",
-          populate: {
-            path: "productId",
-            model: "ProductMongo",
-            select:
-              "name description price category imageUrl stock createdAt updatedAt",
-          },
-        })
         .sort({ createdAt: -1 })
         .skip(offset)
         .limit(limit)
         .lean();
-      return query;
+      return populateOrderItems(items, OrderItemModel);
     } else {
       return OrderModel.findAll({
         where: { userId },
@@ -183,20 +250,56 @@ export const OrderRepository = {
     }
   },
 
-  async updateById(id, data, options = {}) {
-    const { OrderModel } = await this.getModels();
+  async findAllByUserIdWithCount(userId, options = {}) {
+    const { OrderModel, UserModel, OrderItemModel } = await this.getModels();
+    const { limit, offset } = getPaginationOptions(options);
+
     if (getIsMongo()) {
-      return OrderModel.findByIdAndUpdate(id, data, { new: true })
-        .populate("userId", "name email")
-        .populate({
-          path: "items",
-          populate: {
-            path: "productId",
-            model: "ProductMongo",
-            select:
-              "name description price category imageUrl stock createdAt updatedAt",
+      const queryUserId = mongoose.isValidObjectId(userId)
+        ? new mongoose.Types.ObjectId(userId)
+        : userId;
+      const { include, order, where, ...mongoOptions } = options;
+
+      const [items, total] = await Promise.all([
+        OrderModel.find({ userId: queryUserId, ...mongoOptions })
+          .populate("userId", "name email")
+          .sort({ createdAt: -1 })
+          .skip(offset)
+          .limit(limit)
+          .lean(),
+        OrderModel.countDocuments({ userId: queryUserId, ...mongoOptions }),
+      ]);
+
+      return {
+        items: await populateOrderItems(items, OrderItemModel),
+        total,
+      };
+    } else {
+      const { rows, count } = await OrderModel.findAndCountAll({
+        where: { userId },
+        ...options,
+        limit,
+        offset,
+        include: [
+          {
+            model: UserModel,
+            as: "user",
+            attributes: ["id", "name", "email"],
           },
-        });
+        ],
+        distinct: true,
+      });
+      return { items: rows, total: count };
+    }
+  },
+
+  async updateById(id, data, options = {}) {
+    const { OrderModel, OrderItemModel } = await this.getModels();
+    if (getIsMongo()) {
+      const order = await OrderModel.findByIdAndUpdate(id, data, { new: true })
+        .populate("userId", "name email")
+        .lean();
+      return populateOrderItems(order, OrderItemModel);
     } else {
       const order = await OrderModel.findByPk(id, options);
       if (!order) return null;

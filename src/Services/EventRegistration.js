@@ -15,6 +15,10 @@ class EventRegistrationService {
     return await EventRepository.registrationfindAll();
   }
 
+  async getAllRegWithCount(pagination = {}) {
+    return await EventRepository.registrationFindAllWithCount(pagination);
+  }
+
   async getRegById(id) {
     const reg = await EventRepository.registrationFindById(id);
     if (!reg) return null;

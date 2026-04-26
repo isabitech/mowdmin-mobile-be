@@ -25,10 +25,30 @@ class ProductController {
   }
   async getAll(req, res) {
     const { page, limit: pageSize } = req.query;
-    const products = await ProductService.getAll(paginate(page || 1, pageSize));
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } = await ProductService.getAllWithCount(pagination);
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await ProductService.getAll(pagination);
+    }
     return sendSuccess(res, {
       message: "All Products Fetched Successfully",
-      data: products,
+      data,
+      meta,
     });
   }
   async getOne(req, res) {
@@ -40,13 +60,37 @@ class ProductController {
   }
   async getByCategory(req, res) {
     const { page, limit: pageSize } = req.query;
-    const products = await ProductService.getProductsByCategory(
-      req.params.categoryId,
-      paginate(page || 1, pageSize),
-    );
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } =
+        await ProductService.getProductsByCategoryWithCount(
+          req.params.categoryId,
+          pagination,
+        );
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await ProductService.getProductsByCategory(
+        req.params.categoryId,
+        pagination,
+      );
+    }
     return sendSuccess(res, {
       message: "Products Fetched by Category Successfully",
-      data: products,
+      data,
+      meta,
     });
   }
   async update(req, res) {

@@ -22,8 +22,22 @@ class ProductService {
     });
   }
 
+  async getProductsByCategoryWithCount(categoryId, pagination = {}) {
+    return ProductRepository.findAllWithCount({
+      where: { category: categoryId },
+      ...pagination,
+    });
+  }
+
   async getAll(pagination = {}) {
     return ProductRepository.findAll({
+      order: [["createdAt", "ASC"]],
+      ...pagination,
+    });
+  }
+
+  async getAllWithCount(pagination = {}) {
+    return ProductRepository.findAllWithCount({
       order: [["createdAt", "ASC"]],
       ...pagination,
     });

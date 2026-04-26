@@ -55,21 +55,51 @@ class EventController {
     });
   }
   async getAll(req, res, next) {
-    const { page, limit: pageSize, includePast } = req.query;
-    const pagination = paginate(page || 1, pageSize);
-    
-    // Check if user wants to include past events (query param: includePast=true)
-    const options = {
-      includePastEvents: includePast === 'true'
-    };
-    
-    const events = await EventService.getAllEvents(pagination, options);
+    const { page, limit: pageSize, year } = req.query;
+    const hasPagination = page !== undefined || pageSize !== undefined;
+    const pagination = hasPagination ? paginate(page || 1, pageSize) : null;
+    const currentYear = new Date().getFullYear();
+    let yearFilter = currentYear;
+
+    if (year !== undefined) {
+      if (year === "all") {
+        yearFilter = null;
+      } else {
+        const parsedYear = Number.parseInt(year, 10);
+        yearFilter = Number.isFinite(parsedYear) ? parsedYear : currentYear;
+      }
+    }
+
+    let data;
+    let meta = {};
+
+    if (hasPagination) {
+      const { items, total } = await EventService.getAllEventsWithCount({
+        pagination,
+        year: yearFilter,
+      });
+      data = items;
+      const pageNum = Number.parseInt(page || 1, 10);
+      const limitNum = pagination?.limit;
+      meta = {
+        totalItems: total,
+        totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+        currentPage: pageNum,
+        pageSize: limitNum,
+      };
+    } else {
+      data = await EventService.getAllEvents({
+        pagination,
+        year: yearFilter,
+      });
+    }
     return sendSuccess(res, {
       message: "Events fetched successfully",
-      data: events,
+      data,
+      meta,
     });
   }
-  
+
   async getAllAdmin(req, res, next) {
     // Admin-only endpoint to get all events including past ones
     const { page, limit: pageSize } = req.query;
@@ -80,7 +110,7 @@ class EventController {
       data: events,
     });
   }
-  
+
   async cleanupPastEvents(req, res, next) {
     // Admin-only endpoint to cleanup past events
     const result = await EventService.cleanupPastEvents();
