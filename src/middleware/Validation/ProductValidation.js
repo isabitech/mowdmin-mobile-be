@@ -6,6 +6,8 @@ export const validateCreateProduct = (payload) =>
     price: Joi.number().min(0).required(),
     description: Joi.string().allow("", null),
     categoryId: Joi.string().required(),
+    stripeProductId: Joi.string().allow("", null),
+    stripeLink: Joi.string().uri().allow("", null),
   })
     .prefs({ stripUnknown: true })
     .validate(payload);
@@ -22,6 +24,8 @@ export const validateUpdateProduct = (payload) =>
 
     imageUrl: Joi.string().uri().allow("", null),
     stock: Joi.number().integer().min(0),
+    stripeProductId: Joi.string().allow("", null),
+    stripeLink: Joi.string().uri().allow("", null),
   })
     .min(1)
     .prefs({ stripUnknown: true })

@@ -4,6 +4,19 @@ import { connectDB } from "./src/Config/db.js";
 import { ProductRepository } from "./src/repositories/ProductRepository.js";
 import fs from "fs/promises";
 
+const getPriceForFormat = (format) => {
+    switch (format) {
+        case "hardCover":
+            return 25;
+        case "softCover":
+            return 10;
+        case "pdf":
+            return 5;
+        default:
+            return 10;
+    }
+};
+
 const replaceProducts = async () => {
     try {
         console.log("🔄 Replacing fake products with real Mowdmin books...");
@@ -46,38 +59,29 @@ const replaceProducts = async () => {
         // Convert books into individual product entries for each language/format combination
         const realProducts = [];
         
+        // Define image URLs for each book
+        const bookImageUrls = {
+            "The Cry of the Image of God": "https://mowdmin.vercel.app/static/media/cry.0c05972c134d775b83c2.jpg",
+            "The Seed of the Blessing": "https://mowdmin.vercel.app/static/media/seed.633a9cd12a83329a7a04.jpg",
+            "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS": "https://mowdmin.vercel.app/static/media/prophecy.03700452920de408efed.png"
+        };
+        
         booksFromFile.forEach(book => {
             book.languages.forEach(lang => {
                 Object.entries(lang.formats).forEach(([format, stripeLink]) => {
                     const productName = `${book.name} (${lang.language} - ${format})`;
                     
-                    // Estimate prices based on format
-                    let price;
-                    switch(format) {
-                        case 'hardCover':
-                            price = 29.99;
-                            break;
-                        case 'softCover':
-                            price = 19.99;
-                            break;
-                        case 'pdf':
-                            price = 9.99;
-                            break;
-                        default:
-                            price = 19.99;
-                    }
-                    
                     realProducts.push({
                         name: productName,
                         description: book.description,
-                        price: price,
+                        price: getPriceForFormat(format),
                         category: book.category,
                         stripeLink: stripeLink,
                         language: lang.language,
                         format: format,
                         baseTitle: book.name,
                         stock: 999, // Digital/print-on-demand, virtually unlimited
-                        imageUrl: null // Could be added later
+                        imageUrl: bookImageUrls[book.name] || null
                     });
                 });
             });

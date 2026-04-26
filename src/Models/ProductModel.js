@@ -30,6 +30,14 @@ const Product = getSequelize().define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    stripeProductId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    stripeLink: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "products",
