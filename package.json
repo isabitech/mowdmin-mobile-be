@@ -22,7 +22,8 @@
     "test-profile-dry": "set DRY_RUN=1&& node test-profile.js --run-tests --dry-run",
     "test-profile-validation": "node test-profile.js --validation-tests",
     "seed:admin": "node src/seeders/01-adminSeeder.js",
-    "seed:all": "node src/seeders/index.js"
+    "seed:all": "node src/seeders/index.js",
+    "cleanup:prayer-requests": "node cleanup-prayer-requests.js"
   },
   "repository": {
     "type": "git",

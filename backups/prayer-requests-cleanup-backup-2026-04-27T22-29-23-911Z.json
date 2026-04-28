@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-04-27T22:29:23.912Z",
+  "mode": "dry-run",
+  "criteria": {
+    "fakerBurstDates": [
+      "2026-03-29",
+      "2026-04-12"
+    ],
+    "includeManualTestTitles": true,
+    "manualTestTitles": [
+      "test",
+      "testing"
+    ]
+  },
+  "summary": {
+    "totalPrayerRequests": 19,
+    "matchedForCleanup": 0,
+    "linkedPrayerRequestCount": 0,
+    "fakerBurstMatches": 0,
+    "manualTestMatches": 0
+  },
+  "prayerRequests": []
+}
