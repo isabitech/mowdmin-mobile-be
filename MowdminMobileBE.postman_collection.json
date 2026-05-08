@@ -1447,6 +1447,268 @@
       ]
     },
     {
+      "name": "Testimony",
+      "item": [
+        {
+          "name": "List Testimonies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony"
+              ]
+            }
+          }
+        },
+        {
+          "name": "My Testimonies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Testimony",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"God answered my prayer\",\n  \"description\": \"I received unexpected favor and provision.\",\n  \"isPublic\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Testimony",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated testimony title\",\n  \"description\": \"Updated testimony description\",\n  \"isPublic\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony/:testimonyId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony",
+                ":testimonyId"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Testimony",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony/:testimonyId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony",
+                ":testimonyId"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Testimony Reactions",
+      "item": [
+        {
+          "name": "Toggle Testimony Like",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony-like/:testimonyId/like",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony-like",
+                ":testimonyId",
+                "like"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Testimony Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony-comment/:testimonyId/comments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony-comment",
+                ":testimonyId",
+                "comments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Testimony Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Amen, this is encouraging.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony-comment/:testimonyId/comment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony-comment",
+                ":testimonyId",
+                "comment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Testimony Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/testimony-comment/:commentId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "testimony-comment",
+                ":commentId"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Media",
       "item": [
         {

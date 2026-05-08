@@ -37,6 +37,9 @@ import ministry from "./Routes/MinistryRoute.js";
 import { bibleStoryRouter, bibleVerseRouter } from "./Routes/BibleRoute.js";
 import prayerLike from "./Routes/PrayerLikeRoute.js";
 import prayerComment from "./Routes/PrayerCommentRoute.js";
+import testimony from "./Routes/TestimonyRoute.js";
+import testimonyLike from "./Routes/TestimonyLikeRoute.js";
+import testimonyComment from "./Routes/TestimonyCommentRoute.js";
 import campaign from "./Routes/CampaignRoute.js";
 import { measurePerformance } from "./Utils/performance.js";
 import { scheduleRenderKeepAlive } from "./Utils/keepAlive.js";
@@ -163,7 +166,14 @@ app.post(
 );
 
 // Global Parsers
-app.use(express.json({ limit: "10kb" }));
+const jsonBodyMethods = new Set(["POST", "PUT", "PATCH"]);
+app.use((req, res, next) => {
+  if (!jsonBodyMethods.has(req.method)) {
+    return next();
+  }
+
+  return express.json({ limit: "10kb" })(req, res, next);
+});
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(attachRequestMeta);
 
@@ -179,6 +189,9 @@ apiRouter.use("/prayer", prayer);
 
 apiRouter.use("/prayer-like", prayerLike);
 apiRouter.use("/prayer-comment", prayerComment);
+apiRouter.use("/testimony", testimony);
+apiRouter.use("/testimony-like", testimonyLike);
+apiRouter.use("/testimony-comment", testimonyComment);
 apiRouter.use("/orders", Orders);
 apiRouter.use("/product", Product);
 apiRouter.use("/media-category", mediaCategory);

@@ -1,6 +1,36 @@
 import { MediaCategoryRepository } from "../repositories/MediaCategoryRepository.js";
 import { MediaRepository } from "../repositories/MediaRepository.js";
 import mongoose from "mongoose";
+
+const toPlain = (value) => {
+  if (!value) return null;
+  if (typeof value.toJSON === "function") return value.toJSON();
+  if (typeof value.toObject === "function") return value.toObject();
+  return value;
+};
+
+const normalizeMedia = (media) => {
+  const plainMedia = toPlain(media);
+  if (!plainMedia) return null;
+
+  const category = plainMedia.category || plainMedia.category_id;
+  const normalizedCategory =
+    category && typeof category === "object"
+      ? {
+          _id: category._id || category.id,
+          name: category.name,
+        }
+      : category || null;
+
+  return {
+    ...plainMedia,
+    category_id: normalizedCategory,
+  };
+};
+
+const normalizeMediaCollection = (items = []) =>
+  items.map((item) => normalizeMedia(item));
+
 class MediaService {
   async createMedia(data) {
     if (!data) {
@@ -69,18 +99,27 @@ class MediaService {
   }
 
   async findById(id) {
-    return await MediaRepository.findById(id);
+    const media = await MediaRepository.findById(id);
+    return normalizeMedia(media);
   }
 
   async getAll(filters = {}, pagination = {}) {
-    return await MediaRepository.findAll({ where: filters, ...pagination });
-  }
-
-  async getAllWithCount(filters = {}, pagination = {}) {
-    return await MediaRepository.findAllWithCount({
+    const media = await MediaRepository.findAll({
       where: filters,
       ...pagination,
     });
+    return normalizeMediaCollection(media);
+  }
+
+  async getAllWithCount(filters = {}, pagination = {}) {
+    const result = await MediaRepository.findAllWithCount({
+      where: filters,
+      ...pagination,
+    });
+    return {
+      items: normalizeMediaCollection(result.items),
+      total: result.total,
+    };
   }
 
   async delete(id) {
