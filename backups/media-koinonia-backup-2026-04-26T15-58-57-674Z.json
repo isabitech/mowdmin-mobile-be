@@ -1,0 +1,16 @@
+{
+  "_id": "69dc050926e4d86155ff8b43",
+  "title": "Koinonia live",
+  "description": "",
+  "category_id": "697f849cd59df5e732542f9f",
+  "type": "video",
+  "media_url": "https://www.youtube.com/watch?v=-8t2o5n-K48",
+  "thumbnail": "https://iili.io/BhqYGuj.jpg",
+  "author": "",
+  "duration": "",
+  "is_downloadable": false,
+  "isLive": true,
+  "createdAt": "2026-04-12T20:48:09.231Z",
+  "updatedAt": "2026-04-12T20:48:09.231Z",
+  "__v": 0
+}

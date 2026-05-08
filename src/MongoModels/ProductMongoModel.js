@@ -7,6 +7,8 @@ const ProductMongoSchema = new mongoose.Schema({
   category: { type: String },
   imageUrl: { type: String },
   stock: { type: Number, default: 0 },
+  stripeProductId: { type: String },
+  stripeLink: { type: String },
 }, {
   timestamps: true,
   collection: 'products',

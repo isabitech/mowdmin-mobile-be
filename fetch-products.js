@@ -40,6 +40,23 @@ const checkProducts = async () => {
             if (product.imageUrl) {
                 console.log(`   Image: ${product.imageUrl}`);
             }
+            
+            // Add Stripe information
+            if (product.stripeProductId) {
+                const stripeEnv = process.env.STRIPE_ENV || 'test';
+                const stripeBaseUrl = stripeEnv === 'live' ? 'https://dashboard.stripe.com' : 'https://dashboard.stripe.com/test';
+                const stripeProductUrl = `${stripeBaseUrl}/products/${product.stripeProductId}`;
+                console.log(`   🔗 Stripe Product: ${stripeProductUrl}`);
+            }
+            
+            if (product.stripeLink && product.stripeLink !== product.stripeProductId) {
+                console.log(`   🔗 Stripe Link: ${product.stripeLink}`);
+            }
+            
+            if (!product.stripeProductId && !product.stripeLink) {
+                console.log(`   🔗 Stripe: Not configured`);
+            }
+            
             console.log(`   Created: ${product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A'}`);
         });
         
@@ -59,6 +76,8 @@ const checkProducts = async () => {
         console.log(`   - Products with prices: ${products.filter(p => p.price).length}`);
         console.log(`   - Products with stock info: ${products.filter(p => p.stock).length}`);
         console.log(`   - Products with images: ${products.filter(p => p.imageUrl).length}`);
+        console.log(`   - Products with Stripe IDs: ${products.filter(p => p.stripeProductId).length}`);
+        console.log(`   - Products with Stripe links: ${products.filter(p => p.stripeLink).length}`);
         
         console.log(`\n📊 Products by Category:`);
         for (const [category, categoryProducts] of Object.entries(productsByCategory)) {

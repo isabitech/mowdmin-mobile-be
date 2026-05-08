@@ -1,0 +1,177 @@
+[
+  {
+    "id": "69e06577a76c581e16b98a73",
+    "name": "The Cry of the Image of God (English - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a74",
+    "name": "The Cry of the Image of God (Deutsch - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a75",
+    "name": "The Cry of the Image of God (Deutsch - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a76",
+    "name": "The Cry of the Image of God (Deutsch - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a77",
+    "name": "The Cry of the Image of God (French - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a78",
+    "name": "The Cry of the Image of God (French - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a79",
+    "name": "The Cry of the Image of God (French - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06577a76c581e16b98a7a",
+    "name": "The Seed of the Blessing (English - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a7b",
+    "name": "The Seed of the Blessing (English - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a7c",
+    "name": "The Seed of the Blessing (English - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a7d",
+    "name": "The Seed of the Blessing (Deutsch - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a7e",
+    "name": "The Seed of the Blessing (Deutsch - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a7f",
+    "name": "The Seed of the Blessing (Deutsch - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a80",
+    "name": "The Seed of the Blessing (French - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06578a76c581e16b98a81",
+    "name": "The Seed of the Blessing (French - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a82",
+    "name": "The Seed of the Blessing (French - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a83",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (English - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a84",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (English - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a85",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (English - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a86",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (Deutsch - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a87",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (Deutsch - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a88",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (Deutsch - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  },
+  {
+    "id": "69e06579a76c581e16b98a89",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (French - hardCover)",
+    "price": {
+      "$numberDecimal": "29.99"
+    }
+  },
+  {
+    "id": "69e0657aa76c581e16b98a8a",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (French - softCover)",
+    "price": {
+      "$numberDecimal": "19.99"
+    }
+  },
+  {
+    "id": "69e0657aa76c581e16b98a8b",
+    "name": "PROPHECY And your RESPONSIBILITY In its ACCOMPLISHMENTS (French - pdf)",
+    "price": {
+      "$numberDecimal": "9.99"
+    }
+  }
+]
