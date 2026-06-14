@@ -1,6 +1,8 @@
+import { Op } from "sequelize";
+import mongoose from "mongoose";
+
 let UserModel;
 let ProfileModel;
-
 const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
 
 export const UserRepository = {
@@ -96,6 +98,61 @@ export const UserRepository = {
     seqOptions.limit = limit;
     seqOptions.offset = offset;
     return UserModel.findAll(seqOptions);
+  },
+
+  async findAllIds(options = {}) {
+    const { UserModel } = await this.getModels();
+
+    if (getIsMongo()) {
+      const filter =
+        options.where ||
+        (options.order || options.limit || options.offset || options.include
+          ? {}
+          : options);
+
+      let query = UserModel.find(filter).select("_id");
+      if (options.order) {
+        const sort = {};
+        options.order.forEach(([field, direction]) => {
+          sort[field] = direction.toUpperCase() === "DESC" ? -1 : 1;
+        });
+        query = query.sort(sort);
+      }
+
+      return query.lean();
+    }
+
+    return UserModel.findAll({
+      where: options.where || options || {},
+      attributes: ["id"],
+      ...(options.order ? { order: options.order } : {}),
+    });
+  },
+
+  async findExistingIds(ids = []) {
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return [];
+    }
+
+    const { UserModel } = await this.getModels();
+
+    if (getIsMongo()) {
+      const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
+      if (validIds.length === 0) {
+        return [];
+      }
+
+      return UserModel.find({ _id: { $in: validIds } }).select("_id").lean();
+    }
+
+    return UserModel.findAll({
+      where: {
+        id: {
+          [Op.in]: ids,
+        },
+      },
+      attributes: ["id"],
+    });
   },
 
   async update(id, data) {

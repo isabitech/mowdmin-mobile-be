@@ -1,5 +1,9 @@
 import { DataTypes } from "sequelize";
 import getSequelize from "../Config/db.js";
+import {
+  DEFAULT_NOTIFICATION_DELIVERY,
+  NOTIFICATION_TYPES,
+} from "../Utils/notification.js";
 
 const Notification = getSequelize().define(
   "Notification",
@@ -21,9 +25,25 @@ const Notification = getSequelize().define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    read: {
+    type: {
+      type: DataTypes.ENUM(...NOTIFICATION_TYPES),
+      allowNull: false,
+      defaultValue: "info",
+    },
+    metadata: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
+    delivery: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: DEFAULT_NOTIFICATION_DELIVERY,
+    },
+    isRead: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+      field: "read",
     },
   },
   {

@@ -1,9 +1,19 @@
 import { EventRepository } from "../repositories/EventRepository.js";
 import { Op } from "sequelize"; // For SQL databases
+import { logger } from "../core/logger.js";
+import EventNotificationService from "./EventNotificationService.js";
 
 class EventService {
   async createEvent(data) {
-    return await EventRepository.create(data);
+    const event = await EventRepository.create(data);
+
+    EventNotificationService.handleEventCreated(event).catch((error) => {
+      logger.error("Failed to trigger monthly event notification", {
+        message: error.message,
+      });
+    });
+
+    return event;
   }
 
   async getAllEvents({ pagination, year, includePastEvents = false } = {}) {
@@ -52,7 +62,26 @@ class EventService {
   }
 
   async updateEvent(id, updates) {
-    return await EventRepository.updateById(id, updates);
+    const existingEvent = await EventRepository.findById(id);
+    if (!existingEvent) {
+      return null;
+    }
+
+    const updatedEvent = await EventRepository.updateById(id, updates);
+
+    if (updatedEvent) {
+      EventNotificationService.handleEventUpdated(
+        existingEvent,
+        updatedEvent,
+      ).catch((error) => {
+        logger.error("Failed to trigger event update notification", {
+          message: error.message,
+          eventId: id,
+        });
+      });
+    }
+
+    return updatedEvent;
   }
 
   async deleteEvent(id) {

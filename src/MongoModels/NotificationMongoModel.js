@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import {
+  DEFAULT_NOTIFICATION_DELIVERY,
+  NOTIFICATION_TYPES,
+} from "../Utils/notification.js";
 
 const NotificationMongoSchema = new mongoose.Schema(
   {
@@ -17,24 +21,16 @@ const NotificationMongoSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      // Allow all known notification types used across services and validators
-      enum: [
-        "info",
-        "alert",
-        "reminder",
-        "system",
-        "transaction",
-        "like",
-        "comment",
-        "follow",
-        "mention",
-        "other",
-      ],
+      enum: NOTIFICATION_TYPES,
       default: "info",
     },
     metadata: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
+    },
+    delivery: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({ ...DEFAULT_NOTIFICATION_DELIVERY }),
     },
     isRead: {
       type: Boolean,

@@ -27,6 +27,21 @@ export const NotificationRepository = {
     const Model = await this.getModel();
     return Model.create(payload);
   },
+
+  async createMany(payloads = []) {
+    if (!Array.isArray(payloads) || payloads.length === 0) {
+      return [];
+    }
+
+    const Model = await this.getModel();
+
+    if (getIsMongo()) {
+      return Model.insertMany(payloads);
+    }
+
+    return Model.bulkCreate(payloads, { returning: true });
+  },
+
   async findAllByUserId(userId, options = {}) {
     const Model = await this.getModel();
     const parsedLimit = Number.parseInt(options.limit, 10);
@@ -61,9 +76,11 @@ export const NotificationRepository = {
     const Model = await this.getModel();
     if (getIsMongo()) {
       return Model.findByIdAndUpdate(id, payload, { new: true });
-    } else {
-      return Model.update(payload, { where: { id }, returning: true });
     }
+
+    const notification = await Model.findByPk(id);
+    if (!notification) return null;
+    return notification.update(payload);
   },
 
   async markAsReadByUserId(id, userId) {
@@ -79,7 +96,7 @@ export const NotificationRepository = {
 
     const notification = await Model.findOne({ where: { id, userId } });
     if (!notification) return null;
-    notification.read = true;
+    notification.isRead = true;
     return notification.save();
   },
 };

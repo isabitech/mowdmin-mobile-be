@@ -1,4 +1,6 @@
 import { EventRepository } from "../repositories/EventRepository.js";
+import { logger } from "../core/logger.js";
+import EventNotificationService from "./EventNotificationService.js";
 
 class EventRegistrationService {
   async createEventReg(data) {
@@ -7,7 +9,19 @@ class EventRegistrationService {
       status: "registered",
       userId: data.userId,
     };
-    return await EventRepository.createRegistration(registrationData);
+    const registration = await EventRepository.createRegistration(registrationData);
+
+    EventNotificationService.handleRegistrationCreated(registration).catch(
+      (error) => {
+        logger.error("Failed to trigger event registration notification", {
+          message: error.message,
+          eventId: data.eventId,
+          userId: data.userId,
+        });
+      },
+    );
+
+    return registration;
   }
 
   async getAllReg() {

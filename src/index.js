@@ -13,6 +13,7 @@ import { initializeRedis, isRedisAvailable } from "./Config/redis.js";
 import { attachRequestMeta } from "./middleware/requestMeta.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import EventCleanupWorker from "./Services/EventCleanupWorker.js";
+import EventNotificationWorker from "./Services/EventNotificationWorker.js";
 
 // Routes
 import auth from "./Routes/AuthRoute.js";
@@ -290,6 +291,15 @@ async function bootstrap() {
       logger.info("Event cleanup worker scheduled");
     } catch (err) {
       logger.error("Failed to start event cleanup worker", {
+        message: err.message,
+      });
+    }
+
+    try {
+      EventNotificationWorker.start("*/5 * * * *");
+      logger.info("Event notification worker scheduled");
+    } catch (err) {
+      logger.error("Failed to start event notification worker", {
         message: err.message,
       });
     }

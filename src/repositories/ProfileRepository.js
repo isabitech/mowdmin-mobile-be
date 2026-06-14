@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 let ProfileModel;
 let UserModel;
 const getIsMongo = () => process.env.DB_CONNECTION === "mongodb";
@@ -23,6 +25,26 @@ const ProfileRepository = {
     return getIsMongo()
       ? ProfileModel.findOne({ userId })
       : ProfileModel.findOne({ where: { userId } });
+  },
+
+  async findAllByUserIds(userIds = []) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return [];
+    }
+
+    const { ProfileModel } = await this.getModels();
+
+    if (getIsMongo()) {
+      return ProfileModel.find({ userId: { $in: userIds } });
+    }
+
+    return ProfileModel.findAll({
+      where: {
+        userId: {
+          [Op.in]: userIds,
+        },
+      },
+    });
   },
 
   async findByIdWithUser(id) {

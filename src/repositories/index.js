@@ -4,6 +4,8 @@ export * from "./MediaRepository.js";
 export * from "./MediaCategoryRepository.js";
 export * from "./MediaBookmarkRepository.js";
 export * from "./NotificationRepository.js";
+export * from "./NotificationDeviceRepository.js";
+export * from "./NotificationDispatchLogRepository.js";
 export * from "./OrderItemRepository.js";
 export * from "./EventRepository.js";
 export * from "./PrayerRepository.js";
